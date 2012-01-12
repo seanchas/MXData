@@ -4,6 +4,9 @@
 # or operating system, you probably want to add a global ignore instead:
 #   git config --global core.excludesfile ~/.gitignore_global
 
+# Ignore Mac OS X meta files
+.DS_STORE
+
 # Ignore bundler config
 /.bundle
 
@@ -15,4 +18,4 @@
 
 # Ignore all logfiles and tempfiles.
 /log/*.log
-/tmp
+/tmp/**/*
