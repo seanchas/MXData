@@ -1,4 +1,4 @@
-ru:
+en:
     welcome:
         quote_search:
-            find: 'Find'
+            placeholder: 'Quote search'
