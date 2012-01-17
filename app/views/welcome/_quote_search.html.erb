@@ -1,0 +1,6 @@
+<div id="quote_search">
+    <%= form_tag root_path, :method => :get, :authenticity_token => false do %>
+        <%= text_field_tag :q %>
+        <%= submit_tag t('.find'), :name => nil %>
+    <% end %>
+</div>
