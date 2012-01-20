@@ -62,5 +62,37 @@ table.month {
     border: 1px solid #ccc;
     border-collapse: collapse;
     border-spacing: 0;
+    
+    font-size: 14px;
+    line-height: 1em;
+    
     position: absolute;
+    
+    thead {
+        td {
+            font-weight: bold;
+            padding: .3em 0;
+            text-align: center;
+        }
+    }
+    
+    tbody {
+        td {
+            border: 1px solid #ccc;
+            padding: .5em;
+            text-align: center;
+        }
+
+
+        td.active:hover {
+            cursor: pointer;
+        }
+
+        td.passive {
+            background: #eee;
+            color: #ccc;
+        }
+    
+    }
+    
 }
