@@ -1,0 +1,223 @@
+<section class="search">
+    <form class="search_form">
+    
+      <header>Введите наименование инструмента или эмитента, например: <em>Сбербанк</em> или <em>GAZP</em></header>
+      <input class="search_field loading" type="search" placeholder="Поиск" <%#autofocus%> />
+
+      <span class="section_chooser">Все рынки</span>
+
+      <input type="checkbox" id="search_mode"/><label for="search_mode">Искать только в основном режиме</label>
+    </form>
+    
+    <ul class="sections_list">
+      <li>
+        <input id="sli_1" type="radio" name="section" value="all" checked="checked" />
+        <label for="sli_1">Все рынки</label>
+      </li>
+      <li>
+        <input id="sli_2" type="radio" name="section" value="indeces" />
+        <label for="sli_2">Индексы</label>
+      </li>
+      <li>
+        <input id="sli_3" type="radio" name="section" value="stock" />
+        <label for="sli_3">Фондовый рынок</label>
+      </li>
+      <li>
+        <input id="sli_4" type="radio" name="section" value="currency" />
+        <label for="sli_4">Валютный рынок</label>
+      </li>
+      <li>
+        <input id="sli_5" type="radio" name="section" value="futures" />
+        <label for="sli_5">Срочный рынок</label>
+      </li>
+      <li>
+        <input id="sli_6" type="radio" name="section" value="options" />
+        <label for="sli_6">Опционы
+      </label></li>
+      <li>
+        <input id="sli_7" type="radio" name="section" value="commodity" />
+        <label for="sli_7">Товарные аукционы
+      </label></li>
+      <li>
+        <input id="sli_8" type="radio" name="section" value="state" />
+        <label for="sli_8">Госбумаги
+      </label></li>
+    </ul>
+
+    <div class="search_results">
+      <span class="prev disabled">вверх</span>
+      <div class="search_results_container">
+
+      <dl class="results_list">
+        <dt class="first">
+          Индексы
+        </dt>
+
+        <dd class="first">
+          <ul>
+            <li>
+              ММВБ нефть и газ (MICEX O&G)
+              <span class="description">Индекс фондового рынка ММВБ нефть и газ</span>
+            </li>
+            <li>
+              Нефти и Газа (RTSog)
+              <span class="description">Индекс РТС Нефти и Газа</span>
+            </li>
+          </ul>
+        </dd>
+
+        <dt>
+          Акции
+        </dt>
+        <dd>
+          <ul>
+            <li>
+              ГАЗПРОМ ао (GAZP)
+              <span class="description">Акция обыкновенная "Газпром" (ОАО) ао</span>
+            </li>
+            <li class="selected">
+              Газпрнефть (SIBN)
+              <span class="description">Корпоративная облигация Газпром капитал ООО сер.ОЗ</span>
+            </li>
+            <li>
+              ГПНХСал ао SNOS
+              <span class="description">Акция обыкновенная Газпром нефтехим Салават ОАО</span>
+            </li>
+          </ul>
+        </dd>
+
+        <dt>
+          Облигации
+        </dt>
+        <dd>
+          <ul>
+            <li>
+              ГазпромК03 (RU000A0JRVT5)
+              <span class="description">Корпоративная облигация Газпром капитал ООО сер. 03</span>
+            </li>
+          </ul>
+        </dd>
+
+        <dt class="last">
+          Опционы
+        </dt>
+        <dd class="last">
+          <ul>
+            <li>
+              GAZR-3.12M140212PA 12500 (GZ12500BN2)
+              <span class="description">Опцион Февральский Марж.Амер.Put.12500 Фьюч.контр GAZR-3.12</span>
+            </li>
+            <li>
+              GAZR-3.12M140212CA 14500 (GZ12500BB2)
+              <span class="description">Опцион Февральский Марж.Амер.Call.14500 Фьюч.контр GAZR-3.12</span>
+            </li>
+          </ul>
+        </dd>
+      </dl>
+
+
+      </div>
+      <span class="next enabled">вниз</span>
+    </div>
+
+    <ul class="search_results_description">
+        <li>Основной режим, акции и паи</li>
+        <li>Неполные лоты</li>
+        <li>Standart, дневная сессия</li>
+        <li>Standart, вечерняя сессия</li>
+        <li>РЕПО, акции и паи</li>
+        <li>Standart, сделки РЕПО, вечерняя сессия</li>
+        <li>РПС, акции и паи внесписочные</li>
+        <li>Standart, адресные сделки, вечерняя сессия</li>
+        <li>ЦК, режим основных торгов</li>
+        <li>ЦК, РЕПО</li>
+        <li>ЦК, РПС</li>
+        <li>Аукционы DarkPools (крупные пакеты)</li>
+        <li>Classica, рыночные сделки</li>
+        <li>Classica, адресные ссылки</li>
+    </ul>
+
+</section>
+
+<script type="text/javascript">
+
+  $(document).ready(function() {
+
+    $(".sections_list").hide();
+
+    $(".sections_list").click(function() {
+      $(".section_chooser").removeClass("active");
+      $(".sections_list").slideUp();
+    });
+
+    var sfd = $(".search_field");
+    var pos = sfd.offset();
+    var srs = $(".search_results");
+    var srd = $(".search_results_description");
+    pos.top = pos.top + sfd.outerHeight();
+    srs.offset(pos);
+
+
+    pos = srs.offset();
+    pos.top  = pos.top  + srs.outerHeight() / 2 - srd.outerHeight() / 2;
+    pos.left = pos.left + srs.outerWidth();
+    srd.offset(pos);
+
+    var src = $(".search_results_container");
+
+    var cup = $(".prev");
+    var cdn = $(".next");
+
+    var srl = $(".results_list");
+
+    var scroll = 0;
+    var scroll_speed = 15;
+    var scroll_limit = srl.outerHeight() - src.outerHeight();
+
+    cup.click(function () {
+      cup.removeClass("disabled");
+      cdn.removeClass("disabled");
+      scroll = scroll - scroll_speed;
+      if( scroll < 0 ) {
+        scroll = 0;
+        cup.addClass("disabled");
+      }
+      src.scrollTop(scroll);
+    });
+
+    cdn.click(function () {
+      cdn.removeClass("disabled");
+      cup.removeClass("disabled");
+      scroll = scroll + scroll_speed;
+      if( scroll > scroll_limit ) {
+        scroll = scroll_limit;
+        cdn.addClass("disabled");
+      }
+      src.scrollTop(scroll);
+    });
+
+
+
+    $(".section_chooser").click(function() {
+      var chooser
+      ,   list
+      ,   pos;
+
+      chooser = $(this);
+      list    = $(".sections_list");
+
+      pos =     chooser.offset();
+      pos.top = pos.top + chooser.outerHeight();
+
+      chooser.addClass("active");
+      list.slideDown();
+      list.offset(pos);
+
+    });
+
+    $("input.search_field").keydown(function() {
+       console.log("pressed");
+    });
+  });
+
+</script>
