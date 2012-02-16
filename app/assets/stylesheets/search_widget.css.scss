@@ -1,0 +1,175 @@
+// color scheme
+$bg_color:                           #fefaee;
+$tip_color:                          #999;
+$tip_em_color:                       #666;
+$textfield_border_color:             #ccc;
+$textfield_bg_color:                 #fff;
+$textfield_font_color_blur:          #666;
+$textfield_font_color_focus:         #333;
+$filter_chooser_bg_color:            #ddd;
+$filter_chooser_border_color:        #999;
+$filter_chooser_font_color:          #666;
+$filter_chooser_bg_active_color:     #006299;
+$filter_chooser_border_active_color: #006299;
+$filter_chooser_font_active_color:   #fff;
+$filters_list_bg_color:              #fff;
+$filters_list_border_color:          #ccc;
+$filter_bg_color:                    #fff;
+$filter_font_color:                  #666;
+$filter_bg_hover_color:              #006299;
+$filter_font_hover_color:            #fff;
+$filter_bg_active_color:             #f7f7f7;
+$filter_font_active_color:           #333;
+
+$font-family: Helvetica, Arial, sans-serif;
+$font-size:   16px;
+
+.search_widget {
+
+  background-color: $bg_color;
+
+  font-family: $font-family;
+  font-size:   $font-size;
+
+  padding: 14px 24px;
+  margin:  0 auto;
+
+  width: 780px;
+
+
+  // tip
+  .tip {
+    color: $tip_color;
+    font-family: $font-family;
+    font-style: italic;
+    font-size:  0.813em;
+
+    margin: 0 6px 1.5em;
+
+    em {
+      color: $tip_em_color;
+      text-decoration: underline;
+    }
+  }
+
+  // query_input
+  .query_input_wrapper {
+    background-color: $textfield_border_color;
+    display: block;
+    float: left;
+    margin: 0 0 1em;
+    padding: 1px 0 1px 1px;
+
+    input.query_input {
+      background-color: $textfield_bg_color;
+      border: none;
+      color: $textfield_font_color_blur;
+      font-family: $font-family;
+      font-size:   $font-size;
+      height:      24px;
+      line-height: 24px;
+      margin: 0;
+      outline: none;
+      overflow: hidden;
+      padding: 0 6px;
+      width: 500px;
+
+      -webkit-appearance: none;
+    }
+
+    input.query_input:focus {
+      color: $textfield_font_color_focus;
+    }
+
+  }
+
+  // filter chooser
+  .filter_chooser {
+    background: $filter_chooser_bg_color image-url("icons/bullet_arrow_down.png") no-repeat 224px center;
+    border: 1px solid $filter_chooser_border_color;
+    border-left: none;
+    color: $filter_chooser_font_color;
+    cursor: pointer;
+    display: block;
+    float: left;
+    font-size: 0.9em;
+    line-height: 24px;
+    height: 24px;
+    padding: 0 32px 0 16px;
+    overflow: hidden;
+    width: 200px;
+
+    -webkit-transition: background 0.25s linear, color 0.25s linear;
+    -moz-transition:    background 0.25s linear, color 0.25s linear;
+    -o-transition:      background 0.25s linear, color 0.25s linear;
+    transition:         background 0.25s linear, color 0.25s linear;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+  }
+
+  .filter_chooser.active {
+    background: $filter_chooser_bg_active_color image-url("icons/bullet_arrow_down_white.png") no-repeat 224px center;
+    border: 1px solid $filter_chooser_border_active_color;
+    border-left: none;
+    color: $filter_chooser_font_active_color;
+    -webkit-transition: background 0.25s linear, color 0.25s linear;
+    -moz-transition:    background 0.25s linear, color 0.25s linear;
+    -o-transition:      background 0.25s linear, color 0.25s linear;
+    transition:         background 0.25s linear, color 0.25s linear;
+  }
+
+  .mode_selector {
+    clear: both;
+  }
+
+}
+
+.filters_list {
+  background-color: $filters_list_bg_color;
+  border: 1px solid $filters_list_border_color;
+  display: block;
+  margin:  0;
+  padding: 0.5em 0 0;
+  position: absolute;
+  width: 247px;
+
+
+  li.filter {
+    background-color: $filter_bg_color;
+    color: $filter_font_color;
+    list-style: none;
+    margin: 0 0 0.5em;
+    padding: 2px 16px;
+
+    -webkit-transition: background 0.15s linear, color 0.15s linear;
+    -moz-transition:    background 0.15s linear, color 0.15s linear;
+    -o-transition:      background 0.15s linear, color 0.15s linear;
+    transition:         background 0.15s linear, color 0.15s linear;
+
+    label {
+      padding-left: 0.5em;
+    }
+  }
+
+  li.filter:hover,
+  li.filter.active:hover {
+    background-color: $filter_bg_hover_color;
+    color: $filter_font_hover_color;
+    -webkit-transition: background 0.15s linear, color 0.15s linear;
+    -moz-transition:    background 0.15s linear, color 0.15s linear;
+    -o-transition:      background 0.15s linear, color 0.15s linear;
+    transition:         background 0.15s linear, color 0.15s linear;
+  }
+
+  li.filter.active {
+    background-color: $filter_bg_active_color;
+    color: $filter_font_active_color;
+  }
+
+}

@@ -2,14 +2,17 @@
     <form class="search_form">
     
       <header>Введите наименование инструмента или эмитента, например: <em>Сбербанк</em> или <em>GAZP</em></header>
-      <input class="search_field loading" type="search" placeholder="Поиск" <%#autofocus%> />
 
-      <span class="section_chooser">Все рынки</span>
+      <div class="search_field_wrapper">
+        <input class="search_field" type="search" placeholder="Поиск" autofocus />
+      </div>
 
-      <input type="checkbox" id="search_mode"/><label for="search_mode">Искать только в основном режиме</label>
+      <div class="filter_chooser">Все рынки</div>
+
+      <input type="checkbox" id="search_mode" /><label for="search_mode">Искать только в основном режиме</label>
     </form>
     
-    <ul class="sections_list">
+    <ul class="filters_list">
       <li>
         <input id="sli_1" type="radio" name="section" value="all" checked="checked" />
         <label for="sli_1">Все рынки</label>
@@ -36,7 +39,7 @@
       </label></li>
       <li>
         <input id="sli_7" type="radio" name="section" value="commodity" />
-        <label for="sli_7">Товарные аукционы
+        <label for="sli_7">Товарные аукционы блабла блаблаблабла
       </label></li>
       <li>
         <input id="sli_8" type="radio" name="section" value="state" />
@@ -46,7 +49,7 @@
 
     <div class="search_results">
       <span class="prev disabled">вверх</span>
-      <div class="search_results_container">
+      <div class="list_container">
 
       <dl class="results_list">
         <dt class="first">
@@ -75,7 +78,7 @@
               ГАЗПРОМ ао (GAZP)
               <span class="description">Акция обыкновенная "Газпром" (ОАО) ао</span>
             </li>
-            <li class="selected">
+            <li>
               Газпрнефть (SIBN)
               <span class="description">Корпоративная облигация Газпром капитал ООО сер.ОЗ</span>
             </li>
@@ -143,81 +146,263 @@
 
   $(document).ready(function() {
 
-    $(".sections_list").hide();
+    _.mixin(_.string.exports());
 
-    $(".sections_list").click(function() {
-      $(".section_chooser").removeClass("active");
-      $(".sections_list").slideUp();
-    });
+    // search criteria list behavior
+    (function () {
 
-    var sfd = $(".search_field");
-    var pos = sfd.offset();
-    var srs = $(".search_results");
-    var srd = $(".search_results_description");
-    pos.top = pos.top + sfd.outerHeight();
-    srs.offset(pos);
+      var criteria_list, chooser, position;
+
+      criteria_list = $(".filters_list");
+      chooser       = $(".filter_chooser");
+
+      // positioning search criteria list and hide
+      position     = chooser.offset();
+      position.top = position.top + chooser.outerHeight();
+      criteria_list.offset(position);
+      criteria_list.hide();
 
 
-    pos = srs.offset();
-    pos.top  = pos.top  + srs.outerHeight() / 2 - srd.outerHeight() / 2;
-    pos.left = pos.left + srs.outerWidth();
-    srd.offset(pos);
+      // hide block with search criteria
+      $(".filters_list").hide();
 
-    var src = $(".search_results_container");
+      // click on chooser
+      $(".filter_chooser").click(function() {
 
-    var cup = $(".prev");
-    var cdn = $(".next");
+        if(chooser.hasClass("active")) {
+          chooser.removeClass("active");
+          criteria_list.slideUp();
+        } else {
+          chooser.addClass("active");
+          criteria_list.slideDown();
+        }
 
-    var srl = $(".results_list");
+      });
 
-    var scroll = 0;
-    var scroll_speed = 15;
-    var scroll_limit = srl.outerHeight() - src.outerHeight();
+      // click event on criteria
+      $(".filters_list label, .filters_list input").click(function() {
 
-    cup.click(function () {
-      cup.removeClass("disabled");
-      cdn.removeClass("disabled");
-      scroll = scroll - scroll_speed;
-      if( scroll < 0 ) {
-        scroll = 0;
-        cup.addClass("disabled");
+        var list_label;
+
+        list_label = $(this).parent("li").find("label");
+
+        chooser.removeClass("active");
+        criteria_list.slideUp();
+        chooser.html(list_label.html());
+
+      });
+
+    })();
+
+
+
+
+    // search input field behavior
+    (function () {
+
+      var search_form, search_field, search_results, results_desc, search_string, position;
+
+      search_field   = $("input.search_field");
+      search_results = $(".search_results");
+      results_desc   = $(".search_results_description");
+      search_form    = $(".search_form");
+      search_string  = "";
+
+      // postitioning search results box under search field and hide
+      position     = search_field.offset();
+      position.top = position.top + search_field.outerHeight();
+      search_results.offset(position);
+      search_results.hide();
+
+      // search field simulating ajax search process
+      search_field.on('keyup click', function() {
+
+        if(search_field.attr("value") !== search_string) {
+
+          search_string = search_field.attr("value");
+
+          if( search_string.length > 2) {
+            search_field.addClass("loading");
+            setTimeout(function() {
+               search_field.removeClass("loading");
+            }, 1500);
+            if( !search_results.is(":visible") ) {
+              setTimeout(function() {
+                search_results.slideDown();
+              }, 1500);
+            }
+          } else {
+            search_results.slideUp();
+            if( results_desc.is(":visible") ) results_desc.fadeOut(100);
+          }
+        }
+
+      });
+
+      // form submit stop event
+      search_form.on("submit", function(e) {
+        e.preventDefault();
+      });
+
+    })();
+
+
+
+
+    // search results list behavior
+    (function() {
+
+      var results_container, results_list, list_items, results_desc, desc_items;
+
+      results_container = $(".search_results");
+      list_items        = $(".results_list li");
+      results_desc      = $(".search_results_description");
+      desc_items        = $(".search_results_description li");
+
+      // hide search details container
+      results_desc.hide();
+
+      function showDescription() {
+
+        var position;
+
+        // positioning description container
+
+        results_desc.show();
+        position      = results_container.offset();
+        position.top  = position.top  + results_container.outerHeight() / 2 - results_desc.outerHeight() / 2;
+        position.left = position.left + results_container.outerWidth();
+        results_desc.offset(position);
+        results_desc.hide();
+
+        // show description container
+        results_desc.fadeIn();
+
       }
-      src.scrollTop(scroll);
-    });
 
-    cdn.click(function () {
-      cdn.removeClass("disabled");
-      cup.removeClass("disabled");
-      scroll = scroll + scroll_speed;
-      if( scroll > scroll_limit ) {
-        scroll = scroll_limit;
-        cdn.addClass("disabled");
-      }
-      src.scrollTop(scroll);
-    });
+      // click on list item
+      list_items.on("click", function() {
+        var item;
+
+        item = $(this);
+
+        list_items.removeClass("loading");
+        item.addClass("loading");
+        if(results_desc.is(":visible")) results_desc.fadeOut(100);
+
+        setTimeout(function() {
+          list_items.removeClass("selected");
+          item.removeClass("loading");
+          item.addClass("selected");
+
+          showDescription();
+
+        }, 500);
+
+      });
+
+      // click on description list item
+      desc_items.on("click", function() {
+        results_desc.fadeOut(100);
+        results_container.slideUp();
+      });
+
+    })();
 
 
 
-    $(".section_chooser").click(function() {
-      var chooser
-      ,   list
-      ,   pos;
 
-      chooser = $(this);
-      list    = $(".sections_list");
+    // ugly scroller behavior
+    (function () {
 
-      pos =     chooser.offset();
-      pos.top = pos.top + chooser.outerHeight();
+      var search_results, items, container, content,
+          scrollup_btn, scrolldown_btn, scroll_limit,
+          scroll_position, scroll_step, animation_interval, offset;
 
-      chooser.addClass("active");
-      list.slideDown();
-      list.offset(pos);
+      search_results = $(".search_results");
+      container      = $(".list_container");
+      content        = $(".results_list");
+      items          = $(".results_list li");
 
-    });
+      scrollup_btn   = $(".search_results .next");
+      scrolldown_btn = $(".search_results .prev");
 
-    $("input.search_field").keydown(function() {
-       console.log("pressed");
-    });
+      scroll_step        = 30;
+      scroll_position    = 0;
+      animation_interval = 200;
+
+      // get dimensions to determine scroll size and scroll step
+      search_results.show();
+      scroll_limit    = content.outerHeight() - container.height();
+      offset          = parseInt(content.css("margin-top"));
+      // // determine height of the biggest li in list - thats gona be scroll step
+      // scroll_step     = $(_.max(items, function(item) { return $(item).outerHeight(); })).outerHeight();
+      search_results.hide();
+
+
+      // click to scroll up
+      $(".search_results .next, .search_results .prev").mousedown(function() {
+
+        var el = $(this);
+
+        if(el.hasClass("next")) {
+          scroll_position = scroll_position + scroll_step;
+          if( scroll_position > scroll_limit ) scroll_position = scroll_limit;
+        } else if(el.hasClass("prev")) {
+          scroll_position = scroll_position - scroll_step;
+          if( scroll_position < 0) scroll_position = 0;
+        }
+
+        switch(true) {
+
+          case (0 < scroll_position) && (scroll_position < scroll_limit):
+          scrollup_btn.removeClass("disabled");
+          scrolldown_btn.removeClass("disabled");
+          break;
+
+          case scroll_position == 0:
+          scrolldown_btn.addClass("disabled");
+          break;
+
+          case scroll_position == scroll_limit:
+          scrollup_btn.addClass("disabled");
+          break;
+
+        }
+
+        content.animate({
+          "margin-top": (offset - scroll_position + "px")
+        }, animation_interval);
+
+      });
+
+    })();
+
+    //other
+    (function() {
+
+      var search_results, results_desc, criteria_list, chooser;
+
+      search_results = $(".search_results");
+      chooser        = $(".filter_chooser");
+      criteria_list  = $(".filters_list");
+      results_desc   = $(".search_results_description");
+
+      //click outside search widget
+      $(document).on("click", function(e) {
+
+        if( !$(e.target).parents(".search").length ) {
+          if( search_results.is(":visible")) search_results.slideUp();
+          if( results_desc.is(":visible"))   results_desc.fadeOut(100);
+          if( criteria_list.is(":visible")) {
+            criteria_list.slideUp();
+            chooser.removeClass("active");
+          }
+        }
+
+      });
+    }());
+
   });
 
 </script>
