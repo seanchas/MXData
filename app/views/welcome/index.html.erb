@@ -1,16 +1,11 @@
 <div id="test">
-    
-    <span id="date" class="date_chooser_target">date goes here</span>
-    
+    <input type="text" id="quote_search" name="q" size="75" placeholder="Поиск котировки..." />
 </div>
 
 <script type="text/javascript" charset="utf-8">
     
     $(function() {
-        
-        mx.data.date_chooser($('#date'), 'stock', 'shares', {
-        });
-        
+        mx.data.quote_search($("#quote_search"))
     });
     
 </script>

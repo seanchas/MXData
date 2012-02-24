@@ -1,23 +1,48 @@
 root    = @
 scope   = root['mx']['data']
+
+
 $       = jQuery
 
 
-query_param_threshold = 3
+search_param_threshold = 3
+search_keypress_timeout = 300
 
 
 widget = (element, options = {}) ->
     element = $(element); return unless _.size(element) > 0
+
+    search_param        = undefined
+    keypress_timeout    = undefined
     
-    search_request  = null
+    render_instruments = (data) ->
+        list = make_instruments_list(element)
+        list.html("")
+        for item in data
+            list.append $("<li>").html(item.name)
     
-    query_field     = $("input[type=search]", element)
-    query_param     = ""
+    search = (param) ->
+        return if param == search_param
+        search_param = param
+        mx.iss.quote_search(param).then render_instruments
     
-    onchange = (event) ->
-    
-    query_field.on "keyup", onchange
-    
+    observe_keyboard = (event) ->
+        param = element.val()
+        return unless param? and param.length >= search_param_threshold
+        clearTimeout keypress_timeout
+        keypress_timeout = _.delay search, search_keypress_timeout, param
+        
+
+    element.on "keyup", observe_keyboard
+
+    {}
+
+
+make_instruments_list = _.once (element) ->
+    list = $("<ul>")
+    element.after(list)
+    list
+
 
 $.extend scope,
     quote_search: widget
