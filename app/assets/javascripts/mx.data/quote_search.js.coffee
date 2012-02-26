@@ -19,7 +19,8 @@ widget = (element, options = {}) ->
         list = make_instruments_list(element)
         list.html("")
         for item in data
-            list.append $("<li>").html(item.name)
+            list.append $("<dt>").html(item.secid)
+            list.append $("<dd>").html(item.name)
     
     search = (param) ->
         return if param == search_param
@@ -39,7 +40,7 @@ widget = (element, options = {}) ->
 
 
 make_instruments_list = _.once (element) ->
-    list = $("<ul>")
+    list = $("<dl>").addClass("security-list")
     element.after(list)
     list
 
