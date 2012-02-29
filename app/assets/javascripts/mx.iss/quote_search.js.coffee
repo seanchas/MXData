@@ -9,9 +9,11 @@ fetch = (query, options = {}) ->
     $.ajax
         url: "#{scope.url_prefix}/securities.jsonp?callback=?"
         data:
-            q:          query
-            'iss.meta': 'off'
-            'iss.only': 'securities'
+            q:              query
+            group_by:     if options.group_by then options.group_by else ''
+            is_trading:   if options.is_traded then options.is_traded else ''
+            'iss.meta':     'off'
+            'iss.only':     'securities'
         dataType: 'jsonp'
     .then (json) ->
         deferred.resolve scope.merge_columns_and_data json?.securities
