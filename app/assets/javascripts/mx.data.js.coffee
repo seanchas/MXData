@@ -9,3 +9,7 @@ root = @
 root['mx'] ?= {}
 root['mx']['data'] = {}
 
+scope = root['mx']['data']
+
+_.extend scope,
+    ready: mx.iss.metadata()

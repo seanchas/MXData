@@ -45,7 +45,7 @@ buildBoardsList = (element) ->
 
 widget = (element, options = {}) ->
     element = $(element); return unless _.size(element) > 0
-
+    
     last_query      = undefined
     query_timeout   = undefined
 
@@ -100,14 +100,6 @@ widget = (element, options = {}) ->
         
         boards_list_container.show()
         
-        console.log boards_list_container
-        
-    onFocus = (event) ->
-        element.addClass("active")
-    
-    onBlur = (event) ->
-        element.removeClass("active")
-
     search = (query) ->
         return if last_query == query
         last_query = query
@@ -120,15 +112,18 @@ widget = (element, options = {}) ->
         query_input.val("")
         query_input.focus()
         securities_list_container.hide()
+        fsm.clarify()
         mx.iss.security_boards(secid).then onSecurityBoardsLoadComplete
     
     chooseTicker = (event) ->
         [engine, market, board, param] = $(event.currentTarget).data('param').split(":")
+        closeTag()
+        $(window).trigger("security:selected", { engine: engine, market: market, board: board, param: param })
         
         
     
     closeTag = (event) ->
-        event.preventDefault()
+        event.preventDefault() if event?
         $("td.tag").remove()
         query_input.val("")
         query_input.focus()
@@ -141,9 +136,45 @@ widget = (element, options = {}) ->
             security_groups[group.name] = group
 
 
-    query_input.on "focus", onFocus
+    fsm_timeout = undefined
 
-    query_input.on "blur",  onBlur
+    fsm = StateMachine.create
+    
+        events: [
+            {
+                name:   'startup'
+                from:   'none'
+                to:     'security'
+            }
+            {
+                name:   'clarify'
+                from:   'security'
+                to:     'board'
+            }
+            {
+                name:   'shutdown'
+                from:   '*'
+                to:     'none'
+            }
+        ]
+        
+        callbacks:
+            
+            onstartup: ->
+                element.addClass "active"
+                console.log "startup"
+            
+            onclarify: ->
+                console.log "clarify"
+            
+            onshutdown: ->
+                element.removeClass "active"
+                console.log "shutdown"
+
+
+    query_input.on "focus", -> fsm.startup()
+
+    query_input.on "blur",  -> fsm.shutdown()
 
     query_input.on "keyup", (event) ->
         query = query_input.val()
@@ -154,7 +185,6 @@ widget = (element, options = {}) ->
     securities_list_container.on "click", "td[data-secid]", chooseSecurity
     boards_list_container.on "click", "tr[data-param]", chooseTicker
     element.on "click", "td.tag a", closeTag
-
     
 
 $.extend scope,

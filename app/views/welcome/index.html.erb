@@ -11,11 +11,21 @@
     </table>
 </div>
 
+
+<div id="tables">
+    
+</div>
+
+
 <script type="text/javascript" charset="utf-8">
 
     $(function() {
-        
-        mx.data.quote_search("#quote_search")
+
+        mx.data.ready.then(function(metadata) {
+            _.each(metadata.markets, function(market) { mx.data.table($("#tables"), market); });
+        });
+
+        mx.data.quote_search("#quote_search");
         
     });
 

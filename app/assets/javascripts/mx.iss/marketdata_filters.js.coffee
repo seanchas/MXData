@@ -10,10 +10,8 @@ prepare = (data) ->
     , {}
 
 
-fetch = (param) ->
+fetch = (engine, market) ->
     deferred = new $.Deferred
-    
-    [engine, market] = param.split(":")
     
     $.ajax
         url: "#{scope.url_prefix}/engines/#{engine}/markets/#{market}/securities/columns/filters.jsonp?callback=?"
