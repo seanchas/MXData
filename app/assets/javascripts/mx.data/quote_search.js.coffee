@@ -162,14 +162,14 @@ widget = (element, options = {}) ->
             
             onstartup: ->
                 element.addClass "active"
-                console.log "startup"
+                #console.log "startup"
             
             onclarify: ->
-                console.log "clarify"
+                #console.log "clarify"
             
             onshutdown: ->
                 element.removeClass "active"
-                console.log "shutdown"
+                #console.log "shutdown"
 
 
     query_input.on "focus", -> fsm.startup()

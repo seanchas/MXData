@@ -12,6 +12,7 @@ scope = root['mx']['iss']
 
 
 merge = (json) ->
+    return [] unless json.data? and json.columns?
     for datum in json.data
         item = {}
         for column, index in json.columns

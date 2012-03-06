@@ -1,228 +1,91 @@
-/*
- *
- * css styles for mx_table
- *
-*/
-
-// color scheme
-
-$c_txt_base:    #000;
-$c_txt_head:    #4d4d4d;
-$c_lnk_head:    #359;
-$c_lnh_head:    #47f;
-$c_lnv_head:    #359;
-$c_lnk_body:    #4d4d4d;
-$c_lnh_body:    #47f;
-$c_lnv_body:    #4d4d4d;
-$c_bg_base:     #fff;
-$c_bg_head:     #f7f7f7;
-$c_bg_row_odd:  #fff;
-$c_bg_row_even: #fafafa;
-$c_trend_up:    green;
-$c_trend_down:  red;
-$c_datetime:    #178;
-
-
-// css3 mixins
-
-@mixin linear-gradient($col1: #eee, $col2: #ccc) {
-    background: $col1; /* Old browsers */
-    background: -moz-linear-gradient(top, $col1 0%, $col2 100%); /* FF3.6+ */
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,$col1), color-stop(100%,$col2)); /* Chrome,Safari4+ */
-    background: -webkit-linear-gradient(top, $col1 0%, $col2 100%); /* Chrome10+,Safari5.1+ */
-    background: -o-linear-gradient(top, $col1 0%, $col2 100%); /* Opera 11.10+ */
-    background: -ms-linear-gradient(top, $col1 0%, $col2 100%); /* IE10+ */
-    background: linear-gradient(top, $col1 0%, $col2 100%); /* W3C */
-    filter:     progid:DXImageTransform.Microsoft.gradient( startColorstr=$col1, endColorstr=$col2, GradientType=0 ); /* IE6-9 */
-}
-
-@mixin border-radius($radius: 5px) {
-    -webkit-border-radius: $radius;
-    -moz-border-radius:    $radius;
-    border-radius:         $radius;
-}
-
-
-
-// mx_table styles
-
-table.mx_table {
-    background-color: $c_bg_base;
-    border-collapse:  collapse;
-    color:            $c_txt_base;
-    font:             12px/16px Arial, Helvetica, sans-serif;
-}
-
-
-table.mx_table {
-
-    thead {
-        @include linear-gradient($c_bg_head, darken($c_bg_head, 10));
-
-        color: $c_txt_head;
-        font-weight: bold;
-
-        th {
-            padding: 5px 10px;
-        }
-
-        a {
-            color: $c_lnk_head;
-            border-bottom: 1px $c_lnk_head dashed;
-            text-decoration: none;
-        }
-
-        a:link {
-            color: $c_lnk_head;
-            border-bottom: 1px $c_lnk_head dashed;
-            text-decoration: none;
-        }
-
-        a:visited {
-            color: $c_lnv_head;
-            border-bottom: 1px $c_lnv_head dashed;
-            text-decoration: none;
-        }
-
-        a:hover {
-            color: $c_lnh_head;
-            border-bottom: 1px $c_lnh_head dashed;
-            text-decoration: none;
-        }
-
-    }
-
-    tbody {
-
-        tr.odd {
-            background-color: $c_bg_row_odd;
-        }
-
-        tr.even {
-            background-color: $c_bg_row_even;
-        }
-
+#tables {
+    
+    table {
+        
+        border-collapse: collapse;
+        border-spacing: 0;
+        
+        width: 100%;
+        
+        th,
         td {
+            border: 1px solid #ccc;
+            margin: 0;
+            padding: .25em 5px;
+        }
+        
+        thead td {
+            color: #666;
+            font-size: 75%;
+            padding: .5em 5px;
+        }
+        
+        thead td.sortable span {
+            border-bottom: 1px dashed #99f;
             cursor: pointer;
-            padding: 5px 10px;
+        }
+        
+        thead td.sortable.asc span:after,
+        thead td.sortable.desc span:after {
+            margin-left: 10px;
         }
 
-        a {
-            color: $c_lnk_body;
-            border-bottom: 1px $c_lnk_body dashed;
-            text-decoration: none;
+        thead td.sortable.asc span:after {
+            content: '↓'
         }
-
-        a:link {
-            color: $c_lnk_body;
-            border-bottom: 1px $c_lnk_body dashed;
-            text-decoration: none;
+        
+        thead td.sortable.desc span:after {
+            content: '↑'
         }
-
-        a:visited {
-            color: $c_lnv_body;
-            border-bottom: 1px $c_lnv_body dashed;
-            text-decoration: none;
+        
+        tbody tr.row td {
+            white-space: nowrap;
         }
-
-        a:hover {
-            color: $c_lnh_body;
-            border-bottom: 1px $c_lnh_body dashed;
-            text-decoration: none;
+        
+        td.number,
+        td.time {
+            text-align: right;
         }
-
-    }
-
-    // Data types:
-    // - number
-    .number {
-        text-align: right;
-    }
-    // - string
-    .string {
-        text-align: left;
-    }
-    // - time
-    thead .time {
-        text-align: right;
-    }
-    tbody .time {
-        color: $c_datetime;
-        text-align: right;
-    }
-    // - date
-    thead .date {
-        text-align: right;
-    }
-    tbody .date {
-        color: $c_datetime;
-        text-align: right;
-    }
-
-
-    .control {}
-
-    .trend_self_up {
-        color: $c_trend_up;
-        background: image-url("icons/arrow_up.png") no-repeat center right;
-        padding-right: 16px;
-        text-align: right;
-    }
-
-    .trend_self_down {
-        color: $c_trend_down;
-        background: image-url("icons/arrow_down.png") no-repeat center right;
-        padding-right: 16px;
-        text-align: right;
-    }
-
-    .trend_up {
-        color: $c_trend_up;
-        text-align: right;
-    }
-
-    .trend_down {
-        color: $c_trend_down;
-        text-align: right;
-    }
-
-    .sortable {
-
-    }
-
-    .sortable.asc a {
-        padding-right: 16px;
-        background: image-url("icons/bullet_arrow_up.png") no-repeat center right;
-    }
-
-    .sortable.desc a {
-        padding-right: 16px;
-        background: image-url("icons/bullet_arrow_down.png") no-repeat center right;
-    }
-
-    .control {
-        a.chart_add,
-        a.chart_add:hover,
-        a.chart_add:visited,
-        a.chart_add:link, {
-            background: image-url("icons/chart_curve_add.png");
-            display: block;
-            height: 16px;
-            line-height: 9999px;
-            overflow: hidden;
-            width: 16px;
+        
+        td.time {
+            color: #666;
+            font-size: 75%;
         }
-
-        a.chart_delete
-        a.chart_delete:hover,
-        a.chart_delete:visited,
-        a.chart_delete:link {
-            background: image-url("icons/chart_curve_delete.png");
-            display: block;
-            height: 16px;
-            line-height: 9999px;
-            overflow: hidden;
-            width: 16px;
+        
+        tr.row {
+            
+            td.remove {
+                color: #f00;
+                cursor: pointer;
+                text-align: center;
+            }
+            
         }
+        
+        tr.filter {
+            
+            ul {
+                color: #666;
+                font-size: 75%;
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                
+                li {
+                    background-color: #eee;
+                    display: inline-block;
+                    margin: 5px;
+                    padding: .25em 5px;
+                }
+                
+                li.visible {
+                    color: #060;
+                    background-color: #cfc;
+                }
+            }
+            
+        }
+        
     }
+    
 }

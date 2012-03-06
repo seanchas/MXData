@@ -4,10 +4,7 @@ $       = jQuery
 
 
 prepare = (data) ->
-    _.reduce data, (memo, item) ->
-        (memo[item.filter_name] ||= []).push(item)
-        memo
-    , {}
+    _.reduce data, ((memo, item) -> (memo[item.filter_name] ||= []).push(item); memo), {}
 
 
 fetch = (engine, market) ->
