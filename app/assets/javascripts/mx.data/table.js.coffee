@@ -26,6 +26,7 @@ make_container = (wrapper, market) ->
     container.append table
     
     container.appendTo wrapper
+    container.hide()
 
 
 
@@ -146,6 +147,8 @@ widget = (wrapper, market_object) ->
     render = ->
         render_head()
         render_body()
+        container.hide() if _.size(securities) == 0
+        container.show() if _.size(securities) > 0
     
     render_head = ->
         return unless should_render_head
