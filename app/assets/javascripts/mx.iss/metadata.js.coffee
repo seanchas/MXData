@@ -6,10 +6,11 @@ $       = jQuery
 keys = [
     'engines'
     'markets'
+    'boards'
 ]
 
 
-fetch = (ticker) ->
+fetch = ->
     deferred = new $.Deferred
     
     data = {}
@@ -28,4 +29,4 @@ fetch = (ticker) ->
 
 
 $.extend scope,
-    metadata: fetch
+    metadata: _.once fetch

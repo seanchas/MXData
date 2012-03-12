@@ -5,7 +5,7 @@ scope   = root['mx']['data']
 $       = jQuery
 
 
-chart_types = ['line', 'candle', 'ohlc']
+chart_types = ['candles', 'line', 'stockbar']
 
 
 chart_options =
@@ -18,15 +18,18 @@ chart_options =
     
     series: [
         {
-            name: 'main-line'
+            id: 'main-line'
+            type: 'line'
         }
         {
-            name: 'main-ohlc'
+            id: 'main-stockbar'
+            type: 'ohlc'
         }
         {
-            name: 'main-candle'
+            id: 'main-candles'
+            type: 'candlestick'
         }
-            
+        
     ]
 
 
@@ -67,10 +70,33 @@ widget = (wrapper) ->
     # refresh
     
     refresh = ->
-        # load data
-        # mx.cs.highstock securities
+        console.log "asd"
         
-        # render data
+        chart.showLoading()
+        
+        console.log chart_type
+        
+        console.log "asd"
+        
+        mx.cs.highstock(securities, { type: chart_type }).then (json) ->
+            [candles, volumes] = json
+            
+            candle = _.first(candles)
+            
+            for candle_type in chart_types
+                series = chart.get("main-#{chart_type}")
+
+                if candle_type == candle.type
+                    series.setData(candle.data, false)
+                    series.show()
+                else
+                    series.hide()
+            
+            chart.redraw()
+            chart.hideLoading()
+                    
+    
+    addSecurity('stock:index:SNDX:MICEXINDEXCF')
     
     
 
