@@ -61,7 +61,7 @@ widget = (wrapper) ->
     addSecurity = (param) ->
         included = is_security_included param
         securities.push param unless included
-        refresh()
+        #refresh()
     
     removeSecurity = (param) ->
         included = is_security_included param
@@ -70,13 +70,7 @@ widget = (wrapper) ->
     # refresh
     
     refresh = ->
-        console.log "asd"
-        
         chart.showLoading()
-        
-        console.log chart_type
-        
-        console.log "asd"
         
         mx.cs.highstock(securities, { type: chart_type }).then (json) ->
             [candles, volumes] = json
@@ -96,7 +90,7 @@ widget = (wrapper) ->
             chart.hideLoading()
                     
     
-    addSecurity('stock:index:SNDX:MICEXINDEXCF')
+    addSecurity('stock:shares:EQBR:AFLT')
     
     
 

@@ -28,10 +28,10 @@
     $(function() {
 
         mx.data.ready.then(function(metadata) {
-            //_.each(metadata.markets, function(market) { mx.data.table($("#tables"), market); });
+            _.each(metadata.markets, function(market) { mx.data.table($("#tables"), market); });
 
-            //$(window).trigger("security:selected", { engine: 'stock', market: 'shares', board: 'EQBR', param: 'AFLT' });
-            //$(window).trigger("security:selected", { engine: 'stock', market: 'shares', board: 'EQNE', param: 'GAZP' });
+            $(window).trigger("security:selected", { engine: 'stock', market: 'shares', board: 'EQBR', param: 'AFLT' });
+            $(window).trigger("security:selected", { engine: 'stock', market: 'shares', board: 'EQNE', param: 'GAZP' });
             
             mx.data.chart($('#chart'));
             
