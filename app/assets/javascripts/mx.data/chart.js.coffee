@@ -5,10 +5,42 @@ scope   = root['mx']['data']
 $       = jQuery
 
 
-chart_types = ['candles', 'line', 'stockbar']
+chart_types = ['line', 'candles', 'stockbar']
 
 
-chart_options =
+chart_types_titles =
+    line:       'Линия'
+    candles:    'Свечи'
+    stockbar:   'Бары'
+
+
+chart_types_mapping =
+    line:       'line'
+    candles:    'candlestick'
+    stockbar:   'ohlc'
+
+
+make_content = (container) ->
+    container.html("<div id=\"chart-type-selector-container\"></div><div id=\"chart-container\"></div>")    
+
+
+make_chart_type_selector = (container) ->
+    selector = $("<select>")
+        .attr("id", "chart-type-selector")
+    
+    for chart_type in chart_types
+        selector.append $("<option>")
+            .attr("value", chart_type)
+            .html(chart_types_titles[chart_type])
+    
+    container.html selector
+
+
+# default chart options
+
+default_chart_options =
+    chart:
+        alignTicks: true
     
     credits:
         enabled: false
@@ -16,42 +48,103 @@ chart_options =
     rangeSelector:
         enabled: false
     
-    series: [
-        {
-            id: 'main-line'
-            type: 'line'
-        }
-        {
-            id: 'main-stockbar'
-            type: 'ohlc'
-        }
-        {
-            id: 'main-candles'
-            type: 'candlestick'
-        }
-        
-    ]
+    plotOptions:
+        ohlc:
+            lineWidth: 2
+        series:
+            gapSize: 60
 
 
-make_chart = (container) ->
-    new Highcharts.StockChart(
-        $.extend(
-            true,
-            {},
-            chart_options,
-            chart:
-                renderTo: container[0]
-        )
-    )
+# default series options
+
+default_series_options =
+    dataGrouping:
+        smoothed: true
+
+
+# default x axis options
+
+default_xaxis_options =
+    id: null
+
+
+# default y axis options
+
+default_yaxis_options =
+    id: null
+
+
+_make_chart = (container, data, options = {}) ->
+    chart_options = $.extend true, {}, default_chart_options
+    
+    series  = []
+    xAxis   = []
+    yAxis   = []
+    
+    
+    xAxis.push $.extend true, {}, default_xaxis_options
+
+    yAxis.push $.extend true, {}, default_yaxis_options
+
+    yAxis.push $.extend true, {}, default_yaxis_options,
+        opposite: true
+
+
+    data_size = _.size data
+    
+    
+    if data_size > 2
+        $.extend true, chart_options,
+            plotOptions:
+                series:
+                    compare: 'percent'
+    
+    for serie, index in data
+        serie_options = $.extend true, {}, default_series_options
+
+        $.extend serie_options,
+            type:   chart_types_mapping[serie.type]
+            data:   serie.data
+            yAxis:  if index == 1 and data_size == 2 then 1 else 0
+    
+        series.push serie_options
+    
+
+    $.extend true, chart_options,
+        chart:
+            renderTo: _.first(container)
+        series: series
+        xAxis:  xAxis
+        yAxis:  yAxis
+    
+
+    options.chart.destroy() if options.chart
+    chart = new Highcharts.StockChart chart_options
+    
+
+    xaxis = _.first chart.xAxis
+    xaxis.setExtremes(options.min, options.max, true, false) if options.min? and options.max?
+    
+
+    chart
 
 
 widget = (wrapper) ->
     wrapper = $(wrapper); return if _.size(wrapper) == 0
     
     securities  = []
+    
+    make_content wrapper
 
-    chart       = make_chart wrapper
-    chart_type  = _.first chart_types
+    make_chart_type_selector $('#chart-type-selector-container', wrapper)
+
+    chart_container = $('#chart-container', wrapper)
+    chart           = _make_chart chart_container, [{ data: [] }]
+    
+    chart_type_selector = $('select#chart-type-selector')
+    chart_type          = _.first chart_types
+    
+    refresh_timeout = undefined
     
     # interface
     
@@ -59,13 +152,24 @@ widget = (wrapper) ->
         _.include securities, param
 
     addSecurity = (param) ->
+        clearTimeout refresh_timeout
+
         included = is_security_included param
         securities.push param unless included
-        #refresh()
+
+        refresh_timeout = _.delay refresh, 300
     
     removeSecurity = (param) ->
+        clearTimeout refresh_timeout
+
         included = is_security_included param
         securities = _.without securities, param if included
+        
+        refresh_timeout = _.delay refresh, 300
+    
+    setChartType = (new_chart_type) ->
+        chart_type = new_chart_type if _.include chart_types, new_chart_type
+        refresh()
     
     # refresh
     
@@ -75,22 +179,25 @@ widget = (wrapper) ->
         mx.cs.highstock(securities, { type: chart_type }).then (json) ->
             [candles, volumes] = json
             
-            candle = _.first(candles)
+            { min, max } = _.first(chart.xAxis).getExtremes()
             
-            for candle_type in chart_types
-                series = chart.get("main-#{chart_type}")
-
-                if candle_type == candle.type
-                    series.setData(candle.data, false)
-                    series.show()
-                else
-                    series.hide()
-            
-            chart.redraw()
-            chart.hideLoading()
+            chart = _make_chart chart_container, candles, { chart: chart, min: min, max: max }
                     
     
+    addSecurity('stock:shares:EQNE:GAZP')
+    addSecurity('stock:index:SNDX:MICEXINDEXCF')
+    addSecurity('stock:index:SNDX:MICEX10INDEX')
+    addSecurity('stock:index:SNDX:MICEXO&G')
     addSecurity('stock:shares:EQBR:AFLT')
+    
+    # event observers
+    
+    onChartTypeSelectorChange = (event) ->
+        setChartType chart_type_selector.val()
+
+    # event listeners
+    
+    chart_type_selector.on "change", onChartTypeSelectorChange
     
     
 

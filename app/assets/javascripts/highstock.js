@@ -1,6 +1,3 @@
-// ==ClosureCompiler==
-// @compilation_level SIMPLE_OPTIMIZATIONS
-
 /**
  * @license Highstock JS v1.1.4 (2012-02-15)
  *
