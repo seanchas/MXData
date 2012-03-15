@@ -1,0 +1,89 @@
+#chart-period-selector-container {
+    
+    $border_color: #aaa;
+    $light_item_background: #ececec;
+    $item_background: #d1d1d1;
+    $selected_item_backgound: #fff;
+    $text_shadow_color: #fff;
+    $box_shadow_color: rgba(0, 0, 0, 0.4);
+    
+    ul {
+        font-size: 12px;
+        line-height: 2em;
+        list-style: none;
+        margin: 20px 0;
+        overflow: hidden;
+        padding: 0 20px;
+        position: relative;
+        
+        li {
+            background: $item_background;
+            background: -o-linear-gradient(top, $light_item_background 50%, $item_background 100%);
+            background: -ms-linear-gradient(top, $light_item_background 50%, $item_background 100%);
+            background: -moz-linear-gradient(top, $light_item_background 50%, $item_background 100%);
+            background: -webkit-linear-gradient(top, $light_item_background 50%, $item_background 100%);
+            background: linear-gradient(top, $light_item_background 50%, $item_background 100%);
+            border: 1px solid $border_color;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            box-shadow: 0 3px 3px $box_shadow_color, inset 0 1px 0 $text_shadow_color;
+            cursor: pointer;
+            display: inline-block;
+            margin: 0 -3px;
+            padding: 0 20px;
+            position: relative;
+            text-shadow: 0 1px $text_shadow_color;
+            z-index: 0;
+        }
+        
+        li.selected {
+            background: $selected_item_backgound;
+            border-bottom-color: $selected_item_backgound;
+            z-index: 2;
+        }
+        
+        li:before,
+        li:after {
+            border: 1px solid $border_color;
+            bottom: -1px;
+            content: " ";
+            height: 5px;
+            position: absolute;
+            width: 5px;
+        }
+        
+        li:before {
+            border-width: 0 1px 1px 0;
+            border-bottom-right-radius: 6px;
+            box-shadow: 2px 2px 0 $item_background;
+            left: -6px;
+        }
+        
+        li:after {
+            border-width: 0 0 1px 1px;
+            border-bottom-left-radius: 6px;
+            box-shadow: -2px 2px 0 $item_background;
+            right: -6px;
+        }
+        
+        li.selected:before {
+            box-shadow: 2px 2px $selected_item_backgound;
+        }
+        
+        li.selected:after {
+            box-shadow: -2px 2px $selected_item_backgound;
+        }
+        
+    }
+    
+    ul:after {
+        border-bottom: 1px solid $border_color;
+        bottom: 0;
+        content: " ";
+        left: 0;
+        position: absolute;
+        width: 100%;
+        z-index: 1;
+    }
+    
+}

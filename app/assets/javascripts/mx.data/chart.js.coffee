@@ -5,6 +5,39 @@ scope   = root['mx']['data']
 $       = jQuery
 
 
+colors = [
+    '#4572a7'
+    '#aa4643'
+    '#89a54e'
+    '#80699b'
+    '#3d96ae'
+    '#db843d'
+    '#92a8cd'
+    '#a47d7c'
+    '#b5ca92'
+]
+
+
+chart_periods = [
+    {
+        title: 'День'
+    }
+    {
+        title: 'Неделя'
+    }
+    {
+        title: 'Месяц'
+        selected: true
+    }
+    {
+        title: 'Год'
+    }
+    {
+        title: 'Весь период'
+    }
+]
+
+    
 chart_types = ['line', 'candles', 'stockbar']
 
 
@@ -18,10 +51,22 @@ chart_types_mapping =
     line:       'line'
     candles:    'candlestick'
     stockbar:   'ohlc'
+    bar:        'column'
 
 
 make_content = (container) ->
-    container.html("<div id=\"chart-type-selector-container\"></div><div id=\"chart-container\"></div>")    
+    container.html("<div id=\"chart-period-selector-container\"></div><div id=\"chart-type-selector-container\"></div><div id=\"chart-container\"></div>")    
+
+
+make_chart_period_selector = (container) ->
+    list = $('<ul>')
+
+    for chart_period in chart_periods
+        item = $('<li>').html chart_period.title
+        item.addClass("selected") if chart_period.selected
+        list.append item
+
+    container.append list
 
 
 make_chart_type_selector = (container) ->
@@ -41,6 +86,7 @@ make_chart_type_selector = (container) ->
 default_chart_options =
     chart:
         alignTicks: true
+        height: 470
     
     credits:
         enabled: false
@@ -48,9 +94,17 @@ default_chart_options =
     rangeSelector:
         enabled: false
     
+    navigator:
+        height: 50
+    
+    scrollbar:
+        height: 15
+    
     plotOptions:
         ohlc:
             lineWidth: 2
+        column:
+            lineWidth: 1
         series:
             gapSize: 60
 
@@ -61,20 +115,43 @@ default_series_options =
     dataGrouping:
         smoothed: true
 
+# default volumes series options
+
+default_volumes_series_options =
+    dataGrouping:
+        smoothed: true
+
 
 # default x axis options
 
 default_xaxis_options =
+    height: 370
+    top: 0
+    offset: 0
     id: null
 
 
 # default y axis options
 
 default_yaxis_options =
-    id: null
+    lineWidth: 1
+    height: 250
+    top: 0
+    offset: 0
+    showEmpty: false
+
+# default volumnes y axis options
+
+default_volumes_yaxis_options =
+    lineWidth: 1
+    height: 100
+    top: 260
+    offset: 0
+    showEmpty: false
+    alignTicks: false
 
 
-_make_chart = (container, data, options = {}) ->
+_make_chart = (container, candles_data, volumes_data, options = {}) ->
     chart_options = $.extend true, {}, default_chart_options
     
     series  = []
@@ -88,27 +165,45 @@ _make_chart = (container, data, options = {}) ->
 
     yAxis.push $.extend true, {}, default_yaxis_options,
         opposite: true
+        gridLineWidth: 0
 
 
-    data_size = _.size data
+    candles_data_size = _.size candles_data
     
     
-    if data_size > 2
-        $.extend true, chart_options,
-            plotOptions:
-                series:
-                    compare: 'percent'
-    
-    for serie, index in data
+    for serie, index in candles_data
         serie_options = $.extend true, {}, default_series_options
-
+        
         $.extend serie_options,
+            color: colors[index]
             type:   chart_types_mapping[serie.type]
             data:   serie.data
-            yAxis:  if index == 1 and data_size == 2 then 1 else 0
+            yAxis:  if index == 1 and candles_data_size == 2 then 1 else 0
+        
+            if candles_data_size > 2
+                $.extend true, serie_options,
+                    compare: 'percent'
     
         series.push serie_options
     
+    
+    # volumes
+    
+    volumes_yaxis_index = _.size yAxis
+    
+    yAxis.push $.extend true, {}, default_volumes_yaxis_options
+
+    for serie, index in _.first(volumes_data, if _.size(volumes_data) > 2 then 1 else 2)
+        
+        serie_options = $.extend true, {}, default_volumes_series_options
+
+        $.extend true, serie_options,
+            color: colors[index]
+            type: chart_types_mapping[serie.type]
+            data: serie.data
+            yAxis: volumes_yaxis_index
+
+        series.push serie_options
 
     $.extend true, chart_options,
         chart:
@@ -136,10 +231,11 @@ widget = (wrapper) ->
     
     make_content wrapper
 
+    make_chart_period_selector $('#chart-period-selector-container', wrapper)
     make_chart_type_selector $('#chart-type-selector-container', wrapper)
 
     chart_container = $('#chart-container', wrapper)
-    chart           = _make_chart chart_container, [{ data: [] }]
+    chart           = _make_chart chart_container, [{ data: [] }], [{ data: [] }]
     
     chart_type_selector = $('select#chart-type-selector')
     chart_type          = _.first chart_types
@@ -181,14 +277,11 @@ widget = (wrapper) ->
             
             { min, max } = _.first(chart.xAxis).getExtremes()
             
-            chart = _make_chart chart_container, candles, { chart: chart, min: min, max: max }
+            chart = _make_chart chart_container, candles, volumes, { chart: chart, min: min, max: max }
                     
     
-    addSecurity('stock:shares:EQNE:GAZP')
     addSecurity('stock:index:SNDX:MICEXINDEXCF')
-    addSecurity('stock:index:SNDX:MICEX10INDEX')
-    addSecurity('stock:index:SNDX:MICEXO&G')
-    addSecurity('stock:shares:EQBR:AFLT')
+    addSecurity('currency:basket:BKT:USDEUR_BKT')
     
     # event observers
     

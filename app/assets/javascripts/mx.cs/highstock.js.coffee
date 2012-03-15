@@ -17,8 +17,8 @@ fetch = (params, options = {}) ->
         
         data =
             's1.type': options.type ? 'line'
-            'interval': 10
-            'period': '2w'
+            'interval': 24
+            'period': '2y'
         
         [engine, market, board, param]  = _.first(params).split(":")
         board_group                     = find_board_group board
