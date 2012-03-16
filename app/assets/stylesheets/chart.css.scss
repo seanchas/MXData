@@ -88,6 +88,10 @@
                 }
             }
             
+            li.disabled {
+                opacity: .5;
+            }
+            
         }
         
         span.reset {

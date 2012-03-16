@@ -311,11 +311,13 @@ widget = (wrapper) ->
 widget = (wrapper) ->
     wrapper = $(wrapper); return if _.size(wrapper) == 0
     
-    chart_periods_container = $('#chart_periods', wrapper)
-    chart_types_container   = $('#chart_types', wrapper)
+    chart_periods_container     = $('#chart_periods', wrapper)
+    chart_types_container       = $('#chart_types', wrapper)
+    chart_instruments_container = $('#chart_instruments', wrapper)
     
     current_period  = undefined
     current_type    = undefined
+    instruments     = {}
     
     # interface
     
@@ -327,6 +329,7 @@ widget = (wrapper) ->
     
         current_period = period
     
+
     setType = (type) ->
         item = $("li[data-type=#{type}]", chart_types_container); return if _.size(item) == 0
 
@@ -334,6 +337,17 @@ widget = (wrapper) ->
         item.addClass('selected')
 
         current_type = type
+    
+    toggleInstrument = (param) ->
+        item = $("li[data-param=#{param}]", chart_instruments_container); return if _.size(item) == 0
+        
+        console.log param
+        instruments[param] ?= {}
+        instruments[param].disabled = !instruments[param].disabled
+        
+        item.toggleClass('disabled')
+        
+        console.log instruments
         
     # event observers
     
@@ -344,11 +358,19 @@ widget = (wrapper) ->
     
     chart_types_container.on "click", "li:not(.selected)", (event) ->
         setType $(event.currentTarget).data('type')
+    
+    chart_instruments_container.on "click", "li", (event) ->
+        toggleInstrument $(event.currentTarget).data('param')
 
     # initialization
     
     setPeriod(_.first(period.name for period in chart_periods when period.is_default))
+
     setType(_.first(type.name for type in chart_types when type.is_default))
+    
+    $(chart_instruments_container).sortable
+        axis: 'x'
+        tolerance: 'intersect'
 
     # returned interface
     
