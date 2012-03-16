@@ -20,31 +20,44 @@ colors = [
 
 chart_periods = [
     {
-        title: 'День'
+        name:       'day'
+        title:      'День'
+        is_default: true
     }
     {
-        title: 'Неделя'
+        name:       'week'
+        title:      'Неделя'
     }
     {
-        title: 'Месяц'
-        selected: true
+        name:       'month'
+        title:      'Месяц'
     }
     {
-        title: 'Год'
+        name:       'year'
+        title:      'Год'
     }
     {
-        title: 'Весь период'
+        name:       'all'
+        title:      'Весь период'
     }
 ]
 
     
-chart_types = ['line', 'candles', 'stockbar']
-
-
-chart_types_titles =
-    line:       'Линия'
-    candles:    'Свечи'
-    stockbar:   'Бары'
+chart_types = [
+    {
+        name:       'line'
+        title:      'Линия'
+        is_default: true
+    }
+    {
+        name:       'candles'
+        title:      'Свечи'
+    }
+    {
+        name:       'stockbar'
+        title:      'Бары'
+    }
+]
 
 
 chart_types_mapping =
@@ -223,7 +236,7 @@ _make_chart = (container, candles_data, volumes_data, options = {}) ->
 
     chart
 
-
+    ###
 widget = (wrapper) ->
     wrapper = $(wrapper); return if _.size(wrapper) == 0
     
@@ -292,8 +305,58 @@ widget = (wrapper) ->
     
     chart_type_selector.on "change", onChartTypeSelectorChange
     
-    
+###
 
+
+widget = (wrapper) ->
+    wrapper = $(wrapper); return if _.size(wrapper) == 0
+    
+    chart_periods_container = $('#chart_periods', wrapper)
+    chart_types_container   = $('#chart_types', wrapper)
+    
+    current_period  = undefined
+    current_type    = undefined
+    
+    # interface
+    
+    setPeriod = (period) ->
+        item = $("li[data-period=#{period}]", chart_periods_container); return if _.size(item) == 0
+    
+        item.siblings().removeClass('selected')
+        item.addClass('selected')
+    
+        current_period = period
+    
+    setType = (type) ->
+        item = $("li[data-type=#{type}]", chart_types_container); return if _.size(item) == 0
+
+        item.siblings().removeClass('selected')
+        item.addClass('selected')
+
+        current_type = type
+        
+    # event observers
+    
+    # event listeners
+
+    chart_periods_container.on "click", "li:not(.selected)", (event) ->
+        setPeriod $(event.currentTarget).data('period')
+    
+    chart_types_container.on "click", "li:not(.selected)", (event) ->
+        setType $(event.currentTarget).data('type')
+
+    # initialization
+    
+    setPeriod(_.first(period.name for period in chart_periods when period.is_default))
+    setType(_.first(type.name for type in chart_types when type.is_default))
+
+    # returned interface
+    
+    {
+        setPeriod: setPeriod
+        setType: setType
+    }
+    
 
 $.extend scope,
     chart: widget
