@@ -39,6 +39,7 @@
     <div id="chart_instruments_container">
         
         <ul id="chart_instruments">
+            <!--
             <li style="color: #4572a7;" data-param="GAZP">
                 Газпром
                 <span></span>
@@ -59,6 +60,7 @@
                 Курс доллара
                 <span></span>
             </li>
+            -->
         </ul>
         
         <span class="reset">Очистить</span>
@@ -82,8 +84,22 @@
             $(window).trigger("security:selected", { engine: 'stock', market: 'shares', board: 'EQBR', param: 'AFLT' });
             $(window).trigger("security:selected", { engine: 'stock', market: 'shares', board: 'EQNE', param: 'GAZP' });
             
-            mx.data.chart($('#chart'));
+            var chart = mx.data.chart($('#chart'));
+            chart.addInstrument({
+                title:  'Аэрофлот',
+                engine: 'stock',
+                market: 'shares',
+                board:  'EQBR',
+                id:     'AFLT'
+            })
             
+            chart.addInstrument({
+                title:  'Газпром',
+                engine: 'stock',
+                market: 'shares',
+                board:  'EQNE',
+                id:     'GAZP'
+            })
         });
 
         mx.data.quote_search("#quote_search");

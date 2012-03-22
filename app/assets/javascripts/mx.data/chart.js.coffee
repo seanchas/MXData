@@ -307,6 +307,11 @@ widget = (wrapper) ->
     
 ###
 
+make_instrument_view = (instrument, color) ->
+    $('<li>')
+        .attr('data-param', instrument.id)
+        .css('color', color)
+        .html("#{instrument.title}<span></span>")
 
 widget = (wrapper) ->
     wrapper = $(wrapper); return if _.size(wrapper) == 0
@@ -317,7 +322,7 @@ widget = (wrapper) ->
     
     current_type    = undefined
     current_period  = undefined
-    instruments     = {}
+    instruments     = []
     
     # interface
     
@@ -341,14 +346,19 @@ widget = (wrapper) ->
     toggleInstrumentState = (param) ->
         item = $("li[data-param=#{param}]", chart_instruments_container); return if _.size(item) == 0
         
-        instruments[param] ?= {}
-        instruments[param].disabled = !instruments[param].disabled
-        
         item.toggleClass('disabled')
     
-    addInstrument = (param) ->
+    addInstrument = (new_instrument) ->
+        instrument = _.first(instrument for instrument in instruments when instrument.id == new_instrument.id)
+        return if instrument?
+        
+        chart_instruments_container.append make_instrument_view(new_instrument, colors[_.size(instruments)])
+        instruments.push(new_instrument)
     
     removeInstrument = (param) ->
+        item = $("li[data-param=#{param}]", chart_instruments_container); return if _.size(item) == 0
+        
+        # refresh()
     
     clearInstruments = ->
     
@@ -365,6 +375,10 @@ widget = (wrapper) ->
     
     chart_instruments_container.on "click", "li", (event) ->
         toggleInstrumentState $(event.currentTarget).data('param')
+
+    chart_instruments_container.on "click", "li span", (event) ->
+        event.stopPropagation()
+        removeInstrument $(event.currentTarget).closest('li').data('param')
 
     # initialization
     
