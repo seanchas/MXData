@@ -67,6 +67,11 @@ chart_types_mapping =
     bar:        'column'
 
 
+instruments_amount_margins =
+    min:    1
+    max:    5
+
+
 make_content = (container) ->
     container.html("<div id=\"chart-period-selector-container\"></div><div id=\"chart-type-selector-container\"></div><div id=\"chart-container\"></div>")    
 
@@ -307,11 +312,16 @@ widget = (wrapper) ->
     
 ###
 
-make_instrument_view = (instrument, color) ->
-    $('<li>')
+make_instrument_view = (instrument, color, options = {}) ->
+    view = $('<li>')
         .attr('data-param', instrument.id)
         .css('color', color)
-        .html("#{instrument.title}<span></span>")
+        .toggleClass('disabled', instrument.__disabled == true)
+        .html("#{instrument.title}")
+    
+        view.addClass('removeable').append($('<span>')) if options.count > 1
+    
+    view
 
 widget = (wrapper) ->
     wrapper = $(wrapper); return if _.size(wrapper) == 0
@@ -323,6 +333,11 @@ widget = (wrapper) ->
     current_type    = undefined
     current_period  = undefined
     instruments     = []
+    
+    # utilities
+    
+    should_be_enabled = ->
+        _.size(instruments) == _.size(instrument for instrument in instruments when instrument.__disabled == true)
     
     # interface
     
@@ -344,26 +359,51 @@ widget = (wrapper) ->
     
 
     toggleInstrumentState = (param) ->
-        item = $("li[data-param=#{param}]", chart_instruments_container); return if _.size(item) == 0
-        
-        item.toggleClass('disabled')
-    
+        instrument = _.first(instrument for instrument in instruments when instrument.id == param)
+        return unless instrument?
+
+        instrument.__disabled = !instrument.__disabled
+        instrument.__disabled = false if should_be_enabled()
+
+        renderInstruments()
+
     addInstrument = (new_instrument) ->
         instrument = _.first(instrument for instrument in instruments when instrument.id == new_instrument.id)
         return if instrument?
-        
-        chart_instruments_container.append make_instrument_view(new_instrument, colors[_.size(instruments)])
+
         instruments.push(new_instrument)
+
+        renderInstruments()
     
+
     removeInstrument = (param) ->
-        item = $("li[data-param=#{param}]", chart_instruments_container); return if _.size(item) == 0
-        
-        # refresh()
+        return unless _.size(instruments) > 1
+
+        instrument = _.first(instrument for instrument in instruments when instrument.id == param)
+        return unless instrument?
+
+        instruments = _.without(instruments, instrument)
+        _.first(instruments).__disabled = false if should_be_enabled()
+
+        renderInstruments()
     
+
     clearInstruments = ->
+        delete instruments
+        instruments = []
+        renderInstruments()
     
+
     reorderInstruments = ->
-            
+
+
+    # renders
+    
+    renderInstruments = ->
+        chart_instruments_container.empty()
+        count = _.size(instruments)
+        for instrument, index in instruments
+            chart_instruments_container.append make_instrument_view(instrument, colors[index], { count: count })
         
     # event listeners
 
@@ -379,6 +419,9 @@ widget = (wrapper) ->
     chart_instruments_container.on "click", "li span", (event) ->
         event.stopPropagation()
         removeInstrument $(event.currentTarget).closest('li').data('param')
+
+    chart_instruments_container.parent().on "click", "span.reset", (event) ->
+        clearInstruments()
 
     # initialization
     

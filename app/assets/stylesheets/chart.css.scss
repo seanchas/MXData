@@ -73,9 +73,14 @@
                 cursor: pointer;
                 float: left;
                 margin: 0 5px;
-                padding: .5em 30px .5em 10px;
+                padding: .5em 10px .5em 10px;
                 position: relative;
                 
+            }
+            
+            li.removeable {
+                padding-right: 30px;
+
                 span {
                     background: #ecc;
                     border: 1px solid #966;
