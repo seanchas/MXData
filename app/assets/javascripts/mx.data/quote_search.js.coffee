@@ -227,7 +227,7 @@ render_securities_list = (container, groups, records) ->
 
         for record in records[group]
             list.append $('<li>')
-                .data('param', "#{record.primary_boardid}:#{record.secid}")
+                .attr('data-param', "#{record.primary_boardid}:#{record.secid}")
                 .html(record.shortname)
                 .append($('<span>').addClass('title').html(record.name))
 
@@ -251,8 +251,9 @@ widget = (wrapper, options = {}) ->
     pending_query               = undefined
     pending_promise             = undefined
     
-    securities_list_wrapper = build_securities_list wrapper
-    securities_list         = $ 'tbody', securities_list_wrapper
+    securities_list_wrapper     = build_securities_list wrapper
+    securities_list             = $ 'tbody', securities_list_wrapper
+    security                    = undefined
     
     items                       = undefined
     selected_item               = undefined
@@ -269,7 +270,7 @@ widget = (wrapper, options = {}) ->
             { name: 'next',         from: 'initial',    to: 'quotes'    }
             { name: 'next',         from: 'quotes',     to: 'boards'    }
 
-            { name: 'prev',         from: 'boards',     to: 'quotes'    }
+            { name: 'prev',         from: 'boards',     to: 'initial'   }
             { name: 'prev',         from: 'quotes',     to: 'initial'   }
             { name: 'prev',         from: 'initial',    to: 'inactive'  }
             { name: 'prev',         from: 'inactive',   to: 'inactive'  }
@@ -281,9 +282,9 @@ widget = (wrapper, options = {}) ->
             onenterinitial:     ->
 
             onenterquotes:      ->
-                
 
             onenterboards:      ->
+                console.log security
 
             onenterinactive:    ->
                 wrapper.removeClass 'active'
@@ -296,6 +297,7 @@ widget = (wrapper, options = {}) ->
                 hide_quotes()
 
             onleaveboards:      ->
+                security        = undefined
 
             onleaveinactive:    ->
                 wrapper.addClass 'active'
@@ -466,8 +468,14 @@ widget = (wrapper, options = {}) ->
             query_input.blur() if machine.current == 'initial' ; return machine.prev()
         clearTimeout timeout_for_process_query ; timeout_for_process_query = _.delay ( -> quotes_search_with_query_check query_input.val() ), search_timeout
     
+    # quotes events
+    
     securities_list.on 'click', 'li', (event) ->
         hide_quotes()
+        query_input.focus()
+        security = $(event.currentTarget).data('param')
+        machine.next()
+        #boards_search security
     
     securities_list.on 'mouseenter', 'li', (event) ->
         if mouse_locked then mouse_locked = false ; return
