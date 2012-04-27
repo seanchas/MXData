@@ -218,6 +218,25 @@ build_securities_list = (wrapper) ->
     
     container
 
+
+build_boards_list = (wrapper) ->
+    container = $('<div>').addClass('quote_search_boards_container')
+    
+    table = $('<table>')
+        .html('<thead></thead><tbody></tbody>')
+    
+    container.html table
+    container.hide()
+    
+    offset      = wrapper.offset()
+    offset.top  = offset.top + wrapper.outerHeight() + 2
+    
+    wrapper.after container
+    container.offset offset
+
+    container
+
+
 render_securities_list = (container, groups, records) ->
     for group in groups
         
@@ -237,6 +256,18 @@ render_securities_list = (container, groups, records) ->
         container.append    row
     
 
+render_boards_list = (container, boards) ->
+    for board in boards
+        
+        row = $('<tr>')
+            .data('param', board)
+        
+        row.append $('<th>').html(board.boardid)
+        row.append $('<td>').addClass('title').html(board.title)
+        
+        container.append row
+        
+
 
 widget = (wrapper, options = {}) ->
     wrapper = $(wrapper); return if _.size(wrapper) == 0
@@ -255,8 +286,12 @@ widget = (wrapper, options = {}) ->
     securities_list             = $ 'tbody', securities_list_wrapper
     security                    = undefined
     
+    boards_list_wrapper         = build_boards_list wrapper
+    boards_list                 = $ 'tbody', boards_list_wrapper
+    
     items                       = undefined
     selected_item               = undefined
+    items_list                  = undefined
     
     last_cursor_position        = undefined
     mouse_locked                = false
@@ -282,11 +317,16 @@ widget = (wrapper, options = {}) ->
             onenterinitial:     ->
 
             onenterquotes:      ->
+                items_list      = securities_list_wrapper
 
             onenterboards:      ->
+                query_input.val('')
+                items_list      = boards_list_wrapper
+                add_tag _.last(security.split(':'))
                 console.log security
 
             onenterinactive:    ->
+                pending_query   = undefined
                 wrapper.removeClass 'active'
 
             onleaveinitial:     ->
@@ -294,10 +334,15 @@ widget = (wrapper, options = {}) ->
             onleavequotes:      ->
                 items           = undefined
                 selected_item   = undefined
+                items_list      = undefined
                 hide_quotes()
 
             onleaveboards:      ->
+                items           = undefined
+                selected_item   = undefined
                 security        = undefined
+                remove_tag()
+                hide_boards()
 
             onleaveinactive:    ->
                 wrapper.addClass 'active'
@@ -314,6 +359,10 @@ widget = (wrapper, options = {}) ->
     hide_quotes = ->
         securities_list_wrapper.hide()
         securities_list.empty()
+    
+    hide_boards = ->
+        boards_list_wrapper.hide()
+        boards_list.empty()
     
     # search
     
@@ -333,7 +382,8 @@ widget = (wrapper, options = {}) ->
     
     search_boards = ->
         busy_spinner.show()
-    
+        mx.iss.security_boards(_.last(security.split(':')), { is_traded: 1 }).done on_boards_search_complete
+
     on_quotes_search_complete = (data) ->
         machine.next() unless machine.current == 'quotes'
         hide_quotes()
@@ -353,6 +403,19 @@ widget = (wrapper, options = {}) ->
         
         busy_spinner.hide()
     
+    on_boards_search_complete = (data) ->
+        machine.next() unless machine.current == 'boards'
+        hide_boards()
+        
+        render_boards_list boards_list, data
+        boards_list_wrapper.show()
+
+        items           = $('tr', boards_list_wrapper)
+        selected_item   = items.first()
+        render_selected_item()
+
+        busy_spinner.hide()
+    
     # navigation
     
     render_selected_item = ->
@@ -361,21 +424,21 @@ widget = (wrapper, options = {}) ->
         items.removeClass 'selected'
         selected_item.addClass 'selected'
         
-        scroll_top      = securities_list_wrapper.scrollTop()
+        scroll_top      = items_list.scrollTop()
         item_top        = selected_item.offset().top
         item_height     = selected_item.outerHeight()
-        wrapper_top     = securities_list_wrapper.offset().top
-        wrapper_height  = securities_list_wrapper.innerHeight()
+        wrapper_top     = items_list.offset().top
+        wrapper_height  = items_list.innerHeight()
 
         top_overlap     = item_top - wrapper_top
         bottom_overlap  = (wrapper_top + wrapper_height) - (item_top + item_height)
         
         if top_overlap < 0
-            securities_list_wrapper.scrollTop(scroll_top + top_overlap)
+            items_list.scrollTop(scroll_top + top_overlap)
             return
         
         if bottom_overlap < 0
-            securities_list_wrapper.scrollTop(scroll_top - bottom_overlap)
+            items_list.scrollTop(scroll_top - bottom_overlap)
             return
             
     
@@ -411,25 +474,25 @@ widget = (wrapper, options = {}) ->
         
     
     page_up = ->
-        scroll_top      = securities_list_wrapper.scrollTop()
-        wrapper_height  = securities_list_wrapper.innerHeight()
-        securities_list_wrapper.scrollTop(scroll_top - wrapper_height)
+        scroll_top      = items_list.scrollTop()
+        wrapper_height  = items_list.innerHeight()
+        items_list.scrollTop(scroll_top - wrapper_height)
         
-        no_move = Math.abs(scroll_top - securities_list_wrapper.scrollTop()) < wrapper_height
+        no_move = Math.abs(scroll_top - items_list.scrollTop()) < wrapper_height
         
-        visible = visible_items_in(securities_list_wrapper)
+        visible = visible_items_in(items_list)
         
         selected_item = $ if no_move then _.first visible else _.last visible
         render_selected_item()
 
     page_down = ->
-        scroll_top      = securities_list_wrapper.scrollTop()
-        wrapper_height  = securities_list_wrapper.innerHeight()
-        securities_list_wrapper.scrollTop(scroll_top + securities_list_wrapper.innerHeight())
+        scroll_top      = items_list.scrollTop()
+        wrapper_height  = items_list.innerHeight()
+        items_list.scrollTop(scroll_top + items_list.innerHeight())
         
-        no_move = Math.abs(scroll_top - securities_list_wrapper.scrollTop()) < wrapper_height
+        no_move = Math.abs(scroll_top - items_list.scrollTop()) < wrapper_height
         
-        visible = visible_items_in(securities_list_wrapper)
+        visible = visible_items_in(items_list)
 
         selected_item = $ if no_move then _.last visible else _.first visible
         render_selected_item()
@@ -466,7 +529,8 @@ widget = (wrapper, options = {}) ->
     query_input.on 'keyup', (event) ->
         if event.keyCode == KEY_ESC
             query_input.blur() if machine.current == 'initial' ; return machine.prev()
-        clearTimeout timeout_for_process_query ; timeout_for_process_query = _.delay ( -> quotes_search_with_query_check query_input.val() ), search_timeout
+        if machine.current == 'initial' or machine.current == 'quotes'
+            clearTimeout timeout_for_process_query ; timeout_for_process_query = _.delay ( -> quotes_search_with_query_check query_input.val() ), search_timeout
     
     # quotes events
     
@@ -475,13 +539,23 @@ widget = (wrapper, options = {}) ->
         query_input.focus()
         security = $(event.currentTarget).data('param')
         machine.next()
-        #boards_search security
+        search_boards()
     
     securities_list.on 'mouseenter', 'li', (event) ->
         if mouse_locked then mouse_locked = false ; return
         selected_item = $(event.currentTarget)
         render_selected_item()
     
+    boards_list.on 'click', 'tr', (event) ->
+        record = $(event.currentTarget).data('param')
+        machine.off()
+                
+        $(window).trigger("security:selected", { engine: record.engine, market: record.market, board: record.boardid, param: record.secid })
+
+    boards_list.on 'mouseenter', 'tr', (event) ->
+        if mouse_locked then mouse_locked = false ; return
+        selected_item = $(event.currentTarget)
+        render_selected_item()
         
     
 $.extend scope,

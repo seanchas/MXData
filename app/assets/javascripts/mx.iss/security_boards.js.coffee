@@ -3,12 +3,13 @@ scope   = root['mx']['iss']
 $       = jQuery
 
 
-fetch = (ticker) ->
+fetch = (ticker, options = {}) ->
     deferred = new $.Deferred
     
     $.ajax
         url: "#{scope.url_prefix}/securities/#{ticker}/boards.jsonp?callback=?"
         data:
+            is_trading: if options.is_traded then options.is_traded else ''
             'iss.meta': 'off'
             'iss.only': 'boards'
         dataType: 'jsonp'
