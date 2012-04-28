@@ -16,24 +16,22 @@ fetch = (params, options = {}) ->
             _.first(b.board_group_id for b in iss.boards when b.boardid == board)
         
         data =
-            's1.type': options.type ? 'line'
-            'interval': 24
-            'period': '2y'
+            's1.type':  options.type        ? 'line'
+            'interval': options.interval    ? 31
+            'period':   options.period      ? 'all'
         
-        [engine, market, board, param]  = _.first(params).split(":")
+        { engine, market, board, id }   = _.first(params)
         board_group                     = find_board_group board
 
         params_to_compare = for param_to_compare in _.rest(params, 1)
-            [e, m, b, p] = param_to_compare.split(":")
-            bg = find_board_group b
-            [e, m, bg, p].join(":")
+            [param_to_compare.engine, param_to_compare.market, find_board_group(param_to_compare.board), param_to_compare.id].join(':')
         
         
         data.compare = params_to_compare.join(',') if _.size(params_to_compare) > 0
         
         
         $.ajax
-            url: "#{scope.url_prefix}/engines/#{engine}/markets/#{market}/boardgroups/#{board_group}/securities/#{param}.hs?callback=?"
+            url: "#{scope.url_prefix}/engines/#{engine}/markets/#{market}/boardgroups/#{board_group}/securities/#{id}.hs?callback=?"
             data: data
             dataType: 'jsonp'
         .then (json) ->

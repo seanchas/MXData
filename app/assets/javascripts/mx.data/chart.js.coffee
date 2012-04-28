@@ -22,19 +22,27 @@ chart_periods = [
     {
         name:       'day'
         title:      'День'
+        interval:   5
+        period:     '2d'
         is_default: true
     }
     {
         name:       'week'
         title:      'Неделя'
+        interval:   60
+        period:     '2w'
     }
     {
         name:       'month'
         title:      'Месяц'
+        interval:   24
+        period:     '2m'
     }
     {
         name:       'year'
         title:      'Год'
+        interval:   7
+        period:     '2y'
     }
     {
         name:       'all'
@@ -328,11 +336,16 @@ widget = (wrapper) ->
     
     chart_periods_container     = $('#chart_periods', wrapper)
     chart_types_container       = $('#chart_types', wrapper)
+    chart_container             = $('#chart_container', wrapper)
     chart_instruments_container = $('#chart_instruments', wrapper)
     
     current_type    = undefined
     current_period  = undefined
     instruments     = []
+    
+    render_timeout  = undefined
+    
+    chart           = undefined
     
     # utilities
     
@@ -348,6 +361,8 @@ widget = (wrapper) ->
         item.addClass('selected')
 
         current_type = type
+        
+        render()
     
     setPeriod = (period) ->
         item = $("li[data-period=#{period}]", chart_periods_container); return if _.size(item) == 0
@@ -356,6 +371,8 @@ widget = (wrapper) ->
         item.addClass('selected')
     
         current_period = period
+        
+        render()
     
 
     toggleInstrumentState = (param) ->
@@ -395,6 +412,9 @@ widget = (wrapper) ->
     
 
     reorderInstruments = ->
+        sorted_instruments = ( $(item).data('param') for item in $('li', chart_instruments_container) )
+        instruments = _.sortBy instruments, (item) -> _.indexOf sorted_instruments, item.id
+        renderInstruments()
 
 
     # renders
@@ -404,6 +424,29 @@ widget = (wrapper) ->
         count = _.size(instruments)
         for instrument, index in instruments
             chart_instruments_container.append make_instrument_view(instrument, colors[index], { count: count })
+
+        render()
+    
+    render = ->
+        clearTimeout render_timeout
+        render_timeout = _.delay ->
+            
+            console.log 'render'
+            
+            if chart?
+                chart.showLoading()
+            
+            console.log current_period
+            chart_period = _.last(chart_period for chart_period in chart_periods when chart_period.name == current_period)
+            
+            console.log chart_period
+            
+            mx.cs.highstock(instruments, { type: current_type, interval: chart_period.interval, period: chart_period.period }).then (json) ->
+                [candles, volumes] = json
+                { min, max } =  if chart? then _.first(chart.xAxis).getExtremes() else { min: undefined, max: undefined }
+                chart = _make_chart chart_container, candles, volumes, { chart: chart, min: min, max: max }
+            
+        , 300
         
     # event listeners
 
@@ -431,7 +474,7 @@ widget = (wrapper) ->
 
     $(chart_instruments_container).sortable
         axis: 'x'
-        tolerance: 'intersect'
+        update: reorderInstruments
 
     # returned interface
     
