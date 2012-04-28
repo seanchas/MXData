@@ -57,10 +57,18 @@
         
         tr.row {
             
+            td.chart {
+                color: #090;
+                cursor: pointer;
+                text-align: center;
+                width: 20px;
+            }
+
             td.remove {
                 color: #f00;
                 cursor: pointer;
                 text-align: center;
+                width: 20px;
             }
             
         }

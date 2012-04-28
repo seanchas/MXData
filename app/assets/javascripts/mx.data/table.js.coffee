@@ -57,6 +57,10 @@ render_head_row = (columns) ->
             .html("<span>#{column.short_title}</span>")
     
     row.append $("<td>")
+        .addClass("chart")
+        .html("")
+
+    row.append $("<td>")
         .addClass("remove")
         .html("")
 
@@ -72,6 +76,11 @@ render_body_row = (record, columns) ->
         row.append $("<td>")
             .addClass(column.type)
             .html(record[column.name] ? '&mdash;')
+    
+    row.append $("<td>")
+        .attr('data-title', record['SHORTNAME'])
+        .addClass("chart")
+        .html("<span>+</span>")
     
     row.append $("<td>")
         .addClass("remove")
@@ -275,6 +284,12 @@ widget = (wrapper, market_object) ->
         else
             render_filter row
     
+    onChartCellClick = (event) ->
+        event.stopPropagation()
+        cell =  $(event.currentTarget)
+        [board, param] = cell.closest('tr').data('param').split(':');
+        $(window).trigger('security:to:chart', { engine: engine, market: market, board: board, id: param, title: cell.data('title') });
+    
     onRemoveCellClick = (event) ->
         event.stopPropagation()
         removeSecurity $(event.currentTarget).parent('tr').data('param')
@@ -321,6 +336,8 @@ widget = (wrapper, market_object) ->
     
     table.on "click", "tbody tr.filter button", onFilterButtonClick
     
+    table.on "click", "tbody tr.row td.chart", onChartCellClick
+
     table.on "click", "tbody tr.row td.remove", onRemoveCellClick
     
     

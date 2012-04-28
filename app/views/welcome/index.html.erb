@@ -84,9 +84,14 @@
                 board:  'EQNE',
                 id:     'GAZP'
             })
+
+            $(window).on('security:to:chart', function(event, data) {
+                chart.addInstrument(data);
+            });
         });
 
         mx.data.quote_search("#quote_search");
+        
         
     });
 
