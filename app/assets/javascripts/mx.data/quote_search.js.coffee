@@ -141,19 +141,19 @@ widget = (wrapper, options = {}) ->
                 query_input.val('')
                 items_list      = boards_list_wrapper
                 add_tag _.last(security.split(':'))
-                console.log security
 
             onenterinactive:    ->
                 pending_query   = undefined
                 wrapper.removeClass 'active'
+                query_input.blur()
 
             onleaveinitial:     ->
 
             onleavequotes:      ->
+                hide_quotes()
                 items           = undefined
                 selected_item   = undefined
                 items_list      = undefined
-                hide_quotes()
 
             onleaveboards:      ->
                 items           = undefined
@@ -237,7 +237,7 @@ widget = (wrapper, options = {}) ->
     # navigation
     
     render_selected_item = ->
-        return unless items and selected_item
+        return unless items and selected_item and items_list
 
         items.removeClass 'selected'
         selected_item.addClass 'selected'
@@ -314,7 +314,21 @@ widget = (wrapper, options = {}) ->
 
         selected_item = $ if no_move then _.last visible else _.first visible
         render_selected_item()
-        
+    
+    accept_selected_item = (event) ->
+        switch machine.current
+            when 'quotes' then accept_quote event, selected_item.data('param')
+            when 'boards' then accept_board event, selected_item.data('param')
+    
+    accept_quote = (event, quote) ->
+        security = quote
+        hide_quotes()
+        machine.next()
+        search_boards()
+    
+    accept_board = (event, board) ->
+        machine.off()
+        $(window).trigger("security:selected", { engine: board.engine, market: board.market, board: board.boardid, param: board.secid })
 
     # event listeners
     
@@ -328,21 +342,13 @@ widget = (wrapper, options = {}) ->
     query_input.on 'keydown', (event) ->
         mouse_locked = true
         
-        if event.keyCode == KEY_PAGE_DOWN
-            page_down()
-            return false;
+        switch event.keyCode
+            when KEY_PAGE_UP    then page_up()                      ; return false
+            when KEY_PAGE_DOWN  then page_down()                    ; return false
+            when KEY_UP         then select_prev_item()             ; return false
+            when KEY_DOWN       then select_next_item()             ; return false
+            when KEY_ENTER      then accept_selected_item(event)    ; return false
 
-        if event.keyCode == KEY_PAGE_UP
-            page_up()
-            return false;
-
-        if event.keyCode == KEY_DOWN
-            select_next_item()
-            return false
-
-        if event.keyCode == KEY_UP
-            select_prev_item()
-            return false
 
     query_input.on 'keyup', (event) ->
         if event.keyCode == KEY_ESC
@@ -353,11 +359,7 @@ widget = (wrapper, options = {}) ->
     # quotes events
     
     securities_list.on 'click', 'li', (event) ->
-        hide_quotes()
-        query_input.focus()
-        security = $(event.currentTarget).data('param')
-        machine.next()
-        search_boards()
+        accept_quote event, $(event.currentTarget).data('param')
     
     securities_list.on 'mouseenter', 'li', (event) ->
         if mouse_locked then mouse_locked = false ; return
@@ -365,15 +367,17 @@ widget = (wrapper, options = {}) ->
         render_selected_item()
     
     boards_list.on 'click', 'tr', (event) ->
-        record = $(event.currentTarget).data('param')
-        machine.off()
-                
-        $(window).trigger("security:selected", { engine: record.engine, market: record.market, board: record.boardid, param: record.secid })
+        accept_board event, $(event.currentTarget).data('param')
 
     boards_list.on 'mouseenter', 'tr', (event) ->
         if mouse_locked then mouse_locked = false ; return
         selected_item = $(event.currentTarget)
         render_selected_item()
+    
+    # window events
+
+    $(document).on 'focusout', (event) ->
+        query_input.val('')
         
     
 $.extend scope,
