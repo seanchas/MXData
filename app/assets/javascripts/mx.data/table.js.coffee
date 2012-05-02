@@ -5,6 +5,9 @@ scope   = root['mx']['data']
 $       = jQuery
 
 
+cache = kizzy('data.table')
+
+
 default_filter_name = 'preview'
 full_filter_name    = 'full'
 
@@ -93,12 +96,11 @@ render_body_row = (record, columns) ->
 widget = (wrapper, market_object) ->
     wrapper     = $(wrapper); return if _.size(wrapper) == 0
     
-    
-    
     engine      = market_object.trade_engine_name
     market      = market_object.market_name
     
-
+    cache_key   = "#{engine}:#{market}"
+    
     container   = make_container(wrapper, market_object)
     table       = $("table", container)
     table_body  = $("tbody", table)
@@ -115,6 +117,7 @@ widget = (wrapper, market_object) ->
     
 
     securities          = []
+    securities_cached   = false
     filtered_columns    = undefined
     
     reload_timeout      = undefined
@@ -132,12 +135,13 @@ widget = (wrapper, market_object) ->
 
     addSecurity = (data) ->
         securities.push "#{data.board}:#{data.param}"
-        
+        cache.set("#{cache_key}:securities", securities)
         clearTimeout reload_timeout
         reload_timeout = _.delay reload, 300
     
     removeSecurity = (param) ->
         securities = _.without securities, param
+        cache.set("#{cache_key}:securities", securities)
         render()
     
     #
@@ -256,7 +260,8 @@ widget = (wrapper, market_object) ->
 
     onSecuritySelected = (event, data) ->
         return unless data.engine == engine and data.market == market
-        addSecurity data unless securityExists data
+        unless data.no_cache == true and securities_cached == true
+            addSecurity data unless securityExists data
     
     onSortableCellClick = (event) ->
         cell        = $(event.currentTarget)
@@ -339,6 +344,19 @@ widget = (wrapper, market_object) ->
     table.on "click", "tbody tr.row td.chart", onChartCellClick
 
     table.on "click", "tbody tr.row td.remove", onRemoveCellClick
+    
+    #
+    
+    cached_securities = cache.get("#{cache_key}:securities")
+    securities_cached = !!cached_securities
+    
+    if securities_cached
+        for security in cached_securities
+            [board, param] = security.split(':') ; security = { board: board, param: param }
+            addSecurity security unless securityExists security
+            
+    
+    {}
     
     
 
