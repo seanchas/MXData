@@ -16,9 +16,10 @@ fetch = (params, options = {}) ->
             _.first(b.board_group_id for b in iss.boards when b.boardid == board)
         
         data =
-            's1.type':  options.type        ? 'line'
-            'interval': options.interval    ? 31
-            'period':   options.period      ? 'all'
+            's1.type':  options.type        ? undefined
+            'interval': options.interval    ? undefined
+            'period':   options.period      ? undefined
+            'candles':  options.candles     ? undefined
         
         { engine, market, board, id }   = _.first(params)
         board_group                     = find_board_group board
