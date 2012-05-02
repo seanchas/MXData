@@ -253,8 +253,8 @@ _make_chart = (container, candles_data, volumes_data, options = {}) ->
 
     { min, max } = xaxis.getExtremes()
 
-    if min < options.min then min = options.min
-    if max > options.max then max = options.max
+    if min < options.min and max > options.min then min = options.min
+    if max > options.max and min < options.min then max = options.max
 
     xaxis.setExtremes(min, max, true, true)
     
