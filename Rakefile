@@ -4,4 +4,4 @@
 
 require File.expand_path('../config/application', __FILE__)
 
-Mxdata::Application.load_tasks
+MxData::Application.load_tasks
