@@ -30,6 +30,7 @@ namespace :deploy do
 end
 
 configuration = [
+    '.rvmrc'
 ]
 
 namespace :deploy do

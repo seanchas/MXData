@@ -12,6 +12,10 @@ gem 'jquery-rails'
 
 gem 'capistrano'
 
+group :production do
+    gem 'therubyracer'
+end
+
 group :test do
   gem 'turn', '0.8.2', :require => false
 end
