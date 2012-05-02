@@ -5,6 +5,9 @@ scope   = root['mx']['data']
 $       = jQuery
 
 
+default_candle_width = 240
+
+
 colors = [
     '#4572a7'
     '#aa4643'
@@ -22,8 +25,9 @@ chart_periods = [
     {
         name:       'day'
         title:      'День'
-        interval:   5
+        interval:   10
         period:     '2d'
+        candles:    240
         is_default: true
     }
     {
@@ -53,17 +57,17 @@ chart_periods = [
     
 chart_types = [
     {
-        name:       'line'
-        title:      'Линия'
-        is_default: true
-    }
-    {
         name:       'candles'
         title:      'Свечи'
+        is_default: true
     }
     {
         name:       'stockbar'
         title:      'Бары'
+    }
+    {
+        name:       'line'
+        title:      'Линия'
     }
 ]
 
@@ -85,15 +89,17 @@ make_content = (container) ->
 
 
 make_chart_period_selector = (container) ->
-    list = $('<ul>')
+    mx.data.ready.then (metadata) ->
 
-    for chart_period in chart_periods
-        item = $('<li>').html chart_period.title
-        item.addClass("selected") if chart_period.selected
-        list.append item
-
-    container.append list
-
+        for duration in metadata.durations
+            item = $('<li>')
+                .html(duration.title)
+                .attr('data-interval', duration.interval)
+                .attr('data-duration', duration.duration)
+            
+            item.addClass('selected') if duration.interval == 10
+            
+            container.append item
 
 make_chart_type_selector = (container) ->
     selector = $("<select>")
@@ -244,7 +250,13 @@ _make_chart = (container, candles_data, volumes_data, options = {}) ->
     
 
     xaxis = _.first chart.xAxis
-    xaxis.setExtremes(options.min, options.max, true, false) if options.min? and options.max?
+
+    { min, max } = xaxis.getExtremes()
+
+    if min < options.min then min = options.min
+    if max > options.max then max = options.max
+
+    xaxis.setExtremes(min, max, true, true)
     
 
     chart
@@ -339,9 +351,12 @@ widget = (wrapper) ->
     chart_container             = $('#chart_container', wrapper)
     chart_instruments_container = $('#chart_instruments', wrapper)
     
-    current_type    = undefined
-    current_period  = undefined
-    instruments     = []
+    make_chart_period_selector chart_periods_container
+    
+    current_type        = undefined
+    current_interval    = undefined
+    current_duration    = undefined
+    instruments         = []
     
     render_timeout  = undefined
     
@@ -364,13 +379,15 @@ widget = (wrapper) ->
         
         render()
     
-    setPeriod = (period) ->
-        item = $("li[data-period=#{period}]", chart_periods_container); return if _.size(item) == 0
+    setInterval = (interval) ->
+        item = $("li[data-interval=#{interval}]", chart_periods_container); return if _.size(item) == 0
+        
     
         item.siblings().removeClass('selected')
         item.addClass('selected')
     
-        current_period = period
+        current_interval = interval
+        current_duration = item.data('duration')
         
         render()
     
@@ -431,17 +448,10 @@ widget = (wrapper) ->
         clearTimeout render_timeout
         render_timeout = _.delay ->
             
-            console.log 'render'
-            
             if chart?
                 chart.showLoading()
             
-            console.log current_period
-            chart_period = _.last(chart_period for chart_period in chart_periods when chart_period.name == current_period)
-            
-            console.log chart_period
-            
-            mx.cs.highstock(instruments, { type: current_type, interval: chart_period.interval, period: chart_period.period }).then (json) ->
+            mx.cs.highstock(instruments, { type: current_type, interval: current_interval, candles: default_candle_width }).then (json) ->
                 [candles, volumes] = json
                 { min, max } =  if chart? then _.first(chart.xAxis).getExtremes() else { min: undefined, max: undefined }
                 chart = _make_chart chart_container, candles, volumes, { chart: chart, min: min, max: max }
@@ -454,7 +464,7 @@ widget = (wrapper) ->
         setType $(event.currentTarget).data('type')
     
     chart_periods_container.on "click", "li:not(.selected)", (event) ->
-        setPeriod $(event.currentTarget).data('period')
+        setInterval $(event.currentTarget).data('interval')
     
     chart_instruments_container.on "click", "li", (event) ->
         toggleInstrumentState $(event.currentTarget).data('param')
@@ -470,7 +480,7 @@ widget = (wrapper) ->
     
     setType(_.first(type.name for type in chart_types when type.is_default))
     
-    setPeriod(_.first(period.name for period in chart_periods when period.is_default))
+    setInterval(10)
 
     $(chart_instruments_container).sortable
         axis: 'x'
@@ -480,7 +490,7 @@ widget = (wrapper) ->
     
     {
         setType:            setType
-        setPeriod:          setPeriod
+        setInterval:        setInterval
         addInstrument:      addInstrument
         removeInstrument:   removeInstrument
         clearInstruments:   clearInstruments

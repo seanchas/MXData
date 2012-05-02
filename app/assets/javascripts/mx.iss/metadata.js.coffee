@@ -7,6 +7,7 @@ keys = [
     'engines'
     'markets'
     'boards'
+    'durations'
 ]
 
 
