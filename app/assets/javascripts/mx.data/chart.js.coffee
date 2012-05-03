@@ -139,6 +139,8 @@ default_chart_options =
             lineWidth: 1
         series:
             gapSize: 60
+            dataGrouping:
+                enabled: false
 
 
 # default series options
