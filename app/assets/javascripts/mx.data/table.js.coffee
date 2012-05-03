@@ -385,7 +385,7 @@ widget = (wrapper, market_object) ->
     
     cached_filtered_columns = cache.get("#{cache_key}:filtered_columns")
     
-    console.log check_filtered_columns_cache cached_filtered_columns
+    delete cached_filtered_columns unless check_filtered_columns_cache cached_filtered_columns
     
     sort = cache.get("#{cache_key}:sort") ? {}
     
