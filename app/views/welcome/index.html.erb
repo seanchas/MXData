@@ -64,12 +64,14 @@
             $(window).trigger("security:selected", { engine: 'stock', market: 'shares', board: 'EQNE', param: 'GAZP', no_cache: true });
             
             var chart = mx.data.chart($('#chart'));
+
             chart.addInstrument({
                 title:  'Аэрофлот',
                 engine: 'stock',
                 market: 'shares',
                 board:  'EQBR',
-                id:     'AFLT'
+                id:     'AFLT',
+                no_cache: true
             })
             
             chart.addInstrument({
@@ -77,7 +79,8 @@
                 engine: 'stock',
                 market: 'shares',
                 board:  'EQNE',
-                id:     'GAZP'
+                id:     'GAZP',
+                no_cache: true
             })
 
             $(window).on('security:to:chart', function(event, data) {

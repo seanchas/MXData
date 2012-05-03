@@ -4,8 +4,12 @@ scope   = root['mx']['data']
 
 $       = jQuery
 
+cache = kizzy('data.chart')
+
 
 default_candle_width = 240
+
+max_instruments = 5
 
 
 colors = [
@@ -347,6 +351,8 @@ make_instrument_view = (instrument, color, options = {}) ->
 widget = (wrapper) ->
     wrapper = $(wrapper); return if _.size(wrapper) == 0
     
+    cache_key = ""
+    
     chart_periods_container     = $('#chart_periods', wrapper)
     chart_types_container       = $('#chart_types', wrapper)
     chart_container             = $('#chart_container', wrapper)
@@ -358,6 +364,8 @@ widget = (wrapper) ->
     current_interval    = undefined
     current_duration    = undefined
     instruments         = []
+    
+    instruments_cached  = false
     
     render_timeout  = undefined
     
@@ -381,7 +389,6 @@ widget = (wrapper) ->
         render()
     
     setInterval = (interval) ->
-        console.log chart_periods_container
         item = $("li[data-interval=#{interval}]", chart_periods_container) ; return if _.size(item) == 0
         
     
@@ -404,10 +411,17 @@ widget = (wrapper) ->
         renderInstruments()
 
     addInstrument = (new_instrument) ->
+        return if _.size(instruments) >= max_instruments
         instrument = _.first(instrument for instrument in instruments when instrument.id == new_instrument.id)
         return if instrument?
+        
+        return if new_instrument.no_cache and instruments_cached == true
+
+        delete new_instrument.no_cache
 
         instruments.push(new_instrument)
+
+        cache.set("#{cache_key}:instruments", instruments)
 
         renderInstruments()
     
@@ -420,19 +434,24 @@ widget = (wrapper) ->
 
         instruments = _.without(instruments, instrument)
         _.first(instruments).__disabled = false if should_be_enabled()
+        
+        cache.set("#{cache_key}:instruments", instruments)
 
         renderInstruments()
     
 
     clearInstruments = ->
-        delete instruments
-        instruments = []
-        renderInstruments()
+        #delete instruments
+        #instruments = []
+        #renderInstruments()
     
 
     reorderInstruments = ->
         sorted_instruments = ( $(item).data('param') for item in $('li', chart_instruments_container) )
         instruments = _.sortBy instruments, (item) -> _.indexOf sorted_instruments, item.id
+
+        cache.set("#{cache_key}:instruments", instruments)
+
         renderInstruments()
 
 
@@ -489,6 +508,14 @@ widget = (wrapper) ->
     $(chart_instruments_container).sortable
         axis: 'x'
         update: reorderInstruments
+
+    # restore from cache
+
+    cached_instruments = cache.get("#{cache_key}:instruments") || []
+    instruments_cached = !!cached_instruments
+
+    for instrument in cached_instruments
+        addInstrument instrument
 
     # returned interface
     
