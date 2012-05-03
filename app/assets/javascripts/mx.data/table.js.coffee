@@ -277,6 +277,8 @@ widget = (wrapper, market_object) ->
             column:     column
             direction:  direction
         
+        cache.set("#{cache_key}:sort", sort)
+
         render_body()
     
 
@@ -322,6 +324,8 @@ widget = (wrapper, market_object) ->
                 column._is_visible = _.include visible_columns, column.name
                 _.indexOf sorted_columns  , column.name
             
+            cache.set("#{cache_key}:filtered_columns", filtered_columns)
+            
         should_render_head = true
         render(true)
         
@@ -354,7 +358,10 @@ widget = (wrapper, market_object) ->
         for security in cached_securities
             [board, param] = security.split(':') ; security = { board: board, param: param }
             addSecurity security unless securityExists security
-            
+    
+    filtered_columns = cache.get("#{cache_key}:filtered_columns")            
+    
+    sort = cache.get("#{cache_key}:sort") ? {}
     
     return
     
