@@ -33,16 +33,25 @@ make_container = (wrapper, market) ->
 
 
 
-filter_columns = (columns, filters) ->
+filter_columns = (columns, filters, cache = undefined) ->
     data = []
 
-    visible_columns = (column_descriptor.id for column_descriptor in filters[default_filter_name])
-    for id in visible_columns
-        data.push(_.tap columns[id], (column) -> column._is_visible = true) if columns[id].is_system == 0
+    if cache?
+        
+        for column_meta in cache
+            column = columns[column_meta[0]]
+            if column?
+                column._is_visible = !!column_meta[1]
+                data.push(column)
+        
+    else
+        visible_columns = (column_descriptor.id for column_descriptor in filters[default_filter_name])
+        for id in visible_columns
+            data.push(_.tap columns[id], (column) -> column._is_visible = true) if columns[id].is_system == 0
     
-    hidden_columns = (column_descriptor.id for column_descriptor in filters[full_filter_name] when not _.include visible_columns, column_descriptor.id)
-    for id in hidden_columns
-        data.push(_.tap columns[id], (column) -> column._is_visible = false) if columns[id].is_system == 0
+        hidden_columns = (column_descriptor.id for column_descriptor in filters[full_filter_name] when not _.include visible_columns, column_descriptor.id)
+        for id in hidden_columns
+            data.push(_.tap columns[id], (column) -> column._is_visible = false) if columns[id].is_system == 0
 
     data
 
@@ -125,6 +134,8 @@ widget = (wrapper, market_object) ->
     should_render_head  = true
     
     sort                = {}
+    
+    cached_filtered_columns = undefined
 
     #
     # utils
@@ -160,6 +171,7 @@ widget = (wrapper, market_object) ->
     render = ->
         render_head()
         render_body()
+        
         container.hide() if _.size(securities) == 0
         container.show() if _.size(securities) > 0
     
@@ -175,7 +187,7 @@ widget = (wrapper, market_object) ->
             cds
         ).then (filters, columns) ->
             
-            filtered_columns ?= filter_columns(columns, filters)
+            filtered_columns ?= filter_columns(columns, filters, cached_filtered_columns)
             
             table_head.empty()
             
@@ -191,7 +203,7 @@ widget = (wrapper, market_object) ->
             rds
         ).then (filters, columns, data) ->
 
-            filtered_columns ?= filter_columns(columns, filters)
+            filtered_columns ?= filter_columns(columns, filters, cached_filtered_columns)
             
             if sort.column? and sort.direction?
                 direction   = if sort.direction == 'asc' then 1 else -1
@@ -216,7 +228,7 @@ widget = (wrapper, market_object) ->
             [board, param] = row.data("param").split(":")
             return unless param? and board?
         
-            filtered_columns ?= filter_columns(columns, filters)
+            filtered_columns ?= filter_columns(columns, filters, cached_filtered_columns)
             
             record = _.first(record for record in data when record.SECID == param and record.BOARDID == board)
             return unless record?
@@ -324,7 +336,9 @@ widget = (wrapper, market_object) ->
                 column._is_visible = _.include visible_columns, column.name
                 _.indexOf sorted_columns  , column.name
             
-            cache.set("#{cache_key}:filtered_columns", filtered_columns)
+            cached_filtered_columns = ([column.id, column._is_visible] for column in filtered_columns)
+            
+            cache.set("#{cache_key}:filtered_columns", cached_filtered_columns)
             
         should_render_head = true
         render(true)
@@ -359,7 +373,7 @@ widget = (wrapper, market_object) ->
             [board, param] = security.split(':') ; security = { board: board, param: param }
             addSecurity security unless securityExists security
     
-    filtered_columns = cache.get("#{cache_key}:filtered_columns")            
+    cached_filtered_columns = cache.get("#{cache_key}:filtered_columns")
     
     sort = cache.get("#{cache_key}:sort") ? {}
     
