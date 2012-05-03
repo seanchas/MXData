@@ -202,7 +202,6 @@ _make_chart = (container, candles_data, volumes_data, options = {}) ->
 
     candles_data_size = _.size candles_data
     
-    
     for serie, index in candles_data
         serie_options = $.extend true, {}, default_series_options
         
@@ -214,7 +213,7 @@ _make_chart = (container, candles_data, volumes_data, options = {}) ->
         
             if candles_data_size > 2
                 $.extend true, serie_options,
-                    compare: 'percent'
+                compare: 'value'
     
         series.push serie_options
     
