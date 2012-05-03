@@ -101,6 +101,16 @@ render_body_row = (record, columns) ->
     row
 
 
+check_filtered_columns_cache = (cache) ->
+    return false unless _.isArray(cache)
+    
+    result = true
+    
+    for entry in cache
+        result = false if !_.isArray(entry) or _.size(entry) != 2
+
+    return result
+
 
 widget = (wrapper, market_object) ->
     wrapper     = $(wrapper); return if _.size(wrapper) == 0
@@ -374,7 +384,8 @@ widget = (wrapper, market_object) ->
             addSecurity security unless securityExists security
     
     cached_filtered_columns = cache.get("#{cache_key}:filtered_columns")
-    delete cached_filtered_columns unless _.isArray(cached_filtered_columns) or _.isArray(_.first(cached_filtered_columns))
+    
+    console.log check_filtered_columns_cache cached_filtered_columns
     
     sort = cache.get("#{cache_key}:sort") ? {}
     
