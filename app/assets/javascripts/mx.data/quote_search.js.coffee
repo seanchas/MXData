@@ -327,7 +327,7 @@ widget = (wrapper, options = {}) ->
         search_boards()
     
     accept_board = (event, board) ->
-        machine.off()
+        machine.off() unless event.shiftKey == true
         $(window).trigger("security:selected", { engine: board.engine, market: board.market, board: board.boardid, param: board.secid })
 
     # event listeners
