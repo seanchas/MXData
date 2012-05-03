@@ -370,7 +370,7 @@ widget = (wrapper) ->
     # interface
     
     setType = (type) ->
-        item = $("li[data-type=#{type}]", chart_types_container); return if _.size(item) == 0
+        item = $("li[data-type=#{type}]", chart_types_container) ; return if _.size(item) == 0
 
         item.siblings().removeClass('selected')
         item.addClass('selected')
@@ -380,7 +380,8 @@ widget = (wrapper) ->
         render()
     
     setInterval = (interval) ->
-        item = $("li[data-interval=#{interval}]", chart_periods_container); return if _.size(item) == 0
+        console.log chart_periods_container
+        item = $("li[data-interval=#{interval}]", chart_periods_container) ; return if _.size(item) == 0
         
     
         item.siblings().removeClass('selected')
@@ -451,7 +452,9 @@ widget = (wrapper) ->
             if chart?
                 chart.showLoading()
             
-            mx.cs.highstock(instruments, { type: current_type, interval: current_interval, candles: default_candle_width }).then (json) ->
+            period = Math.ceil(current_duration / 120) || 1
+            
+            mx.cs.highstock(instruments, { type: current_type, interval: current_interval, period: "#{period}d" }).then (json) ->
                 [candles, volumes] = json
                 { min, max } =  if chart? then _.first(chart.xAxis).getExtremes() else { min: undefined, max: undefined }
                 chart = _make_chart chart_container, candles, volumes, { chart: chart, min: min, max: max }

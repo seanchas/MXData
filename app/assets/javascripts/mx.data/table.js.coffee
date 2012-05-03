@@ -356,7 +356,7 @@ widget = (wrapper, market_object) ->
             addSecurity security unless securityExists security
             
     
-    {}
+    return
     
     
 
