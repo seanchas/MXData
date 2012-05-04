@@ -6,6 +6,8 @@ $       = jQuery
 fetch = (ticker) ->
     deferred = new $.Deferred
     
+    data = []
+    
     $.ajax
         url: "#{scope.url_prefix}/securitygroups.jsonp?callback=?"
         data:
@@ -13,9 +15,10 @@ fetch = (ticker) ->
             'iss.only': 'securitygroups'
         dataType: 'jsonp'
     .then (json) ->
-        deferred.resolve scope.merge_columns_and_data json?.securitygroups
+        data.push(scope.merge_columns_and_data(json?.securitygroups)...)
+        deferred.resolve data
     
-    deferred.promise()
+    deferred.promise(data)
 
 
 $.extend scope,

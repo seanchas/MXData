@@ -55,7 +55,11 @@ build_boards_list = (wrapper) ->
     container
 
 
-render_securities_list = (container, groups, records) ->
+render_securities_list = (container, groups, records, security_groups) ->
+    
+    find_security_group = (group) ->
+        _.first(g for g in security_groups when g.name == group)
+    
     for group in groups
         
         row     = $('<tr>')
@@ -69,7 +73,7 @@ render_securities_list = (container, groups, records) ->
                 .append($('<span>').addClass('title').html(record.name))
 
         cell.append         list
-        row.append          $('<th>').html(group)
+        row.append          $('<th>').html(find_security_group(group).title)
         row.append          cell
         container.append    row
     
@@ -113,6 +117,10 @@ widget = (wrapper, options = {}) ->
     
     last_cursor_position        = undefined
     mouse_locked                = false
+    
+    # data sources
+    
+    security_groups = mx.iss.security_groups()
 
     # fsm
     
@@ -212,7 +220,7 @@ widget = (wrapper, options = {}) ->
             groups.push record.group unless _.include groups, record.group
             (records[record.group] ?= []).push record
         
-        render_securities_list securities_list, groups, records
+        render_securities_list securities_list, groups, records, security_groups
         securities_list_wrapper.show()
         
         items           = $('li', securities_list_wrapper)
@@ -332,52 +340,56 @@ widget = (wrapper, options = {}) ->
 
     # event listeners
     
-    query_input.on 'focus', (event) ->
-        clearTimeout timeout_for_deactivation
-        machine.on() if machine.current == 'inactive'
+    $.when(security_groups).then ->
     
-    query_input.on 'blur', (event) ->
-        clearTimeout timeout_for_deactivation ; timeout_for_deactivation = _.delay ( -> machine.off() ), deactivation_timeout
+        query_input.on 'focus', (event) ->
+            clearTimeout timeout_for_deactivation
+            machine.on() if machine.current == 'inactive'
     
-    query_input.on 'keydown', (event) ->
-        mouse_locked = true
+        query_input.on 'blur', (event) ->
+            clearTimeout timeout_for_deactivation ; timeout_for_deactivation = _.delay ( -> machine.off() ), deactivation_timeout
+    
+        query_input.on 'keydown', (event) ->
+            mouse_locked = true
         
-        switch event.keyCode
-            when KEY_PAGE_UP    then page_up()                      ; return false
-            when KEY_PAGE_DOWN  then page_down()                    ; return false
-            when KEY_UP         then select_prev_item()             ; return false
-            when KEY_DOWN       then select_next_item()             ; return false
-            when KEY_ENTER      then accept_selected_item(event)    ; return false
+            switch event.keyCode
+                when KEY_PAGE_UP    then page_up()                      ; return false
+                when KEY_PAGE_DOWN  then page_down()                    ; return false
+                when KEY_UP         then select_prev_item()             ; return false
+                when KEY_DOWN       then select_next_item()             ; return false
+                when KEY_ENTER      then accept_selected_item(event)    ; return false
 
 
-    query_input.on 'keyup', (event) ->
-        if event.keyCode == KEY_ESC
-            query_input.blur() if machine.current == 'initial' ; return machine.prev()
-        if machine.current == 'initial' or machine.current == 'quotes'
-            clearTimeout timeout_for_process_query ; timeout_for_process_query = _.delay ( -> quotes_search_with_query_check query_input.val() ), search_timeout
+        query_input.on 'keyup', (event) ->
+            if event.keyCode == KEY_ESC
+                query_input.blur() if machine.current == 'initial' ; return machine.prev()
+            if machine.current == 'initial' or machine.current == 'quotes'
+                clearTimeout timeout_for_process_query ; timeout_for_process_query = _.delay ( -> quotes_search_with_query_check query_input.val() ), search_timeout
     
-    # quotes events
+        # quotes events
     
-    securities_list.on 'click', 'li', (event) ->
-        accept_quote event, $(event.currentTarget).data('param')
+        securities_list.on 'click', 'li', (event) ->
+            accept_quote event, $(event.currentTarget).data('param')
     
-    securities_list.on 'mouseenter', 'li', (event) ->
-        if mouse_locked then mouse_locked = false ; return
-        selected_item = $(event.currentTarget)
-        render_selected_item()
+        securities_list.on 'mouseenter', 'li', (event) ->
+            if mouse_locked then mouse_locked = false ; return
+            selected_item = $(event.currentTarget)
+            render_selected_item()
     
-    boards_list.on 'click', 'tr', (event) ->
-        accept_board event, $(event.currentTarget).data('param')
+        boards_list.on 'click', 'tr', (event) ->
+            accept_board event, $(event.currentTarget).data('param')
 
-    boards_list.on 'mouseenter', 'tr', (event) ->
-        if mouse_locked then mouse_locked = false ; return
-        selected_item = $(event.currentTarget)
-        render_selected_item()
+        boards_list.on 'mouseenter', 'tr', (event) ->
+            if mouse_locked then mouse_locked = false ; return
+            selected_item = $(event.currentTarget)
+            render_selected_item()
     
-    # window events
+        # window events
 
-    $(document).on 'focusout', (event) ->
-        query_input.val('')
+        $(document).on 'focusout', (event) ->
+            query_input.val('')
+    
+    return
         
     
 $.extend scope,
