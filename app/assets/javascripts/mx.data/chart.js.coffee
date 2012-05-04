@@ -467,6 +467,7 @@ widget = (wrapper) ->
     
     render = ->
         clearTimeout render_timeout
+        return unless _.size(instruments) > 0
         render_timeout = _.delay ->
             
             if chart?
