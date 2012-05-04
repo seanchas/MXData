@@ -511,11 +511,12 @@ widget = (wrapper) ->
 
     # restore from cache
 
-    cached_instruments = cache.get("#{cache_key}:instruments") || []
+    cached_instruments = cache.get("#{cache_key}:instruments")
     instruments_cached = !!cached_instruments
 
-    for instrument in cached_instruments
-        addInstrument instrument
+    if instruments_cached
+        for instrument in cached_instruments
+            addInstrument instrument
 
     # returned interface
     
