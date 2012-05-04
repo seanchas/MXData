@@ -105,7 +105,7 @@
                 
                 _.each([_.first(data.indices), _.first(data.currencies)], function(security) {
                     var board = boards[security.BOARDID]
-                    $(window).trigger("security:to:chart", { engine: board.engine, market: board.market, board: board.board, id: security.SECID, no_cache: true });
+                    $(window).trigger("security:to:chart", { engine: board.engine, market: board.market, board: board.board, id: security.SECID, title: security.SHORTNAME, no_cache: true });
                 });
                     
             });

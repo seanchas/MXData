@@ -16,8 +16,8 @@ fetch = ->
         url: "#{scope.url_prefix}/imicex/index.jsonp?callback=?"
         data:
             'iss.meta':             'off'
-            'indices.columns':      'SECID,BOARDID'
-            'currencies.columns':   'SECID,BOARDID'
+            'indices.columns':      'SECID,BOARDID,SHORTNAME'
+            'currencies.columns':   'SECID,BOARDID,SHORTNAME'
         dataType: 'jsonp'
     .then (json) ->
         for key in keys
