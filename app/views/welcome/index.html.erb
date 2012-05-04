@@ -59,11 +59,62 @@
     $(function() {
     mx.data.ready.then(function(metadata) {
             _.each(metadata.markets, function(market) { mx.data.table($("#tables"), market); });
+            var chart = mx.data.chart($('#chart'));
+
+            $(window).on('security:to:chart', function(event, data) { chart.addInstrument(data); });
+
+            function find_engine(engine_id) {
+                return _.find(metadata.engines, function(engine) {
+                    return engine.id == engine_id;
+                });
+            }
+
+            function find_market(market_id) {
+                return _.find(metadata.markets, function(market) {
+                    return market.market_id == market_id;
+                });
+            }
+
+            function find_board(boardid) {
+                return _.find(metadata.boards, function(board) {
+                    return board.boardid == boardid;
+                });
+            }
+
+            mx.iss.bootstrap().then(function(data) {
+                var instruments         = _.union(data.indices, data.currencies),
+                    boards              = {},
+                    securities          = [],
+                    chart_securities    = [];
+                
+                _.each(instruments, function(security) {
+                    var board = boards[security.BOARDID] || (boards[security.BOARDID] = (function() {
+                        var b = find_board(security.BOARDID);
+                            m = find_market(b.market_id),
+                            e = find_engine(b.engine_id);
+                        return { board: b.boardid, market: m.market_name, engine: e.name };
+                    })());
+                    
+                    securities.push($.extend({}, board, { param: security.SECID }));
+                });
+                    
+
+                _.each(securities, function(security) {
+                    $(window).trigger("security:selected", { engine: security.engine, market: security.market, board: security.board, param: security.param, no_cache: true });
+                });
+                
+                _.each([_.first(data.indices), _.first(data.currencies)], function(security) {
+                    var board = boards[security.BOARDID]
+                    $(window).trigger("security:to:chart", { engine: board.engine, market: board.market, board: board.board, id: security.SECID, no_cache: true });
+                });
+                    
+            });
+
+            /*
 
             $(window).trigger("security:selected", { engine: 'stock', market: 'shares', board: 'EQBR', param: 'AFLT', no_cache: true });
             $(window).trigger("security:selected", { engine: 'stock', market: 'shares', board: 'EQNE', param: 'GAZP', no_cache: true });
             
-            var chart = mx.data.chart($('#chart'));
 
             chart.addInstrument({
                 title:  'Аэрофлот',
@@ -83,9 +134,8 @@
                 no_cache: true
             })
 
-            $(window).on('security:to:chart', function(event, data) {
-                chart.addInstrument(data);
-            });
+            */
+
         });
 
         mx.data.quote_search("#quote_search");
