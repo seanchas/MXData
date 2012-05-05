@@ -369,6 +369,7 @@ widget = (wrapper, options = {}) ->
         # quotes events
     
         securities_list.on 'click', 'li', (event) ->
+            query_input.focus()
             accept_quote event, $(event.currentTarget).data('param')
     
         securities_list.on 'mouseenter', 'li', (event) ->
@@ -377,6 +378,7 @@ widget = (wrapper, options = {}) ->
             render_selected_item()
     
         boards_list.on 'click', 'tr', (event) ->
+            query_input.focus()
             accept_board event, $(event.currentTarget).data('param')
 
         boards_list.on 'mouseenter', 'tr', (event) ->
