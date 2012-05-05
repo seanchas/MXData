@@ -259,7 +259,7 @@ _make_chart = (container, candles_data, volumes_data, options = {}) ->
     { min, max } = xaxis.getExtremes()
     
     if min < options.min and max >= options.min then min = options.min
-    if max > options.max and min <= options.min then max = options.max
+    if max > options.max and min <= options.min then max = options.max unless options.max_lock == true
 
     xaxis.setExtremes(min, max, true, false)
     
@@ -476,11 +476,22 @@ widget = (wrapper) ->
             period = Math.ceil(current_duration / 120) || 1
             
             mx.cs.highstock(instruments, { type: current_type, interval: current_interval, period: "#{period}d" }).then (json) ->
+                
+                max_lock = if chart?
+                    extremes = _.first(chart.xAxis).getExtremes()
+                    extremes.max == extremes.dataMax
+                else
+                    false
+                
                 [candles, volumes] = json
                 { min, max } =  if chart? then _.first(chart.xAxis).getExtremes() else { min: undefined, max: undefined }
-                chart = _make_chart chart_container, candles, volumes, { chart: chart, min: min, max: max }
+                chart = _make_chart chart_container, candles, volumes, { chart: chart, min: min, max: max, max_lock: max_lock }
             
         , 300
+    
+    reload = ->
+        render()
+        _.delay reload, 20 * 1000
         
     # event listeners
 
@@ -518,6 +529,8 @@ widget = (wrapper) ->
     if instruments_cached
         for instrument in cached_instruments
             addInstrument instrument
+    
+    reload()
 
     # returned interface
     
