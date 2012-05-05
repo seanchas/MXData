@@ -143,6 +143,8 @@ widget = (wrapper, market_object) ->
     
     should_render_head  = true
     
+    render_is_locked    = false
+    
     sort                = {}
     
     cached_filtered_columns = undefined
@@ -172,13 +174,15 @@ widget = (wrapper, market_object) ->
     reload = ->
         rds = mx.iss.marketdata(engine, market, securities)
         rds.then render
-        #refresh()
+        refresh()
     
     #
     # render
     #
     
     render = ->
+        return if render_is_locked
+
         render_head()
         render_body()
         
@@ -273,7 +277,7 @@ widget = (wrapper, market_object) ->
     #
     
     refresh = ->
-        _.delay reload, 60 * 1000
+        _.delay reload, 5 * 1000
     
     
     #
@@ -305,11 +309,13 @@ widget = (wrapper, market_object) ->
     
 
     onRowClick = (event) ->
+        render_is_locked = true
         row = $(event.currentTarget)
         $("tr.filter", table).not("[data-param=#{row.data('param')}]").remove()
         filter_row = row.next("tr.filter")
         if _.size(filter_row) > 0
             filter_row.remove()
+            render_is_locked = false
         else
             render_filter row
     
@@ -349,7 +355,8 @@ widget = (wrapper, market_object) ->
             cached_filtered_columns = ([column.id, column._is_visible] for column in filtered_columns)
             
             cache.set("#{cache_key}:filtered_columns", cached_filtered_columns)
-            
+        
+        render_is_locked = false
         should_render_head = true
         render(true)
         
