@@ -371,6 +371,9 @@ widget = (wrapper) ->
     
     chart           = undefined
     
+    stored_data     = undefined
+    params_changed  = false
+    
     # utilities
     
     should_be_enabled = ->
@@ -386,6 +389,8 @@ widget = (wrapper) ->
 
         current_type = type
         
+        params_changed = true
+        
         render()
     
     setInterval = (interval) ->
@@ -398,6 +403,8 @@ widget = (wrapper) ->
         current_interval = interval
         current_duration = item.data('duration')
         
+        params_changed = true
+
         render()
     
 
@@ -423,6 +430,8 @@ widget = (wrapper) ->
 
         cache.set("#{cache_key}:instruments", instruments)
 
+        params_changed = true
+
         renderInstruments()
     
 
@@ -436,6 +445,8 @@ widget = (wrapper) ->
         _.first(instruments).__disabled = false if should_be_enabled()
         
         cache.set("#{cache_key}:instruments", instruments)
+
+        params_changed = true
 
         renderInstruments()
     
@@ -451,6 +462,8 @@ widget = (wrapper) ->
         instruments = _.sortBy instruments, (item) -> _.indexOf sorted_instruments, item.id
 
         cache.set("#{cache_key}:instruments", instruments)
+
+        params_changed = true
 
         renderInstruments()
 
@@ -470,13 +483,16 @@ widget = (wrapper) ->
         return unless _.size(instruments) > 0
         render_timeout = _.delay ->
             
-            if chart?
+            if chart? and params_changed
                 chart.showLoading()
             
             period = Math.ceil(current_duration / 120) || 1
             
             mx.cs.highstock(instruments, { type: current_type, interval: current_interval, period: "#{period}d" }).then (json) ->
                 
+
+                delete stored_data if stored_data?
+
                 max_lock = if chart?
                     extremes = _.first(chart.xAxis).getExtremes()
                     extremes.max == extremes.dataMax
@@ -487,6 +503,9 @@ widget = (wrapper) ->
                 { min, max } =  if chart? then _.first(chart.xAxis).getExtremes() else { min: undefined, max: undefined }
                 chart = _make_chart chart_container, candles, volumes, { chart: chart, min: min, max: max, max_lock: max_lock }
             
+                stored_data = json
+                params_changed = false
+                
         , 300
     
     reload = ->
