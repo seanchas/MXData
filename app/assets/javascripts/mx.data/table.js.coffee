@@ -35,7 +35,7 @@ make_container = (wrapper, market) ->
 
 filter_columns = (columns, filters, cache = undefined) ->
     data = []
-
+    
     if cache?
         
         for column_meta in cache
@@ -43,6 +43,11 @@ filter_columns = (columns, filters, cache = undefined) ->
             if column?
                 column._is_visible = !!column_meta[1]
                 data.push(column)
+        
+            delete columns[column_meta[0]]
+        
+        for column in columns
+            data.push column if column.is_system == 0
         
     else
         visible_columns = (column_descriptor.id for column_descriptor in filters[default_filter_name])
