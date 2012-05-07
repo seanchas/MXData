@@ -46,7 +46,9 @@ filter_columns = (columns, filters, cache = undefined) ->
         
             delete columns[column_meta[0]]
         
-        for column in columns
+        console.log columns
+        
+        for id, column of columns
             data.push column if column.is_system == 0
         
     else
