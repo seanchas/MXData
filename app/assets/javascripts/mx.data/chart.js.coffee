@@ -506,6 +506,9 @@ widget = (wrapper) ->
                 stored_data = json
                 params_changed = false
                 
+                
+                chart_container.css('height', chart_container.height())
+                
         , 300
     
     reload = ->
