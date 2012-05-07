@@ -72,6 +72,7 @@ render_head_row = (columns) ->
                 "data-column":  column.name
                 "title":        column.title
             )
+            .addClass(column.type)
             .toggleClass('sortable', column.is_ordered == 1)
             .html("<span>#{column.short_title}</span>")
     
