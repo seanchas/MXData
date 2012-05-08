@@ -6,6 +6,17 @@ scope   = root['mx']['cs']
 $       = jQuery
 
 
+metadata = mx.iss.metadata()
+
+
+find_metadata = (boardid) ->
+    board = _.detect(metadata.boards, (board) -> board.boardid == boardid)
+
+    engine: _.detect(metadata.engines, (engine) -> engine.id == board.engine_id ).name
+    market: _.detect(metadata.markets, (market) -> market.market_id == board.market_id ).market_name
+    group:  board.board_group_id
+
+
 
 fetch = (params, options = {}) ->
     deferred = new $.Deferred
@@ -43,5 +54,33 @@ fetch = (params, options = {}) ->
 
 
 
+fetch_2 = (param, options = {}) ->
+    deferred    = new $.Deferred
+    
+    metadata.then ->
+        
+        [ board, id ]               = param.split(':')
+        { engine, market, group }   = find_metadata board
+        
+        query_data =
+            's1.type':      options.type
+            'interval':     options.interval
+            'period':       options.period
+            'candles':      options.candles
+        
+        query_data = _.reduce(query_data, ((container, value, key) -> container[key] = value if value? ; container ), {})
+        
+        $.ajax
+            url:        "#{scope.url_prefix}/engines/#{engine}/markets/#{market}/boardgroups/#{group}/securities/#{id}.hs?callback=?"
+            data:       query_data
+            dataType:   'jsonp'
+        .then (json) ->
+            deferred.resolve json
+    
+    deferred.promise()
+
+
+
 $.extend scope,
     highstock: fetch
+    highstock_2: fetch_2

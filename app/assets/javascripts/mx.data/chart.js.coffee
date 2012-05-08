@@ -105,6 +105,7 @@ make_chart_period_selector = (container) ->
             
             container.append item
 
+
 make_chart_type_selector = (container) ->
     selector = $("<select>")
         .attr("id", "chart-type-selector")
@@ -145,7 +146,6 @@ default_chart_options =
             gapSize: 60
             dataGrouping:
                 enabled: false
-
 
 # default series options
 
@@ -266,6 +266,83 @@ _make_chart = (container, candles_data, volumes_data, options = {}) ->
 
     chart
 
+
+
+_replace_chart = (container, data, options = {}) ->
+    
+    chart = options.chart ; chart.destroy if chart?
+    
+    chart_options = $.extend true, {}, default_chart_options
+    
+    series  = []
+    xAxis   = []
+    yAxis   = []
+    
+    xAxis.push $.extend true, {}, default_xaxis_options
+
+    yAxis.push $.extend true, {}, default_yaxis_options
+
+    yAxis.push $.extend true, {}, default_yaxis_options,
+        opposite: true
+        gridLineWidth: 0
+
+    yAxis.push $.extend true, {}, default_volumes_yaxis_options
+    
+    
+    size = _.size data
+    
+
+    for datum, index in data
+        [ candles, volumes ] = datum
+        
+        candles = _.first(candles)
+        volumes = _.first(volumes)
+
+        # candles
+        
+        candles_serie_options = $.extend true, {}, default_series_options
+
+        $.extend candles_serie_options,
+            color:  colors[index]
+            type:   chart_types_mapping[if index > 1 or size > 2 then 'line' else candles.type]
+            data:   candles.data
+            yAxis:  if index == 1 and size == 2 then 1 else 0
+
+        if size > 2
+            $.extend candles_serie_options,
+                compare: 'value'
+        
+        series.push candles_serie_options
+
+        # volumes
+
+        if size == 2 or index == 0
+            volumes_serie_options = $.extend true, {}, default_volumes_series_options
+            
+            $.extend true, volumes_serie_options,
+                color:  colors[index]
+                type:   chart_types_mapping[volumes.type]
+                data:   volumes.data
+                yAxis:  2
+
+            series.push volumes_serie_options
+            
+
+    $.extend true, chart_options,
+        chart:
+            renderTo: _.first(container)
+        series: series
+        xAxis:  xAxis
+        yAxis:  yAxis
+
+
+    chart = new Highcharts.StockChart chart_options
+
+    chart
+    
+    
+    
+
     ###
 widget = (wrapper) ->
     wrapper = $(wrapper); return if _.size(wrapper) == 0
@@ -374,6 +451,16 @@ widget = (wrapper) ->
     stored_data     = undefined
     params_changed  = false
     
+    # deferreds
+    
+    init_type_deferred      = new $.Deferred
+    init_interval_deferred  = new $.Deferred
+    
+    ready = ->
+        $.when(init_type_deferred, init_interval_deferred)
+    
+    ready().then -> console.log 'ready'
+    
     # utilities
     
     should_be_enabled = ->
@@ -391,8 +478,11 @@ widget = (wrapper) ->
         
         params_changed = true
         
+        init_type_deferred.resolve()
+        console.log 'type set'
+        
         render()
-    
+        
     setInterval = (interval) ->
         item = $("li[data-interval=#{interval}]", chart_periods_container) ; return if _.size(item) == 0
         
@@ -404,6 +494,9 @@ widget = (wrapper) ->
         current_duration = item.data('duration')
         
         params_changed = true
+
+        init_interval_deferred.resolve()
+        console.log 'interval set'
 
         render()
     
@@ -479,6 +572,7 @@ widget = (wrapper) ->
         render()
     
     render = ->
+        ###
         clearTimeout render_timeout
         return unless _.size(instruments) > 0
         render_timeout = _.delay ->
@@ -510,10 +604,23 @@ widget = (wrapper) ->
                 chart_container.css('height', chart_container.height())
                 
         , 300
+        ###
     
-    reload = ->
-        render()
-        _.delay reload, 20 * 1000
+    render_2 = (data...) ->
+        _replace_chart chart_container, data, { chart: chart, type: current_type }
+    
+    fetch = ->
+        current_duration   ?= 10
+        period              = Math.ceil(current_duration / 120)
+        
+        sources = _.map(instruments, (instrument, index) -> mx.cs.highstock_2("#{instrument.board}:#{instrument.id}", { type: (if index == 0 then current_type else 'line'), interval: current_interval, period: "#{period}d" }))
+        $.when(sources...).then render_2
+        
+    
+    refresh = ->
+        fetch()
+        #render()
+        _.delay refresh, 20 * 1000
         
     # event listeners
 
@@ -534,9 +641,10 @@ widget = (wrapper) ->
         clearInstruments()
 
     # initialization
-    
+    console.log 'set type'
     setType(_.first(type.name for type in chart_types when type.is_default))
     
+    console.log 'set interval'
     setInterval(10)
 
     $(chart_instruments_container).sortable
@@ -552,7 +660,7 @@ widget = (wrapper) ->
         for instrument in cached_instruments
             addInstrument instrument
     
-    reload()
+    refresh()
 
     # returned interface
     
