@@ -268,7 +268,30 @@ _make_chart = (container, candles_data, volumes_data, options = {}) ->
 
 
 
-_replace_chart = (container, data, options = {}) ->
+_process_chart_extremes = (chart, options = {}) ->
+    { min, max } = chart.xAxis[0].getExtremes()
+    
+    if options.leftLock and options.rightLock
+        min = min
+        max = max
+    
+    if !options.leftLock and !options.rightLock
+        min = options.min if options.min > min and options.min < max
+        max = options.max if options.max < max and options.max > min
+    
+    if options.leftLock and !options.rightLock
+        delta = min - options.min
+        max = options.max + delta if options.max + delta < max
+    
+    if !options.leftLock and options.rightLock
+        delta = max - options.max
+        min = options.min + delta if options.min + delta > min
+
+    min: min
+    max: max
+
+
+_create_chart = (container, data, options = {}) ->
     
     chart = options.chart ; chart.destroy if chart?
     
@@ -291,8 +314,8 @@ _replace_chart = (container, data, options = {}) ->
     
     size = _.size data
     
-
     for datum, index in data
+
         [ candles, volumes ] = datum
         
         candles = _.first(candles)
@@ -306,7 +329,7 @@ _replace_chart = (container, data, options = {}) ->
             color:  colors[index]
             type:   chart_types_mapping[if index > 1 or size > 2 then 'line' else candles.type]
             data:   candles.data
-            yAxis:  if index == 1 and size == 2 then 1 else 0
+            yAxis:  if size == 2 and index == 1 then 1 else 0
 
         if size > 2
             $.extend candles_serie_options,
@@ -337,82 +360,45 @@ _replace_chart = (container, data, options = {}) ->
 
 
     chart = new Highcharts.StockChart chart_options
+    
+    { min, max } = _process_chart_extremes(chart, options) ; chart.xAxis[0].setExtremes(min, max, true, false)
+    
+    container.css('height', container.height())
 
     chart
     
     
+_update_chart = (container, data, options = {}) ->
+    chart   = options.chart
     
-
-    ###
-widget = (wrapper) ->
-    wrapper = $(wrapper); return if _.size(wrapper) == 0
+    size    = _.size data
+    index   = 0
     
-    securities  = []
-    
-    make_content wrapper
-
-    make_chart_period_selector $('#chart-period-selector-container', wrapper)
-    make_chart_type_selector $('#chart-type-selector-container', wrapper)
-
-    chart_container = $('#chart-container', wrapper)
-    chart           = _make_chart chart_container, [{ data: [] }], [{ data: [] }]
-    
-    chart_type_selector = $('select#chart-type-selector')
-    chart_type          = _.first chart_types
-    
-    refresh_timeout = undefined
-    
-    # interface
-    
-    is_security_included = (param) ->
-        _.include securities, param
-
-    addSecurity = (param) ->
-        clearTimeout refresh_timeout
-
-        included = is_security_included param
-        securities.push param unless included
-
-        refresh_timeout = _.delay refresh, 300
-    
-    removeSecurity = (param) ->
-        clearTimeout refresh_timeout
-
-        included = is_security_included param
-        securities = _.without securities, param if included
+    for datum in data
         
-        refresh_timeout = _.delay refresh, 300
-    
-    setChartType = (new_chart_type) ->
-        chart_type = new_chart_type if _.include chart_types, new_chart_type
-        refresh()
-    
-    # refresh
-    
-    refresh = ->
-        chart.showLoading()
+        [ candles, volumes ] = datum
         
-        mx.cs.highstock(securities, { type: chart_type }).then (json) ->
-            [candles, volumes] = json
-            
-            { min, max } = _.first(chart.xAxis).getExtremes()
-            
-            chart = _make_chart chart_container, candles, volumes, { chart: chart, min: min, max: max }
-                    
-    
-    addSecurity('stock:index:SNDX:MICEXINDEXCF')
-    addSecurity('currency:basket:BKT:USDEUR_BKT')
-    
-    # event observers
-    
-    onChartTypeSelectorChange = (event) ->
-        setChartType chart_type_selector.val()
+        candles = _.first(candles)
+        volumes = _.first(volumes)
 
-    # event listeners
-    
-    chart_type_selector.on "change", onChartTypeSelectorChange
-    
-###
+        # candles
+        
+        serie       = chart.series[index]
+        serie.setData(candles.data, false)
+        index++
+        
+        # volumes
+        
+        if size == 2 or index == 1
+            serie       = chart.series[index]
+            serie.setData(volumes.data, false)
+            index++
+
+    chart.redraw()
+
+    { min, max } = _process_chart_extremes(chart, options) ; chart.xAxis[0].setExtremes(min, max, true, false)
+
+    chart
 
 make_instrument_view = (instrument, color, options = {}) ->
     view = $('<li>')
@@ -572,11 +558,12 @@ widget = (wrapper) ->
         render()
     
     render = ->
-        ###
         clearTimeout render_timeout
         return unless _.size(instruments) > 0
         render_timeout = _.delay ->
             
+            fetch()
+            ###
             if chart? and params_changed
                 chart.showLoading()
             
@@ -602,14 +589,27 @@ widget = (wrapper) ->
                 
                 
                 chart_container.css('height', chart_container.height())
+                ###
                 
         , 300
-        ###
     
     render_2 = (data...) ->
-        _replace_chart chart_container, data, { chart: chart, type: current_type }
-    
+        
+        { min, max, dataMin, dataMax } = if chart? then chart.xAxis[0].getExtremes() else { min: undefined, max: undefined, dataMin: undefined, dataMax: undefined }
+        
+        chart = if !chart? or params_changed
+            _create_chart chart_container, data, { chart: chart, type: current_type, min: min, max: max, leftLock: min == dataMin, rightLock: max == dataMax }
+        else
+            _update_chart chart_container, data, { chart: chart, type: current_type, min: min, max: max, leftLock: min == dataMin, rightLock: max == dataMax }
+            
+        delete data ; data = null
+
+        params_changed = false
+        
     fetch = ->
+        if chart? and params_changed
+            chart.showLoading()
+        
         current_duration   ?= 10
         period              = Math.ceil(current_duration / 120)
         
