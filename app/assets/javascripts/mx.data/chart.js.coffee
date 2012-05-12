@@ -6,8 +6,7 @@ $       = jQuery
 
 cache = kizzy('data.chart')
 
-
-default_candle_width = 240
+default_candle_width    = 240
 
 max_instruments = 5
 
@@ -93,6 +92,8 @@ make_content = (container) ->
 
 
 make_chart_period_selector = (container) ->
+    deferred = new $.Deferred
+    
     mx.data.ready.then (metadata) ->
 
         for duration in metadata.durations
@@ -105,17 +106,16 @@ make_chart_period_selector = (container) ->
             
             container.append item
 
+        deferred.resolve()
+    
+    deferred.promise()
 
 make_chart_type_selector = (container) ->
-    selector = $("<select>")
-        .attr("id", "chart-type-selector")
+    deferred = new $.Deferred
     
-    for chart_type in chart_types
-        selector.append $("<option>")
-            .attr("value", chart_type)
-            .html(chart_types_titles[chart_type])
+    deferred.resolve()
     
-    container.html selector
+    deferred.promise()
 
 
 # default chart options
@@ -301,7 +301,9 @@ _create_chart = (container, data, options = {}) ->
     xAxis   = []
     yAxis   = []
     
-    xAxis.push $.extend true, {}, default_xaxis_options
+    xAxis.push $.extend true, {}, default_xaxis_options,
+        events:
+            setExtremes: options.onExtremesChange
 
     yAxis.push $.extend true, {}, default_yaxis_options
 
@@ -314,7 +316,11 @@ _create_chart = (container, data, options = {}) ->
     
     size = _.size data
     
+    instrument_index = 0
+    
     for datum, index in data
+
+        instrument_index++ while options.instruments[instrument_index].__disabled == true
 
         [ candles, volumes ] = datum
         
@@ -326,7 +332,7 @@ _create_chart = (container, data, options = {}) ->
         candles_serie_options = $.extend true, {}, default_series_options
 
         $.extend candles_serie_options,
-            color:  colors[index]
+            color:  colors[instrument_index]
             type:   chart_types_mapping[if index > 1 or size > 2 then 'line' else candles.type]
             data:   candles.data
             yAxis:  if size == 2 and index == 1 then 1 else 0
@@ -343,12 +349,14 @@ _create_chart = (container, data, options = {}) ->
             volumes_serie_options = $.extend true, {}, default_volumes_series_options
             
             $.extend true, volumes_serie_options,
-                color:  colors[index]
+                color:  colors[instrument_index]
                 type:   chart_types_mapping[volumes.type]
                 data:   volumes.data
                 yAxis:  2
 
             series.push volumes_serie_options
+        
+        instrument_index++
             
 
     $.extend true, chart_options,
@@ -421,7 +429,8 @@ widget = (wrapper) ->
     chart_container             = $('#chart_container', wrapper)
     chart_instruments_container = $('#chart_instruments', wrapper)
     
-    make_chart_period_selector chart_periods_container
+    chart_period_selector_deferred  = make_chart_period_selector chart_periods_container
+    chart_type_selector_deferred    = make_chart_type_selector chart_types_container
     
     current_type        = undefined
     current_interval    = undefined
@@ -437,15 +446,18 @@ widget = (wrapper) ->
     stored_data     = undefined
     params_changed  = false
     
+    # caches
+    
+    cached_extremes = undefined
+    
     # deferreds
     
-    init_type_deferred      = new $.Deferred
-    init_interval_deferred  = new $.Deferred
-    
-    ready = ->
-        $.when(init_type_deferred, init_interval_deferred)
-    
-    ready().then -> console.log 'ready'
+    init_type_deferred          = new $.Deferred
+    init_interval_deferred      = new $.Deferred
+    init_instruments_deferred   = new $.Deferred
+    init_extremes_deferred      = new $.Deferred
+    dom_ready                   = do -> $.when(chart_period_selector_deferred, chart_type_selector_deferred).then
+    ready                       = do -> $.when(init_type_deferred, init_interval_deferred, init_instruments_deferred).then
     
     # utilities
     
@@ -463,10 +475,12 @@ widget = (wrapper) ->
         current_type = type
         
         params_changed = true
-        
         init_type_deferred.resolve()
-        console.log 'type set'
+
+        cache.set "#{cache_key}:type", current_type
         
+        console.log "type set"
+
         render()
         
     setInterval = (interval) ->
@@ -480,8 +494,8 @@ widget = (wrapper) ->
         current_duration = item.data('duration')
         
         params_changed = true
-
         init_interval_deferred.resolve()
+
         console.log 'interval set'
 
         render()
@@ -493,6 +507,10 @@ widget = (wrapper) ->
 
         instrument.__disabled = !instrument.__disabled
         instrument.__disabled = false if should_be_enabled()
+        
+        cache.set("#{cache_key}:instruments", instruments)
+
+        params_changed = true
 
         renderInstruments()
 
@@ -510,6 +528,7 @@ widget = (wrapper) ->
         cache.set("#{cache_key}:instruments", instruments)
 
         params_changed = true
+        init_instruments_deferred.resolve()
 
         renderInstruments()
     
@@ -545,6 +564,11 @@ widget = (wrapper) ->
         params_changed = true
 
         renderInstruments()
+    
+    onExtremesChange = (extremes) ->
+        cache.set "#{cache_key}:extremes",
+            min: extremes.min
+            max: extremes.max
 
 
     # renders
@@ -558,53 +582,63 @@ widget = (wrapper) ->
         render()
     
     render = ->
-        clearTimeout render_timeout
-        return unless _.size(instruments) > 0
-        render_timeout = _.delay ->
+        ready ->
             
-            fetch()
-            ###
-            if chart? and params_changed
-                chart.showLoading()
+            clearTimeout render_timeout
+            return unless _.size(instruments) > 0
+            render_timeout = _.delay ->
             
-            period = Math.ceil(current_duration / 120) || 1
-            
-            mx.cs.highstock(instruments, { type: current_type, interval: current_interval, period: "#{period}d" }).then (json) ->
-                
+                console.log 'rendering'
 
-                delete stored_data if stored_data?
-
-                max_lock = if chart?
-                    extremes = _.first(chart.xAxis).getExtremes()
-                    extremes.max == extremes.dataMax
-                else
-                    false
-                
-                [candles, volumes] = json
-                { min, max } =  if chart? then _.first(chart.xAxis).getExtremes() else { min: undefined, max: undefined }
-                chart = _make_chart chart_container, candles, volumes, { chart: chart, min: min, max: max, max_lock: max_lock }
-            
-                stored_data = json
-                params_changed = false
-                
-                
-                chart_container.css('height', chart_container.height())
+                fetch()
                 ###
+                if chart? and params_changed
+                    chart.showLoading()
+            
+                period = Math.ceil(current_duration / 120) || 1
+            
+                mx.cs.highstock(instruments, { type: current_type, interval: current_interval, period: "#{period}d" }).then (json) ->
                 
-        , 300
+
+                    delete stored_data if stored_data?
+
+                    max_lock = if chart?
+                        extremes = _.first(chart.xAxis).getExtremes()
+                        extremes.max == extremes.dataMax
+                    else
+                        false
+                
+                    [candles, volumes] = json
+                    { min, max } =  if chart? then _.first(chart.xAxis).getExtremes() else { min: undefined, max: undefined }
+                    chart = _make_chart chart_container, candles, volumes, { chart: chart, min: min, max: max, max_lock: max_lock }
+            
+                    stored_data = json
+                    params_changed = false
+                
+                
+                    chart_container.css('height', chart_container.height())
+                    ###
+                
+            , 300
     
     render_2 = (data...) ->
         
-        { min, max, dataMin, dataMax } = if chart? then chart.xAxis[0].getExtremes() else { min: undefined, max: undefined, dataMin: undefined, dataMax: undefined }
+        { min, max, dataMin, dataMax } = if cached_extremes? 
+            { min: cached_extremes.min, max: cached_extremes.max }
+        else if chart?
+            chart.xAxis[0].getExtremes()
+        else
+            { min: undefined, max: undefined, dataMin: undefined, dataMax: undefined }
         
         chart = if !chart? or params_changed
-            _create_chart chart_container, data, { chart: chart, type: current_type, min: min, max: max, leftLock: min == dataMin, rightLock: max == dataMax }
+            _create_chart chart_container, data, { chart: chart, instruments: instruments, type: current_type, min: min, max: max, leftLock: min == dataMin, rightLock: max == dataMax, onExtremesChange: onExtremesChange }
         else
-            _update_chart chart_container, data, { chart: chart, type: current_type, min: min, max: max, leftLock: min == dataMin, rightLock: max == dataMax }
+            _update_chart chart_container, data, { chart: chart, instruments: instruments, type: current_type, min: min, max: max, leftLock: min == dataMin, rightLock: max == dataMax }
             
         delete data ; data = null
 
-        params_changed = false
+        cached_extremes = undefined
+        params_changed  = false
         
     fetch = ->
         if chart? and params_changed
@@ -613,37 +647,65 @@ widget = (wrapper) ->
         current_duration   ?= 10
         period              = Math.ceil(current_duration / 120)
         
-        sources = _.map(instruments, (instrument, index) -> mx.cs.highstock_2("#{instrument.board}:#{instrument.id}", { type: (if index == 0 then current_type else 'line'), interval: current_interval, period: "#{period}d" }))
+        active_instruments = ( instrument for instrument in instruments when instrument.__disabled != true)
+        
+        sources = _.map(active_instruments, (instrument, index) -> mx.cs.highstock_2("#{instrument.board}:#{instrument.id}", { type: (if index == 0 then current_type else 'line'), interval: current_interval, period: "#{period}d" }))
         $.when(sources...).then render_2
         
     
     refresh = ->
-        fetch()
-        #render()
-        _.delay refresh, 20 * 1000
+        ready ->
+            fetch()
+            _.delay refresh, 20 * 1000
         
-    # event listeners
-
-    chart_types_container.on "click", "li:not(.selected)", (event) ->
-        setType $(event.currentTarget).data('type')
-    
-    chart_periods_container.on "click", "li:not(.selected)", (event) ->
-        setInterval $(event.currentTarget).data('interval')
-    
-    chart_instruments_container.on "click", "li", (event) ->
-        toggleInstrumentState $(event.currentTarget).data('param')
-
-    chart_instruments_container.on "click", "li span", (event) ->
-        event.stopPropagation()
-        removeInstrument $(event.currentTarget).closest('li').data('param')
-
-    chart_instruments_container.parent().on "click", "span.reset", (event) ->
-        clearInstruments()
-
     # initialization
-    console.log 'set type'
-    setType(_.first(type.name for type in chart_types when type.is_default))
     
+    bootstrap = ->
+        
+        dom_ready ->
+            
+            console.log "chart started"
+            
+            # event listeners
+
+            chart_types_container.on "click", "li:not(.selected)", (event) ->
+                setType $(event.currentTarget).data('type')
+    
+            chart_periods_container.on "click", "li:not(.selected)", (event) ->
+                setInterval $(event.currentTarget).data('interval')
+    
+            chart_instruments_container.on "click", "li", (event) ->
+                toggleInstrumentState $(event.currentTarget).data('param')
+
+            chart_instruments_container.on "click", "li span", (event) ->
+                event.stopPropagation()
+                removeInstrument $(event.currentTarget).closest('li').data('param')
+
+            chart_instruments_container.parent().on "click", "span.reset", (event) ->
+                clearInstruments()
+            
+            # read cached values
+            
+            cached_interval     = cache.get("#{cache_key}:interval")
+            cached_type         = cache.get("#{cache_key}:type")
+            #cached_extremes     = cache.get("#{cache_key}:extremes")
+            #cached_instruments  = cache.get("#{cache_key}:instruments")
+                        
+            # start
+            
+            setType(cached_type ? _.first(type.name for type in chart_types when type.is_default))
+            setInterval(10)
+            
+            #if instruments_cached
+            #    for instrument in cached_instruments
+            #        addInstrument instrument
+
+            refresh()
+            
+            return
+            
+        
+            ###
     console.log 'set interval'
     setInterval(10)
 
@@ -652,15 +714,29 @@ widget = (wrapper) ->
         update: reorderInstruments
 
     # restore from cache
+    
+    cached_interval     = cache.get("#{cache_key}:interval")
+    cached_type         = cache.get("#{cache_key}:type")
+    cached_extremes     = cache.get("#{cache_key}:extremes")
+    cached_instruments  = cache.get("#{cache_key}:instruments")
 
-    cached_instruments = cache.get("#{cache_key}:instruments")
     instruments_cached = !!cached_instruments
+    
+    console.log 'set type'
+    setType(cached_type ? _.first(type.name for type in chart_types when type.is_default))
+    
+    console.log cached_type
 
     if instruments_cached
         for instrument in cached_instruments
             addInstrument instrument
     
+    ready ->
+        
     refresh()
+    ###
+    
+    bootstrap()
 
     # returned interface
     

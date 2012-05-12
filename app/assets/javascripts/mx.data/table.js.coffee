@@ -135,6 +135,8 @@ widget = (wrapper, market_object) ->
     fds = undefined
     cds = undefined
     rds = undefined
+    
+    stale = null
             
     init_data_sources = _.once ->
         fds = mx.iss.marketdata_filters engine, market
@@ -223,6 +225,8 @@ widget = (wrapper, market_object) ->
             rds
         ).then (filters, columns, data) ->
 
+            (delete stale ; stale = null) if stale?
+
             filtered_columns ?= filter_columns(columns, filters, cached_filtered_columns)
             
             if sort.column? and sort.direction?
@@ -233,6 +237,8 @@ widget = (wrapper, market_object) ->
 
             for record in data when _.include securities, "#{record.BOARDID}:#{record.SECID}"
                 table_body.append render_body_row record, filtered_columns
+            
+            stale = data
             
     
 
