@@ -631,8 +631,10 @@ widget = (wrapper) ->
             { min: undefined, max: undefined, dataMin: undefined, dataMax: undefined }
         
         chart = if !chart? or params_changed
+            console.log 'create'
             _create_chart chart_container, data, { chart: chart, instruments: instruments, type: current_type, min: min, max: max, leftLock: min == dataMin, rightLock: max == dataMax, onExtremesChange: onExtremesChange }
         else
+            console.log 'update'
             _update_chart chart_container, data, { chart: chart, instruments: instruments, type: current_type, min: min, max: max, leftLock: min == dataMin, rightLock: max == dataMax }
             
         delete data ; data = null
@@ -655,7 +657,8 @@ widget = (wrapper) ->
     
     refresh = ->
         ready ->
-            fetch()
+            #fetch()
+            render()
             _.delay refresh, 20 * 1000
         
     # initialization
@@ -688,17 +691,21 @@ widget = (wrapper) ->
             
             cached_interval     = cache.get("#{cache_key}:interval")
             cached_type         = cache.get("#{cache_key}:type")
-            #cached_extremes     = cache.get("#{cache_key}:extremes")
-            #cached_instruments  = cache.get("#{cache_key}:instruments")
+            cached_extremes     = cache.get("#{cache_key}:extremes")
+            cached_instruments  = cache.get("#{cache_key}:instruments")
                         
             # start
             
-            setType(cached_type ? _.first(type.name for type in chart_types when type.is_default))
+            setType('candles')
             setInterval(10)
             
-            #if instruments_cached
-            #    for instrument in cached_instruments
-            #        addInstrument instrument
+            if cached_instruments?
+                for instrument in cached_instruments
+                    addInstrument instrument
+
+            $(chart_instruments_container).sortable
+                axis: 'x'
+                update: reorderInstruments
 
             refresh()
             
