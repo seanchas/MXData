@@ -479,8 +479,6 @@ widget = (wrapper) ->
 
         cache.set "#{cache_key}:type", current_type
         
-        console.log "type set"
-
         render()
         
     setInterval = (interval) ->
@@ -496,7 +494,7 @@ widget = (wrapper) ->
         params_changed = true
         init_interval_deferred.resolve()
 
-        console.log 'interval set'
+        cache.set "#{cache_key}:interval", current_interval
 
         render()
     
@@ -515,7 +513,10 @@ widget = (wrapper) ->
         renderInstruments()
 
     addInstrument = (new_instrument) ->
+        return unless new_instrument?
+        
         return if _.size(instruments) >= max_instruments
+
         instrument = _.first(instrument for instrument in instruments when instrument.id == new_instrument.id)
         return if instrument?
         
@@ -588,8 +589,6 @@ widget = (wrapper) ->
             return unless _.size(instruments) > 0
             render_timeout = _.delay ->
             
-                console.log 'rendering'
-
                 fetch()
                 ###
                 if chart? and params_changed
@@ -631,10 +630,8 @@ widget = (wrapper) ->
             { min: undefined, max: undefined, dataMin: undefined, dataMax: undefined }
         
         chart = if !chart? or params_changed
-            console.log 'create'
             _create_chart chart_container, data, { chart: chart, instruments: instruments, type: current_type, min: min, max: max, leftLock: min == dataMin, rightLock: max == dataMax, onExtremesChange: onExtremesChange }
         else
-            console.log 'update'
             _update_chart chart_container, data, { chart: chart, instruments: instruments, type: current_type, min: min, max: max, leftLock: min == dataMin, rightLock: max == dataMax }
             
         delete data ; data = null
@@ -665,9 +662,23 @@ widget = (wrapper) ->
     
     bootstrap = ->
         
-        dom_ready ->
+        # read cached values
             
-            console.log "chart started"
+        cached_interval     = cache.get("#{cache_key}:interval")
+        cached_type         = cache.get("#{cache_key}:type")
+        cached_extremes     = cache.get("#{cache_key}:extremes")
+        cached_instruments  = cache.get("#{cache_key}:instruments")
+                        
+        if cached_instruments?
+            instruments_cached = true
+            for instrument in cached_instruments
+                addInstrument instrument
+
+        $(chart_instruments_container).sortable
+            axis: 'x'
+            update: reorderInstruments
+
+        dom_ready ->
             
             # event listeners
 
@@ -687,31 +698,13 @@ widget = (wrapper) ->
             chart_instruments_container.parent().on "click", "span.reset", (event) ->
                 clearInstruments()
             
-            # read cached values
-            
-            cached_interval     = cache.get("#{cache_key}:interval")
-            cached_type         = cache.get("#{cache_key}:type")
-            cached_extremes     = cache.get("#{cache_key}:extremes")
-            cached_instruments  = cache.get("#{cache_key}:instruments")
-                        
             # start
             
-            setType('candles')
-            setInterval(10)
+            setType(cached_type ? 'candles')
+            setInterval(cached_interval ? 10)
             
-            if cached_instruments?
-                for instrument in cached_instruments
-                    addInstrument instrument
-
-            $(chart_instruments_container).sortable
-                axis: 'x'
-                update: reorderInstruments
-
             refresh()
             
-            return
-            
-        
             ###
     console.log 'set interval'
     setInterval(10)
@@ -748,11 +741,7 @@ widget = (wrapper) ->
     # returned interface
     
     {
-        setType:            setType
-        setInterval:        setInterval
-        addInstrument:      addInstrument
-        removeInstrument:   removeInstrument
-        clearInstruments:   clearInstruments
+        addInstrument: (args...) -> dom_ready -> addInstrument args...
     }
     
 
