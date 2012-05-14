@@ -137,6 +137,11 @@ default_chart_options =
     scrollbar:
         height: 15
     
+    tooltip:
+        crosshairs: true
+        #formatter: ->
+        #    false
+    
     plotOptions:
         ohlc:
             lineWidth: 2
@@ -321,6 +326,7 @@ _create_chart = (container, data, options = {}) ->
     for datum, index in data
 
         instrument_index++ while options.instruments[instrument_index].__disabled == true
+        instrument = options.instruments[instrument_index]
 
         [ candles, volumes ] = datum
         
@@ -332,6 +338,7 @@ _create_chart = (container, data, options = {}) ->
         candles_serie_options = $.extend true, {}, default_series_options
 
         $.extend candles_serie_options,
+            name:   instrument.title
             color:  colors[instrument_index]
             type:   chart_types_mapping[if index > 1 or size > 2 then 'line' else candles.type]
             data:   candles.data
