@@ -11,6 +11,18 @@ default_candle_width    = 240
 max_instruments = 5
 
 
+candles_yaxis_margin = 30
+candles_yaxis_height = 250
+
+volumes_yaxis_margin = 30
+volumes_yaxis_height = 100
+
+default_xaxis_margin = 30
+default_xaxis_height = 25
+
+navigator_height = 50
+scrollbar_height = 15
+
 colors = [
     '#4572a7'
     '#aa4643'
@@ -122,8 +134,11 @@ make_chart_type_selector = (container) ->
 
 default_chart_options =
     chart:
-        alignTicks: true
-        height: 470
+        alignTicks: false
+        spacingTop: 1
+        spacingLeft: 1
+        spacingRight: 1
+        spacingBottom: 1
     
     credits:
         enabled: false
@@ -168,7 +183,6 @@ default_volumes_series_options =
 # default x axis options
 
 default_xaxis_options =
-    height: 370
     top: 0
     offset: 0
     id: null
@@ -178,8 +192,8 @@ default_xaxis_options =
 
 default_yaxis_options =
     lineWidth: 1
-    height: 250
-    top: 0
+    height: candles_yaxis_height
+    top: candles_yaxis_margin
     offset: 0
     showEmpty: false
 
@@ -187,93 +201,26 @@ default_yaxis_options =
 
 default_volumes_yaxis_options =
     lineWidth: 1
-    height: 100
-    top: 260
+    height: volumes_yaxis_height
+    top: candles_yaxis_margin + candles_yaxis_height + volumes_yaxis_margin
     offset: 0
     showEmpty: false
     alignTicks: false
 
 
-_make_chart = (container, candles_data, volumes_data, options = {}) ->
-    chart_options = $.extend true, {}, default_chart_options
-    
-    series  = []
-    xAxis   = []
-    yAxis   = []
-    
-    
-    xAxis.push $.extend true, {}, default_xaxis_options
 
-    yAxis.push $.extend true, {}, default_yaxis_options
-
-    yAxis.push $.extend true, {}, default_yaxis_options,
-        opposite: true
-        gridLineWidth: 0
+_process_serie_indicators = (data) ->
+    _.flatten _.reduce(data, (container, item) ->
+            id = parseInt item.id[0].match /\d+$/
+            (container[id] ?= []).push
+                type: item.type
+                data: item.data
+            container
+        , [])
+    , true
 
 
-    candles_data_size = _.size candles_data
-    
-    for serie, index in candles_data
-        serie_options = $.extend true, {}, default_series_options
-        
-        $.extend serie_options,
-            color: colors[index]
-            type:   chart_types_mapping[serie.type]
-            data:   serie.data
-            yAxis:  if index == 1 and candles_data_size == 2 then 1 else 0
-        
-            if candles_data_size > 2
-                $.extend true, serie_options,
-                compare: 'value'
-    
-        series.push serie_options
-    
-    
-    # volumes
-    
-    volumes_yaxis_index = _.size yAxis
-    
-    yAxis.push $.extend true, {}, default_volumes_yaxis_options
-
-    for serie, index in _.first(volumes_data, if _.size(volumes_data) > 2 then 1 else 2)
-        
-        serie_options = $.extend true, {}, default_volumes_series_options
-
-        $.extend true, serie_options,
-            color: colors[index]
-            type: chart_types_mapping[serie.type]
-            data: serie.data
-            yAxis: volumes_yaxis_index
-
-        series.push serie_options
-
-    $.extend true, chart_options,
-        chart:
-            renderTo: _.first(container)
-        series: series
-        xAxis:  xAxis
-        yAxis:  yAxis
-    
-
-    options.chart.destroy() if options.chart
-    chart = new Highcharts.StockChart chart_options
-    
-
-    xaxis = _.first chart.xAxis
-
-    { min, max } = xaxis.getExtremes()
-    
-    if min < options.min and max >= options.min then min = options.min
-    if max > options.max and min <= options.min then max = options.max unless options.max_lock == true
-
-    xaxis.setExtremes(min, max, true, false)
-    
-
-    chart
-
-
-
-_process_chart_extremes = (chart, options = {}) ->
+ _process_chart_extremes = (chart, options = {}) ->
     { min, max } = chart.xAxis[0].getExtremes()
     
     if options.leftLock and options.rightLock
@@ -298,73 +245,151 @@ _process_chart_extremes = (chart, options = {}) ->
 
 _create_chart = (container, data, options = {}) ->
     
-    chart = options.chart ; chart.destroy if chart?
+    size            = _.size data
+    chart           = options.chart ; chart.destroy if chart?
     
-    chart_options = $.extend true, {}, default_chart_options
+    console.log data
     
     series  = []
     xAxis   = []
     yAxis   = []
     
-    xAxis.push $.extend true, {}, default_xaxis_options,
-        events:
-            setExtremes: options.onExtremesChange
+    # candles
 
+    # left candles y axis
     yAxis.push $.extend true, {}, default_yaxis_options
 
+    # right candles y axis
     yAxis.push $.extend true, {}, default_yaxis_options,
         opposite: true
         gridLineWidth: 0
 
-    yAxis.push $.extend true, {}, default_volumes_yaxis_options
-    
-    
-    size = _.size data
-    
     instrument_index = 0
-    
-    for datum, index in data
+
+    for record, index in data
+
+        candles = _.first record.candles
 
         instrument_index++ while options.instruments[instrument_index].__disabled == true
         instrument = options.instruments[instrument_index]
 
-        [ candles, volumes ] = datum
-        
-        candles = _.first(candles)
-        volumes = _.first(volumes)
-
-        # candles
-        
         candles_serie_options = $.extend true, {}, default_series_options
 
         $.extend candles_serie_options,
             name:   instrument.title
             color:  colors[instrument_index]
-            type:   chart_types_mapping[if index > 1 or size > 2 then 'line' else candles.type]
+            type:   chart_types_mapping[candles.type]
             data:   candles.data
             yAxis:  if size == 2 and index == 1 then 1 else 0
+        
 
         if size > 2
             $.extend candles_serie_options,
-                compare: 'value'
+                compare: 'percent'
         
         series.push candles_serie_options
-
-        # volumes
-
-        if size == 2 or index == 0
-            volumes_serie_options = $.extend true, {}, default_volumes_series_options
-            
-            $.extend true, volumes_serie_options,
-                color:  colors[instrument_index]
-                type:   chart_types_mapping[volumes.type]
-                data:   volumes.data
-                yAxis:  2
-
-            series.push volumes_serie_options
         
         instrument_index++
+    
+    # volumes
+    
+    # left volumes y axis
+    yAxis.push $.extend true, {}, default_volumes_yaxis_options
+
+    instrument_index = 0
+
+    for record, index in data
+        
+        volumes = _.first record.volumes
+
+        instrument_index++ while options.instruments[instrument_index].__disabled == true
+        instrument = options.instruments[instrument_index]
+
+        volumes_serie_options = $.extend true, {}, default_volumes_series_options
             
+        $.extend true, volumes_serie_options,
+            name:   instrument.title
+            color:  colors[instrument_index]
+            type:   chart_types_mapping[volumes.type]
+            data:   volumes.data
+            yAxis:  2
+
+        series.push volumes_serie_options
+        
+        instrument_index++
+
+    ###
+
+    # candles technicals
+
+    for candles_technicals, index in chart_data.candles_technicals
+        candles_serie_options = $.extend true, {}, default_series_options
+    
+        $.extend candles_serie_options,
+            color:  colors[_.size(options.instruments) + index]
+            type:   chart_types_mapping[candles_technicals.type]
+            data:   candles_technicals.data
+            yAxis:  0
+        
+        series.push candles_serie_options
+    
+    ###
+
+    offset = candles_yaxis_margin + candles_yaxis_height + volumes_yaxis_margin + volumes_yaxis_height
+    
+    for technicals, index in data[0].technicals
+        
+        if technicals.inline == true
+            for technical_data in technicals.data
+                serie_options = $.extend true, {}, default_series_options,
+                    color: colors[_.size(data) + index]
+                    data: technical_data
+                    type: chart_types_mapping[technicals.type] 
+                    yAxis: 0
+
+                series.push serie_options
+        else
+            console.log 'n/a'
+                
+
+    ###
+
+    # technicals
+    
+    for indicators in technicals
+        yAxis.push $.extend true, {}, default_volumes_yaxis_options,
+            top: offset + volumes_yaxis_margin
+        
+        yAxisIndex = _.size(yAxis) - 1
+        
+        for serie in indicators
+            serie_options = $.extend true, {}, default_series_options,
+                color: colors[0]
+                type: chart_types_mapping[serie.type]
+                data: serie.data
+                yAxis: yAxisIndex
+
+            series.push serie_options
+
+        offset += volumes_yaxis_margin + volumes_yaxis_height
+        
+
+    ###
+
+    # main x axis
+
+    xAxis.push $.extend true, {}, default_xaxis_options,
+        height: offset + default_xaxis_margin
+        events:
+            setExtremes: options.onExtremesChange
+
+    # chart
+    
+    chart_options   = $.extend true, {}, default_chart_options,
+        chart:
+            height: offset + default_xaxis_margin + default_xaxis_height + navigator_height + scrollbar_height
+        tooltip:
+            formatter: options.tooltip
 
     $.extend true, chart_options,
         chart:
@@ -373,47 +398,68 @@ _create_chart = (container, data, options = {}) ->
         xAxis:  xAxis
         yAxis:  yAxis
 
-
     chart = new Highcharts.StockChart chart_options
     
     { min, max } = _process_chart_extremes(chart, options) ; chart.xAxis[0].setExtremes(min, max, true, false)
     
-    container.css('height', container.height())
-
+    container.css('height', chart.chartHeight)
+    
     chart
     
     
 _update_chart = (container, data, options = {}) ->
     chart   = options.chart
-    
-    size    = _.size data
-    index   = 0
-    
-    for datum in data
-        
-        [ candles, volumes ] = datum
-        
-        candles = _.first(candles)
-        volumes = _.first(volumes)
 
-        # candles
-        
-        serie       = chart.series[index]
-        serie.setData(candles.data, false)
-        index++
-        
-        # volumes
-        
-        if size == 2 or index == 1
-            serie       = chart.series[index]
-            serie.setData(volumes.data, false)
-            index++
+    size    = _.size data
+
+    ###
+
+    chart_data      =
+        candles: []
+        volumes: []
+        candles_technicals: []
+    
+    technicals = _.reduce _.rest(data[0], 2), (container, item) ->
+        container.push _process_serie_indicators(item)
+        container
+    , []
+
+    for entry, index in data
+        chart_data.candles.push entry[0][0]
+        chart_data.volumes.push entry[1][0] if index == 0 or size == 2
+        chart_data.candles_technicals.push _.rest(entry[0], 1)... if index == 0
+    
+    ###
+    
+    offset = 0
+    
+    for record, index in data
+        candles = _.first record.candles
+        chart.series[index + offset].setData(candles.data, false)
+    
+    offset += _.size data
+    
+    for record, index in data
+        volumes = _.first record.volumes
+        chart.series[index + offset].setData(volumes.data, false)
+    
+    offset += _.size data
+
+    #for values, index in chart_data.candles_technicals
+    #    chart.series[index + offset].setData(values.data, false)
+
+    #offset += _.size chart_data.candles_technicals
+
+    #for indicators, index in technicals
+    #    for values, shift in indicators
+    #        chart.series[index + shift + offset].setData(values.data, false)
 
     chart.redraw()
 
     { min, max } = _process_chart_extremes(chart, options) ; chart.xAxis[0].setExtremes(min, max, true, false)
 
     chart
+
 
 make_instrument_view = (instrument, color, options = {}) ->
     view = $('<li>')
@@ -453,6 +499,10 @@ widget = (wrapper) ->
     stored_data     = undefined
     params_changed  = false
     
+    
+    technicals = []
+    
+    
     # caches
     
     cached_extremes = undefined
@@ -465,6 +515,9 @@ widget = (wrapper) ->
     init_extremes_deferred      = new $.Deferred
     dom_ready                   = do -> $.when(chart_period_selector_deferred, chart_type_selector_deferred).then
     ready                       = do -> $.when(init_type_deferred, init_interval_deferred, init_instruments_deferred).then
+    
+    candles_tooltip             = undefined
+    volumes_tooltip             = undefined
     
     # utilities
     
@@ -577,6 +630,13 @@ widget = (wrapper) ->
         cache.set "#{cache_key}:extremes",
             min: extremes.min
             max: extremes.max
+    
+    onTechnicalsUpdated = (data) ->
+        technicals = (technical.id for technical in data when !technical.disabled)
+
+        params_changed = true
+        
+        render()
 
 
     # renders
@@ -637,12 +697,14 @@ widget = (wrapper) ->
             { min: undefined, max: undefined, dataMin: undefined, dataMax: undefined }
         
         chart = if !chart? or params_changed
-            _create_chart chart_container, data, { chart: chart, instruments: instruments, type: current_type, min: min, max: max, leftLock: min == dataMin, rightLock: max == dataMax, onExtremesChange: onExtremesChange }
+            candles_tooltip = undefined
+            volumes_tooltip = undefined
+            _create_chart chart_container, data, { chart: chart, instruments: instruments, type: current_type, min: min, max: max, leftLock: min == dataMin, rightLock: max == dataMax, onExtremesChange: onExtremesChange, tooltip: render_tooltip }
         else
             _update_chart chart_container, data, { chart: chart, instruments: instruments, type: current_type, min: min, max: max, leftLock: min == dataMin, rightLock: max == dataMax }
             
         delete data ; data = null
-
+        
         cached_extremes = undefined
         params_changed  = false
         
@@ -655,7 +717,13 @@ widget = (wrapper) ->
         
         active_instruments = ( instrument for instrument in instruments when instrument.__disabled != true)
         
-        sources = _.map(active_instruments, (instrument, index) -> mx.cs.highstock_2("#{instrument.board}:#{instrument.id}", { type: (if index == 0 then current_type else 'line'), interval: current_interval, period: "#{period}d" }))
+        sources = _.map(active_instruments, (instrument, index) -> mx.cs.highstock_2("#{instrument.board}:#{instrument.id}", { 
+            type:       if index == 0 and _.size(active_instruments) <= 2 then current_type else 'line'
+            interval:   current_interval
+            period:     "#{period}d"
+            technicals: if index == 0 then technicals else undefined
+        }))
+
         $.when(sources...).then render_2
         
     
@@ -664,6 +732,52 @@ widget = (wrapper) ->
             #fetch()
             render()
             _.delay refresh, 20 * 1000
+    
+    # tooltip
+    
+    render_tooltip = ->
+        candles_tooltip.destroy() if candles_tooltip?
+        volumes_tooltip.destroy() if volumes_tooltip?
+        
+        renderer = chart.renderer
+
+        # time
+        
+        time = new Date @x
+        time = "#{time.getUTCDate()}/#{time.getUTCMonth() + 1}/#{time.getUTCFullYear()} #{time.getUTCHours()}:#{time.getUTCMinutes()}"
+        
+        # candles
+        
+        serie = chart.series[0]
+        xaxis = serie.xAxis
+        yaxis = serie.yAxis
+        
+        candles = []
+        
+        for point in @points
+            continue if point.series.options.type == 'column'
+            candles.push "<span style=\"color: #{point.series.color};\">#{point.series.name}</span>: #{point.y}"
+            
+        candles_tooltip = renderer.text(time + " | " + candles.join(' | '), 20, yaxis.top + 20).attr({ zIndex: 1000 })
+        candles_tooltip.add()
+        
+        # volumes
+        
+        #serie = chart.series[1]
+        #xaxis = serie.xAxis
+        #yaxis = serie.yAxis
+        
+        #volumes = []
+
+        #for point in @points
+        #    continue unless point.series.options.type == 'column'
+        #    volumes.push "<span style=\"color: #{point.series.color};\">#{point.series.name}</span>: #{point.y}"
+
+        #volumes_tooltip = renderer.text(volumes.join(' | '), 20, yaxis.top + 20)
+        #volumes_tooltip.add()
+
+        false
+    
         
     # initialization
     
@@ -704,6 +818,11 @@ widget = (wrapper) ->
 
             chart_instruments_container.parent().on "click", "span.reset", (event) ->
                 clearInstruments()
+                
+            # technicals
+            
+            $(window).on 'technicals:updated', (event, data) ->
+                onTechnicalsUpdated data.technicals
             
             # start
             

@@ -46,6 +46,13 @@
         
     </div>
     
+    <div id="technicals">
+        
+        <ul class="list">
+        </ul>
+        
+    </div>
+
 </div>
 
 
@@ -53,15 +60,14 @@
 <div id="tables">
 </div>
 
-
 <script type="text/javascript" charset="utf-8">
 
     $(function() {
     mx.data.ready.then(function(metadata) {
             _.each(metadata.markets, function(market) { mx.data.table($("#tables"), market); });
-            var chart = mx.data.chart($('#chart'));
+            //var chart = mx.data.chart($('#chart'));
 
-            $(window).on('security:to:chart', function(event, data) { chart.addInstrument(data); });
+            //$(window).on('security:to:chart', function(event, data) { chart.addInstrument(data); });
 
             function find_engine(engine_id) {
                 return _.find(metadata.engines, function(engine) {
@@ -113,6 +119,15 @@
         });
 
         mx.data.quote_search("#quote_search");
+        
+        var t = mx.data.chart_technicals('#technicals', {
+            callback: function() {
+                console.log( t.technicals())
+            }
+        });
+        t.then(function() {
+            console.log( t.technicals())
+        });
         
     });
 

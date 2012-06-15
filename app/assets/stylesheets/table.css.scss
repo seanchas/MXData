@@ -7,42 +7,19 @@
         
         border-collapse: collapse;
         border-spacing: 0;
-        
         width: 100%;
-        
-        th,
+
         td {
-            border: 1px solid #ccc;
-            margin: 0;
-            padding: .25em 5px;
-        }
-        
-        thead td {
-            color: #666;
-            font-size: 75%;
-            padding: .5em 5px;
-        }
-        
-        thead td.sortable span {
-            border-bottom: 1px dashed #99f;
-            cursor: pointer;
-        }
-        
-        thead td.sortable.asc span:after,
-        thead td.sortable.desc span:after {
-            margin-left: 10px;
+            padding-left: 8px;
+            padding-right: 8px;
         }
 
-        thead td.sortable.asc span:after {
-            content: '↓'
+        td:first-child {
+            padding-left: 16px;
         }
-        
-        thead td.sortable.desc span:after {
-            content: '↑'
-        }
-        
-        tbody tr.row td {
-            white-space: nowrap;
+            
+        td:last-child {
+            padding-right: 16px;
         }
         
         td.number,
@@ -50,51 +27,52 @@
             text-align: right;
         }
         
-        td.time {
-            color: #666;
-            font-size: 75%;
+        td.link span {
+            color: #000;
+            cursor: pointer;
+            border-bottom: 1px solid #000;
         }
         
-        tr.row {
+        thead {
             
-            td.chart {
-                color: #090;
-                cursor: pointer;
-                text-align: center;
-                width: 20px;
-            }
-
-            td.remove {
-                color: #f00;
-                cursor: pointer;
-                text-align: center;
-                width: 20px;
-            }
-            
-        }
-        
-        tr.filter {
-            
-            ul {
+            td {
                 color: #666;
-                font-size: 75%;
-                list-style: none;
-                margin: 0;
-                padding: 0;
+                font-size: 12px;
+                padding-bottom: 10px;
                 
-                li {
-                    background-color: #eee;
-                    display: inline-block;
-                    margin: 5px;
-                    padding: .25em 5px;
-                }
+                vertical-align: top;
+            }
+            
+            td.sortable {
+                cursor: pointer;                
                 
-                li.visible {
-                    color: #060;
-                    background-color: #cfc;
+                span {
+                    border-bottom: 1px dashed #666;
                 }
             }
             
+            td.sortable:hover {
+                color: #999;
+
+                span {
+                    border-bottom-color: #999;
+                }
+            }
+            
+        }
+        
+        tbody {
+            
+            td {
+                font-size: 15px;
+                padding-top: 6px;
+                padding-bottom: 6px;
+            }
+            
+            tr.odd td {
+                background-color: #eee;
+            }
+        
         }
         
     }

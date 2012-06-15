@@ -74,35 +74,38 @@ render_head_row = (columns) ->
             .toggleClass('sortable', column.is_ordered == 1)
             .html("<span>#{column.short_title}</span>")
     
-    row.append $("<td>")
-        .addClass("chart")
-        .html("")
+    #row.append $("<td>")
+    #    .addClass("chart")
+    #    .html("")
 
-    row.append $("<td>")
-        .addClass("remove")
-        .html("")
+    #row.append $("<td>")
+    #    .addClass("remove")
+    #    .html("")
 
     row
 
 
-render_body_row = (record, columns) ->
+render_body_row = (record, columns, index) ->
     row = $("<tr>")
         .addClass("row")
+        .toggleClass("even",    index % 2 == 0)
+        .toggleClass("odd",     index % 2 == 1)
         .attr("data-param", "#{record.BOARDID}:#{record.SECID}")
     
     for column in columns when column._is_visible
         row.append $("<td>")
             .addClass(column.type)
-            .html(record[column.name] ? '&mdash;')
+            .toggleClass('link', column.is_linked == 1)
+            .html($('<span>').html(record[column.name] ? '&mdash;'))
     
-    row.append $("<td>")
-        .attr('data-title', record['SHORTNAME'])
-        .addClass("chart")
-        .html("<span>+</span>")
+    #row.append $("<td>")
+    #    .attr('data-title', record['SHORTNAME'])
+    #    .addClass("chart")
+    #    .html("<span>+</span>")
     
-    row.append $("<td>")
-        .addClass("remove")
-        .html("<span>&ndash;</span>")
+    #row.append $("<td>")
+    #    .addClass("remove")
+    #    .html("<span>&ndash;</span>")
     
     row
 
@@ -235,8 +238,8 @@ widget = (wrapper, market_object) ->
                     
             table_body.empty()
 
-            for record in data when _.include securities, "#{record.BOARDID}:#{record.SECID}"
-                table_body.append render_body_row record, filtered_columns
+            for record, index in data when _.include securities, "#{record.BOARDID}:#{record.SECID}"
+                table_body.append render_body_row record, filtered_columns, index + 1
             
             stale = data
             

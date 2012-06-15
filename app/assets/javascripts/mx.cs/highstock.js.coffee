@@ -67,6 +67,7 @@ fetch_2 = (param, options = {}) ->
             'interval':     options.interval
             'period':       options.period
             'candles':      options.candles
+            'indicators':   options.technicals?.join(',')
         
         query_data = _.reduce(query_data, ((container, value, key) -> container[key] = value if value? ; container ), {})
         
