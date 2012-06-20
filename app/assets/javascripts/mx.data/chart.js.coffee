@@ -358,9 +358,6 @@ widget = (wrapper, options = {}) ->
 
 
     render = ->
-        if should_rebuild == true and chart?
-            chart.showLoading()
-        
         $.when(_.values(data_sources)...).then ->
             
             cached_extremes = cache.get 'extremes'
@@ -384,8 +381,11 @@ widget = (wrapper, options = {}) ->
             
             should_rebuild          = false
             
-    
-    delayed_render = -> _.delay render, 50
+    delayed_render = ->
+        if should_rebuild == true and chart?
+            chart.showLoading()
+
+        _.delay render, 50
     
     
     cache_extremes = (event) ->
@@ -454,8 +454,7 @@ widget = (wrapper, options = {}) ->
         refresh()
         
         deferred.resolve()
-    
-    
+        
     deferred.promise()
 
 
