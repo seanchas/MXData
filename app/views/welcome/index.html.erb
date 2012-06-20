@@ -23,30 +23,23 @@
     
     <div id="chart_tabs_container">
         
-        <ul id="chart_periods" class="left">
-        </ul>
+        <div class="left chart_candle_widths_wrapper">
+        </div>
         
-        <ul id="chart_types" class="right">
-            <li data-type="candles">Свечи</li>
-            <li data-type="stockbar">Бары</li>
-            <li data-type="line">Линия</li>
-        </ul>
+        <div class="right chart_types_wrapper">
+        </div>
         
     </div>
     
-    <div id="chart_container" style="background-color: #eee;">
+    <div id="chart_container" class="chart_wrapper" style="background-color: #eee;">
     </div>
     
-    <div id="chart_instruments_container">
-        
-        <ul id="chart_instruments">
-        </ul>
-        
-        <span class="reset">Очистить</span>
-        
+
+    <div id="chart_instruments_container" class="instruments_wrapper">
     </div>
     
-    <div id="technicals">
+
+    <div id="technicals" class="technicals_wrapper">
         
         <ul class="list">
         </ul>
@@ -65,7 +58,7 @@
     $(function() {
     mx.data.ready.then(function(metadata) {
             _.each(metadata.markets, function(market) { mx.data.table($("#tables"), market); });
-            //var chart = mx.data.chart($('#chart'));
+            var chart = mx.data.chart($('#chart'));
 
             //$(window).on('security:to:chart', function(event, data) { chart.addInstrument(data); });
 
@@ -87,7 +80,7 @@
                 });
             }
 
-            mx.iss.bootstrap().then(function(data) {
+            /*mx.iss.bootstrap().then(function(data) {
                 var instruments         = _.union(data.indices, data.currencies),
                     boards              = {},
                     securities          = [],
@@ -115,20 +108,13 @@
                 });
                     
             });
+            */
+
+            mx.data.quote_search("#quote_search");
 
         });
 
-        mx.data.quote_search("#quote_search");
-        
-        var t = mx.data.chart_technicals('#technicals', {
-            callback: function() {
-                console.log( t.technicals())
-            }
-        });
-        t.then(function() {
-            console.log( t.technicals())
-        });
-        
+
     });
 
 </script>

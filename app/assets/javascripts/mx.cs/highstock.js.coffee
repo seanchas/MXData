@@ -57,13 +57,15 @@ fetch = (params, options = {}) ->
 fetch_2 = (param, options = {}) ->
     deferred    = new $.Deferred
     
+    result = {}
+    
     metadata.then ->
         
         [ board, id ]               = param.split(':')
         { engine, market, group }   = find_metadata board
         
         query_data =
-            's1.type':      options.type
+            's1.type':      'candles'
             'interval':     options.interval
             'period':       options.period
             'candles':      options.candles
@@ -76,9 +78,18 @@ fetch_2 = (param, options = {}) ->
             data:       query_data
             dataType:   'jsonp'
         .then (json) ->
-            deferred.resolve json
+            candles                 = json.candles[0]
+            candles.candles_data    = candles.data
+            candles.line_data       = _.map candles.data, (item) -> [item[0], item[4]]
+
+            delete json.candles[0].data
+
+            for key, value of json
+                result[key] = value
+            
+            deferred.resolve result
     
-    deferred.promise()
+    deferred.promise(result)
 
 
 

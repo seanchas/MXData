@@ -98,10 +98,10 @@ render_body_row = (record, columns, index) ->
             .toggleClass('link', column.is_linked == 1)
             .html($('<span>').html(record[column.name] ? '&mdash;'))
     
-    #row.append $("<td>")
-    #    .attr('data-title', record['SHORTNAME'])
-    #    .addClass("chart")
-    #    .html("<span>+</span>")
+    row.append $("<td>")
+        .attr('data-title', record['SHORTNAME'])
+        .addClass("chart")
+        .html("<span>+</span>")
     
     #row.append $("<td>")
     #    .addClass("remove")

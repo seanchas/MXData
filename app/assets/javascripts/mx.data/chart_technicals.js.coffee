@@ -43,14 +43,14 @@ make_technical = (wrapper, id, values = []) ->
     if descriptor.params and _.size(descriptor.params) > 0
         params_view = $('<ul>')
 
-        for param in descriptor.params
+        for param, index in descriptor.params
 
             param_view          = $('<li>').html(param.title)
             param_value_view    = switch param.value_type
                 when 'select'
-                    make_select_from_param param
+                    make_select_from_param param, values[index]
                 else
-                    make_text_input_from_param param
+                    make_text_input_from_param param, values[index]
             
             param_view.append   param_value_view
             params_view.append  param_view
@@ -58,23 +58,28 @@ make_technical = (wrapper, id, values = []) ->
         view.append params_view
     
     wrapper.append view
-
-
-
-make_select_from_param = (param) ->
-    view = $('<select>')
-    
-    for item in eval(param.value)
-        view.append $('<option>').attr('id', item.id).html(item.title)
     
     view
 
 
 
-make_text_input_from_param = (param) ->
+make_select_from_param = (param, value = undefined) ->
+    view = $('<select>')
+        .attr({ name: param.id })
+    
+    for item in eval(param.value_range)
+        view.append $('<option>').attr('value', item.id).html(item.title)
+    
+    view.val(value?.value ? param.value)
+    
+    view
+
+
+
+make_text_input_from_param = (param, value = undefined) ->
     view = $('<input>')
         .attr({ type: 'text', name: param.id })
-        .val(param.value)
+        .val(value?.value ? param.value)
     
     view
 
@@ -93,7 +98,7 @@ widget = (wrapper, options = {}) ->
     
     ready_for_render        = $.when technicals_descriptors
     
-    technicals_changed      = false
+    technicals_changed      = true
     
 
     # broadcast technicals
@@ -105,8 +110,7 @@ widget = (wrapper, options = {}) ->
         
         technicals_changed = false
     
-        if options.callback and _.isFunction(options.callback)
-            options.callback(technicals)
+        $(window).trigger 'chart:technicals:changed', [technicals]
         
     # technicals
     
@@ -115,8 +119,11 @@ widget = (wrapper, options = {}) ->
         
     
     add_technical = (id, values = []) ->
-        technicals.push { id: id, values: values }
-        make_technical technicals_list, id, values
+        return if _.size(technicals) >= max_technicals
+        return if _.size(technical for technical in technicals when technical.id == id) >= max_identical_technicals
+        
+        view = make_technical technicals_list, id, values
+        technicals.push { id: id, values: serialize_technical_view view }
         
         technicals_changed = true
         cache.set "technicals", technicals
@@ -126,6 +133,22 @@ widget = (wrapper, options = {}) ->
     remove_technical_at = (index) ->
         technicals = _.without technicals, technicals[index]
         $('li.technical', technicals_list).eq(index).remove()
+
+        technicals_changed = true
+        cache.set "technicals", technicals
+        
+        broadcast()
+    
+    # utilities
+    
+    serialize_technical_view = (view) ->
+        $('input,select', view).serializeArray()
+    
+    serialize = ->
+        technicals_views = $('li.technical', technicals_list)
+
+        for technical, index in technicals
+            technical.values = serialize_technical_view technicals_views[index]
 
         technicals_changed = true
         cache.set "technicals", technicals
@@ -143,13 +166,16 @@ widget = (wrapper, options = {}) ->
         technicals_list.on 'click', 'a.remove', (event) ->
             event.preventDefault() ; remove_technical_at $('li.technical', technicals_list).index $(@).closest('li')
         
+        technicals_list.on 'change', 'input, select', (event) ->
+            serialize()
+        
         add_cached_technicals()
 
         deferred.resolve()
     
     # return
     
-    deferred.promise({ technicals: -> technicals })
+    deferred.promise({ data: -> technicals })
         
         
 
