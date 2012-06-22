@@ -62,6 +62,10 @@ default_chart_options =
             lineWidth: 2
         column:
             lineWidth: 1
+        scatter:
+            marker:
+                radius: 2
+                symbol: 'circle'
         series:
             gapSize: 60
             dataGrouping:
@@ -238,7 +242,7 @@ create_inline_technicals = (data_sources, instruments, technicals, offset, optio
                 serie_options = $.extend true, {}, default_candles_series_options,
                     name:   options.technicals_meta[technicals[index].id].title
                     color:  scope.colors[total + index - 1]
-                    type:   cs_to_hs_types[technical.type]
+                    type:   if technicals[index].id == 'psar' then 'scatter' else cs_to_hs_types[technical.type] # TODO: REMOVE THIS HARDCODED PSAR!
                     data:   serie
                     yAxis:  0
             
@@ -288,6 +292,7 @@ create_separate_technicals = (data_sources, instruments, technicals, offset, opt
             top: offset + effective_offset + volumes_yAxis_margin
         
         for serie in technical.data
+            
             serie_options = $.extend true, {}, default_candles_series_options,
                 name:   options.technicals_meta[technicals[index].id].title
                 color:  scope.colors[effective_index]
