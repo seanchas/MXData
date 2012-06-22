@@ -282,7 +282,7 @@ create_separate_technicals = (data_sources, instruments, technicals, offset, opt
     
     for technical, index in data_source
         
-        continue unless !technical.inline
+        continue if technical.inline
         
         yAxis.push $.extend true, {}, default_volumes_yAxis_options,
             top: offset + effective_offset + volumes_yAxis_margin
@@ -293,7 +293,7 @@ create_separate_technicals = (data_sources, instruments, technicals, offset, opt
                 color:  scope.colors[effective_index]
                 type:   cs_to_hs_types[technical.type]
                 data:   serie
-                yAxis:  yAxis_offset_index + index
+                yAxis:  yAxis_offset_index + _.size(yAxis) - 1
             
             series.push serie_options
         
@@ -336,6 +336,8 @@ calculate_extremes = (chart, options) ->
     max: max
 
 create = (container, data_sources, instruments, technicals, chart_type, options = {}) ->
+    
+    t0 = new Date
     
     series  = []
     xAxis   = []
@@ -399,7 +401,9 @@ create = (container, data_sources, instruments, technicals, chart_type, options 
     ###
         CHART
     ###
-    
+
+    t1 = new Date
+
     chart_options = $.extend true, {}, default_chart_options,
         chart:
             renderTo:   _.first(container)
@@ -414,6 +418,8 @@ create = (container, data_sources, instruments, technicals, chart_type, options 
     
     { min, max } = calculate_extremes chart, options
     _.first(chart.xAxis).setExtremes(min, max, true, false)
+    
+    t2 = new Date
     
     container.css 'height', chart.chartHeight
     
