@@ -64,18 +64,22 @@ fetch_2 = (param, options = {}) ->
         [ board, id ]               = param.split(':')
         { engine, market, group }   = find_metadata board
         
+        technicals_params = _.reduce options.technicals, (memo, technical, index) ->
+            memo["indicator#{index}.#{value.name}.value"] = value.value for value in technical.values ; memo
+        , {}
+        
         query_data =
             's1.type':      'candles'
             'interval':     options.interval
             'period':       options.period
             'candles':      options.candles
-            'indicators':   options.technicals?.join(',')
+            'indicators':   _.pluck(options.technicals, 'id').join(',')
         
         query_data = _.reduce(query_data, ((container, value, key) -> container[key] = value if value? ; container ), {})
         
         $.ajax
             url:        "#{scope.url_prefix}/engines/#{engine}/markets/#{market}/boardgroups/#{group}/securities/#{id}.hs?callback=?"
-            data:       query_data
+            data:       $.extend query_data, technicals_params
             dataType:   'jsonp'
         .then (json) ->
             candles                 = json.candles[0]

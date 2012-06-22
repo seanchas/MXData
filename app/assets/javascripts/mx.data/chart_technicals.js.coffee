@@ -175,7 +175,9 @@ widget = (wrapper, options = {}) ->
     
     # return
     
-    deferred.promise({ data: -> technicals })
+    deferred.promise
+        data: -> technicals
+        meta: -> technicals_descriptors
         
         
 

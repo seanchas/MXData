@@ -202,7 +202,7 @@ update_volumes = (data_sources, instruments, offset, options) ->
     effective_instruments_size  = _.size(instrument for instrument in instruments when !instrument.disabled)
     effective_index             = 0
     
-    for instrument, index in instruments
+    for instrument in instruments
         break if effective_instruments_size > 2 and effective_index > 0
         break if effective_index > 1
 
@@ -216,6 +216,107 @@ update_volumes = (data_sources, instruments, offset, options) ->
         effective_index++
     
     effective_index
+
+
+create_inline_technicals = (data_sources, instruments, technicals, offset, options) ->
+    series  = []
+    yAxis   = []
+    
+    total                   = _.size instruments
+    effective_instruments   = (instrument for instrument in instruments when !instrument.disabled)
+
+    if _.size(effective_instruments) < 3
+        
+        effective_instrument    = _.first effective_instruments
+        data_source             = data_sources[effective_instrument.id].technicals
+        
+        for technical, index in data_source
+            
+            continue unless !!technical.inline
+            
+            for serie in technical.data
+                serie_options = $.extend true, {}, default_candles_series_options,
+                    name:   options.technicals_meta[technicals[index].id].title
+                    color:  scope.colors[total + index - 1]
+                    type:   cs_to_hs_types[technical.type]
+                    data:   serie
+                    yAxis:  0
+            
+                series.push serie_options
+    
+    series:     series
+    yAxis:      yAxis
+    offset:     0
+
+
+update_inline_technicals = (data_sources, instruments, technicals, offset, options) ->
+    
+    effective_offset = 0
+    
+    effective_instruments   = (instrument for instrument in instruments when !instrument.disabled)
+    
+    if _.size(effective_instruments) < 3
+    
+        effective_instrument    = _.first effective_instruments
+        data_source             = data_sources[effective_instrument.id].technicals
+    
+        for technical in data_source when !!technical.inline
+            for serie in technical.data
+                options.chart.series[effective_offset + offset].setData(serie, false)
+            
+                effective_offset++
+    
+    effective_offset
+
+
+create_separate_technicals = (data_sources, instruments, technicals, offset, options) ->
+    
+    series  = []
+    yAxis   = []
+    
+    yAxis_offset_index  = 3
+    effective_offset    = 0
+
+    [effective_instrument, effective_index]  = _.first([instrument, index] for instrument, index in instruments when !instrument.disabled)
+    data_source                                         = data_sources[effective_instrument.id].technicals
+    
+    for technical, index in data_source
+        
+        continue unless !technical.inline
+        
+        yAxis.push $.extend true, {}, default_volumes_yAxis_options,
+            top: offset + effective_offset + volumes_yAxis_margin
+        
+        for serie in technical.data
+            serie_options = $.extend true, {}, default_candles_series_options,
+                name:   options.technicals_meta[technicals[index].id].title
+                color:  scope.colors[effective_index]
+                type:   cs_to_hs_types[technical.type]
+                data:   serie
+                yAxis:  yAxis_offset_index + index
+            
+            series.push serie_options
+        
+        effective_offset += volumes_yAxis_margin + volumes_yAxis_height
+
+    series:     series
+    yAxis:      yAxis
+    offset:     effective_offset
+
+
+update_separate_technicals = (data_sources, instruments, technicals, offset, options) ->
+    effective_offset = 0
+    
+    effective_instrument   = _.first(instrument for instrument in instruments when !instrument.disabled)
+    data_source            = data_sources[effective_instrument.id].technicals
+    
+    for technical in data_source when !technical.inline
+        for serie in technical.data
+            options.chart.series[effective_offset + offset].setData(serie, false)
+            
+            effective_offset++
+    
+    effective_offset
 
 
 calculate_extremes = (chart, options) ->
@@ -234,7 +335,7 @@ calculate_extremes = (chart, options) ->
     min: min
     max: max
 
-create = (container, data_sources, instruments, chart_type, options = {}) ->
+create = (container, data_sources, instruments, technicals, chart_type, options = {}) ->
     
     series  = []
     xAxis   = []
@@ -247,18 +348,36 @@ create = (container, data_sources, instruments, chart_type, options = {}) ->
     ###
     
     candles = create_candles data_sources, instruments, chart_type
-    series.push candles.series...
-    yAxis.push  candles.yAxis...
-    offset += candles.offset
+    series.push     candles.series...
+    yAxis.push      candles.yAxis...
+    offset +=       candles.offset
     
     ###
         VOLUMES
     ###
     
     volumes = create_volumes data_sources, instruments
-    series.push volumes.series...
-    yAxis.push  volumes.yAxis...
-    offset += volumes.offset
+    series.push     volumes.series...
+    yAxis.push      volumes.yAxis...
+    offset +=       volumes.offset
+    
+    ###
+        INLINE TECHNICALS
+    ###
+    
+    inline_technicals = create_inline_technicals data_sources, instruments, technicals, offset, options
+    series.push     inline_technicals.series...
+    yAxis.push      inline_technicals.yAxis...
+    offset +=       inline_technicals.offset
+    
+    ###
+        SEPARATE TECHNICALS
+    ###
+    
+    separate_technicals = create_separate_technicals data_sources, instruments, technicals, offset, options
+    series.push     separate_technicals.series...
+    yAxis.push      separate_technicals.yAxis...
+    offset +=       separate_technicals.offset
     
     ###
         XAXIS
@@ -301,7 +420,7 @@ create = (container, data_sources, instruments, chart_type, options = {}) ->
     chart
 
 
-update = (container, data_sources, instruments, chart_type, options = {}) ->
+update = (container, data_sources, instruments, technicals, chart_type, options = {}) ->
     
     chart   = options.chart
     offset  = 0
@@ -317,6 +436,18 @@ update = (container, data_sources, instruments, chart_type, options = {}) ->
     ###
     
     offset += update_volumes data_sources, instruments, offset, options
+    
+    ###
+        UPDATE INLINE TECHNICALS
+    ###
+    
+    offset += update_inline_technicals data_sources, instruments, technicals, offset, options
+
+    ###
+        UPDATE SEPARATE TECHNICALS
+    ###
+    
+    offset += update_separate_technicals data_sources, instruments, technicals, offset, options
     
     ###
         UPDATE CHART
@@ -347,6 +478,7 @@ widget = (wrapper, options = {}) ->
     technicals                  = mx.data.chart_technicals(technicals_wrapper)
             
     data_sources                = {}
+    technicals_meta             = {}
             
     should_rebuild              = true
     refresh_timeout             = undefined
@@ -371,13 +503,14 @@ widget = (wrapper, options = {}) ->
             
             create_or_update = if !chart? or should_rebuild then create else update
             
-            chart = create_or_update chart_wrapper, data_sources, instruments.data(), chart_type.data(),
+            chart = create_or_update chart_wrapper, data_sources, instruments.data(), technicals.data(), chart_type.data(),
                 chart:              chart
                 min:                min
                 max:                max
                 left_lock:          min? and min == dataMin
                 right_lock:         max? and max == dataMax
                 on_extremes_change: cache_extremes
+                technicals_meta:    technicals_meta
             
             should_rebuild          = false
             
@@ -402,10 +535,11 @@ widget = (wrapper, options = {}) ->
         interval    = chart_candle_width.data().interval
         duration    = chart_candle_width.data().duration
         period      = "#{Math.ceil(duration / 120)}d"
-
+        
         mx.cs.highstock_2 "#{instrument.board}:#{instrument.id}",
             interval:   interval
             period:     period
+            technicals: technicals.data()
     
 
     refresh = ->
@@ -441,7 +575,7 @@ widget = (wrapper, options = {}) ->
 
 
     change_technicals = ->
-        console.log 'technicals'
+        should_rebuild = true ; refresh()
 
 
     ready_for_render.then ->
@@ -450,6 +584,10 @@ widget = (wrapper, options = {}) ->
         $(window).on 'chart:type:changed',          change_chart_type
         $(window).on 'chart:instruments:changed',   change_instruments
         $(window).on 'chart:technicals:changed',    change_technicals
+        
+        technicals_meta = _.reduce technicals.meta(), (memo, item) ->
+            memo[item.id] = item ; memo
+        , {}
         
         refresh()
         
