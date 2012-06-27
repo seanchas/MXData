@@ -69,7 +69,7 @@ widget = (wrapper) ->
         render()
         
         broadcast message
-
+        
 
     broadcast = (message) ->
         return unless deferred.state() == 'resolved'

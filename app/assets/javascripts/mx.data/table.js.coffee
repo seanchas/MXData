@@ -5,11 +5,17 @@ scope   = root['mx']['data']
 $       = jQuery
 
 
-cache = kizzy('data.table')
+cache                       = kizzy('data.table')
+cached_chart_instruments    = -> kizzy('data.chart.instruments').get('')
+
 
 
 default_filter_name = 'preview'
 full_filter_name    = 'full'
+
+
+escape_selector = (string) ->
+    string.replace /([\W])/g, "\\$1"
 
 
 make_container = (wrapper, market) ->
@@ -74,9 +80,9 @@ render_head_row = (columns) ->
             .toggleClass('sortable', column.is_ordered == 1)
             .html("<span>#{column.short_title}</span>")
     
-    #row.append $("<td>")
-    #    .addClass("chart")
-    #    .html("")
+    row.append $("<td>")
+        .addClass("chart")
+        .html("")
 
     #row.append $("<td>")
     #    .addClass("remove")
@@ -101,7 +107,7 @@ render_body_row = (record, columns, index) ->
     row.append $("<td>")
         .attr('data-title', record['SHORTNAME'])
         .addClass("chart")
-        .html("<span>+</span>")
+        .html("<div></div>")
     
     #row.append $("<td>")
     #    .addClass("remove")
@@ -241,7 +247,17 @@ widget = (wrapper, market_object) ->
             for record, index in data when _.include securities, "#{record.BOARDID}:#{record.SECID}"
                 table_body.append render_body_row record, filtered_columns, index + 1
             
+            render_chart_instruments()
+        
             stale = data
+    
+    
+    render_chart_instruments = (instruments) ->
+        instruments ?= cached_chart_instruments() ? []
+        for row in $("tr", table_body)
+            row = $(row)
+            index = _.first(index for instrument, index in instruments when row.data('param') == "#{instrument.board}:#{instrument.id}")
+            $('td.chart div', row).css('background-color', (if index? then scope.colors[index] else '')).toggleClass('active', index?)
             
     
 
@@ -394,6 +410,9 @@ widget = (wrapper, market_object) ->
     table.on "click", "tbody tr.row td.chart", onChartCellClick
 
     table.on "click", "tbody tr.row td.remove", onRemoveCellClick
+    
+    $(window).on "chart:instruments:changed", (event, instruments, message) ->
+        render_chart_instruments instruments
     
     #
     
