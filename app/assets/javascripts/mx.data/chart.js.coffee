@@ -10,7 +10,7 @@ cache = kizzy('data.chart')
 fetch_chart_type = 'candles'
 
 
-refresh_delay    = 20 * 1000
+refresh_delay    = 5 * 1000
 
 
 cs_to_hs_types =
