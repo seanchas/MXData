@@ -280,6 +280,7 @@ widget = (wrapper, market_object) ->
             
             filter_row  = $("<tr>")
                 .attr("data-param", "#{board}:#{param}")
+                .toggleClass('odd', row.hasClass('odd'))
                 .addClass("filter")
 
             filter_cell = $("<td>")
@@ -291,7 +292,7 @@ widget = (wrapper, market_object) ->
                 list.append $("<li>")
                     .attr('data-name', column.name)
                     .toggleClass("visible", column._is_visible)
-                    .html("<span title=\"#{column.title}\">#{column.short_title}</span>: <span>#{record[column.name] ? '&mdash;'}</span>")
+                    .html("<span title=\"#{column.title}\">#{column.short_title}</span>: <span class=\"value\">#{record[column.name] ? '&mdash;'}</span>")
                 
             button = $("<button>").html("Готово")
             
