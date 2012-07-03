@@ -10,7 +10,7 @@ cache = kizzy('data.chart')
 fetch_chart_type = 'candles'
 
 
-refresh_delay    = 2 * 1000
+refresh_delay    = 5 * 1000
 
 
 cs_to_hs_types =
@@ -102,6 +102,17 @@ default_volumes_yAxis_options =
 default_xAxis_options =
     top:    0
     offset: 0
+
+no_data = ->
+    $('<div>').addClass('no_data').html('Нет данных')
+
+
+validate_instruments = (instruments, data_sources) ->
+    for instrument in instruments
+        data_source         = data_sources[instrument.id]
+        instrument.failure  = data_source.error_message if data_source.error_message?
+        instrument.disabled = true if instrument.failure?
+    instruments
 
 
 create_candles = (data_sources, instruments, chart_type) ->
@@ -511,19 +522,30 @@ widget = (wrapper, options = {}) ->
                 _.first(chart.xAxis).getExtremes()
             else
                 {}
-            
+
             create_or_update = if !chart? or should_rebuild then create else update
             
-            chart = create_or_update chart_wrapper, data_sources, instruments.data(), technicals.data(), chart_type.data(),
-                chart:              chart
-                min:                min
-                max:                max
-                left_lock:          min? and min == dataMin
-                right_lock:         max? and max == dataMax
-                on_extremes_change: cache_extremes
-                technicals_meta:    technicals_meta
+            validated_instruments   = validate_instruments instruments.data(), data_sources
+            valid_instruments       = (instrument for instrument in validated_instruments when !instrument.failure?)
+            
+            if _.size(valid_instruments) > 0
+                chart = create_or_update chart_wrapper, data_sources, validated_instruments, technicals.data(), chart_type.data(),
+                    chart:              chart
+                    min:                min
+                    max:                max
+                    left_lock:          min? and min == dataMin
+                    right_lock:         max? and max == dataMax
+                    on_extremes_change: cache_extremes
+                    technicals_meta:    technicals_meta
+                
+            else
+                if chart?
+                    chart.destroy() ; chart = undefined
+                chart_wrapper.css('height', '').html(no_data())
             
             should_rebuild          = false
+            
+            $(window).trigger 'chart:render:complete'
             
     delayed_render = ->
         if should_rebuild == true and chart?

@@ -82,17 +82,20 @@ fetch_2 = (param, options = {}) ->
             data:       $.extend query_data, technicals_params
             dataType:   'jsonp'
         .then (json) ->
-            candles                 = json.candles[0]
-            candles.candles_data    = candles.data
-            candles.line_data       = _.map candles.data, (item) -> [item[0], item[4]]
+            if json.candles?
+                candles                 = json.candles[0]
+                candles.candles_data    = candles.data
+                candles.line_data       = _.map candles.data, (item) -> [item[0], item[4]]
 
-            delete json.candles[0].data
+                delete json.candles[0].data
 
             for key, value of json
                 result[key] = value
             
             deferred.resolve result
-    
+            
+            t1 = new Date
+            
     deferred.promise(result)
 
 

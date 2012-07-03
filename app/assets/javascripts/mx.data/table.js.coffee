@@ -6,7 +6,6 @@ $       = jQuery
 
 
 cache                       = kizzy('data.table')
-cached_chart_instruments    = -> kizzy('data.chart.instruments').get('')
 
 
 
@@ -253,7 +252,7 @@ widget = (wrapper, market_object) ->
     
     
     render_chart_instruments = (instruments) ->
-        instruments ?= cached_chart_instruments() ? []
+        instruments ?= scope.caches.chart_instruments()
         for row in $("tr", table_body)
             row = $(row)
             index = _.first(index for instrument, index in instruments when row.data('param') == "#{instrument.board}:#{instrument.id}")

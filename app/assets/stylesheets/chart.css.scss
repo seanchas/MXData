@@ -76,12 +76,17 @@
                 padding: .5em 10px .5em 10px;
                 position: relative;
                 
+                span.failure {
+                    color: #f00;
+                    margin-right: .5em;
+                }
+                
             }
             
             li.removeable {
                 padding-right: 30px;
 
-                span {
+                span.remove {
                     background: #ecc;
                     border: 1px solid #966;
                     height: 10px;
@@ -91,6 +96,7 @@
                     right: 10px;
                     width: 10px;
                 }
+                
             }
             
             li.disabled {
@@ -109,6 +115,16 @@
             padding: .5em 10px;
         }
         
+    }
+    
+    .chart_wrapper {
+        position: relative;
+        
+        div.no_data {
+            height: 200px;
+            line-height: 200px;
+            text-align: center;
+        }
     }
         
 }

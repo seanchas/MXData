@@ -57,10 +57,6 @@
 
     $(function() {
     mx.data.ready.then(function(metadata) {
-            _.each(metadata.markets, function(market) { mx.data.table($("#tables"), market); });
-            var chart = mx.data.chart($('#chart'));
-
-            //$(window).on('security:to:chart', function(event, data) { chart.addInstrument(data); });
 
             function find_engine(engine_id) {
                 return _.find(metadata.engines, function(engine) {
@@ -79,6 +75,37 @@
                     return board.boardid == boardid;
                 });
             }
+            
+            $.when(mx.iss.bootstrap()).then(function(bootstrap) {
+                
+                var cached_chart_instruments    = mx.data.caches.chart_instruments();
+                var chart_instruments           = [];
+                
+                _.each(bootstrap, function(records, key) {
+                    
+                    // chart instruments
+                    var record = _.first(records);
+
+                    chart_instruments.push({
+                        id:         record.SECID,
+                        board:      record.BOARDID,
+                        title:      record.SHORTNAME,
+                        decimals:   record.DECIMALS
+                    })
+
+                });
+                
+                
+                if (!cached_chart_instruments) mx.data.caches.chart_instruments(chart_instruments);
+                        
+                
+                _.each(metadata.markets, function(market) { mx.data.table($("#tables"), market); });
+
+                mx.data.chart($('#chart'));
+
+                mx.data.quote_search("#quote_search");
+
+            })
 
             /*mx.iss.bootstrap().then(function(data) {
                 var instruments         = _.union(data.indices, data.currencies),
@@ -109,8 +136,6 @@
                     
             });
             */
-
-            mx.data.quote_search("#quote_search");
 
         });
 

@@ -4,8 +4,6 @@ scope   = root['mx']['data']
 
 $       = jQuery
 
-cache = kizzy('data.chart.instruments')
-
 
 max_instruments = 5
 
@@ -29,9 +27,13 @@ make_instrument_view = (instrument, index, size) ->
         .html(instrument.title)
         .toggleClass('disabled', !!instrument.disabled)
     
+    if instrument.failure?
+        view.prepend $('<span>').addClass('failure').html('!')
+        view.attr('title', instrument.failure)
+    
     if size > 1
         view
-            .append($('<span>'))
+            .append($('<span>').addClass('remove'))
             .addClass('removeable')
     
     view
@@ -45,7 +47,6 @@ widget = (wrapper) ->
     wrapper = $(wrapper); return if _.size(wrapper) == 0
 
     deferred            = new $.Deferred
-    cache_key           = ''
     
     instruments_wrapper = undefined
     
@@ -64,7 +65,7 @@ widget = (wrapper) ->
 
     update = (message) ->
         instruments_changed = true
-        cache.set cache_key, instruments
+        scope.caches.chart_instruments instruments
         
         render()
         
@@ -81,7 +82,7 @@ widget = (wrapper) ->
     
     
     add_cached = ->
-        add instrument for instrument in cache.get(cache_key, instruments) ? instruments_from_bootstrap()
+        add instrument for instrument in scope.caches.chart_instruments()
         
     
     add = (data) ->
@@ -123,7 +124,7 @@ widget = (wrapper) ->
 
         update 'reorder'
 
-    
+
     should_be_enabled = ->
         _.size(instrument for instrument in instruments when !instrument.disabled) == 0
     
@@ -140,6 +141,8 @@ widget = (wrapper) ->
             remove $(@).closest('li').data('param')
         
         $(window).on 'security:to:chart', (event, data) -> add data
+        
+        $(window).on 'chart:render:complete', (event) -> render()
         
         $(instruments_wrapper).sortable
             axis: 'x'
