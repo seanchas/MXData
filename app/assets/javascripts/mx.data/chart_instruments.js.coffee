@@ -56,9 +56,12 @@ widget = (wrapper) ->
 
 
     ready_for_render    = $.when bootstrap_data
+
+    sort_in_progress    = false
     
     
     render = ->
+        return if sort_in_progress
         instruments_wrapper.empty()
         instruments_wrapper.append make_instrument_view instrument, index, _.size(instruments) for instrument, index in instruments
     
@@ -121,6 +124,7 @@ widget = (wrapper) ->
     reorder = ->
         params      = $('li', @).map -> $(@).data('param')
         instruments = _.sortBy instruments, (instrument) ->_.indexOf params, instrument.id
+        sort_in_progress = false
 
         update 'reorder'
 
@@ -146,6 +150,7 @@ widget = (wrapper) ->
         
         $(instruments_wrapper).sortable
             axis: 'x'
+            start:  -> sort_in_progress = true
             update: reorder
 
         deferred.resolve()
