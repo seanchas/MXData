@@ -252,7 +252,7 @@ create_inline_technicals = (data_sources, instruments, technicals, offset, optio
             for serie in technical.data
                 serie_options = $.extend true, {}, default_candles_series_options,
                     name:   options.technicals_meta[technicals[index].id].title
-                    color:  scope.colors[total + index - 1]
+                    color:  scope.colors[total + index]
                     type:   if technicals[index].id == 'psar' then 'scatter' else cs_to_hs_types[technical.type] # TODO: REMOVE THIS HARDCODED PSAR!
                     data:   serie
                     yAxis:  0

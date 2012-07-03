@@ -5,36 +5,41 @@
     
     #chart_tabs_container {
         
-        font-size: 10px;
-        margin: 10px 0;
+        background: image-url('chart_tabs_bg.png') repeat-x center center;
+        border-top: 1px solid #c4c4c4;
+        
+        font-size: 12px;
+        height: 40px;
+        margin: 0;
         overflow: hidden;
         position: relative;
-    
+        
         ul {
             list-style: none;
-            margin: 0;
-            padding: 0 15px;
+            margin: 0 5px;
+            padding: 0;
             
             li {
-                background-color: #eee;
-                border: 1px solid #ccc;
+                color: #999;
                 cursor: pointer;
                 float: left;
-                margin: 0 5px;
-                padding: .5em 20px;
-                position: relative;
-                z-index: 0;
+                line-height: 40px;
+                margin: 0;
+                padding: 0 10px;
+                text-transform: capitalize;
+            }
+            
+            li:hover {
+                color: #333;
             }
             
             li.selected {
                 background-color: #fff;
-                border-bottom-color: #fff;
-                cursor: inherit;
-                z-index: 2;
+                color: #000;
             }
             
         }
-        
+    
         div.left {
             float: left;
         }
@@ -45,29 +50,64 @@
         
     }
     
-    #chart_tabs_container::after {
-        border-bottom: 1px solid #ccc;
-        bottom: 0;
-        content: " ";
-        left: 0;
-        position: absolute;
-        width: 100%;
-        z-index: 1;
-    }
-    
     #chart_instruments_container {
         
+        background: image-url('chart_instruments_bg.png') repeat-x center center;
+        border-top: 1px solid #c4c4c4;
+
+        color: #fff;
         font-size: 12px;
-        margin: 10px 0;
+        font-weight: bold;
+        height: 54px;
+        margin: 0;
         overflow: hidden;
         position: relative;
         
         ul {
             list-style: none;
             margin: 0;
-            padding: 0;
+            padding: 10px 0 0;
             
             li {
+                border: 2px solid #fff;
+                border-radius: 5px;
+                box-shadow: 0 2px 1px #ddd;
+                cursor: pointer;
+                float: left;
+                line-height: 28px;
+                margin: 0 10px;
+                padding: 0 15px;
+                position: relative;
+                
+                span.remove {
+                    background: #fff image-url('instrument_delete.png') no-repeat center center;
+                    border: 2px solid #fff;
+                    border-radius: 12px;
+                    display: none;
+                    height: 12px;
+                    position: absolute;
+                    right: -8px;
+                    top: -8px;
+                    width: 12px;
+                }
+                
+                span.failure {
+                    color: #f00;
+                    text-shadow: -2px 0 2px #fff, 0 -2px 2px #fff, 2px 0 2px #fff, 0 2px 2px #fff;
+                    padding-right: 10px;
+                }
+                
+            }
+            
+            li:hover span.remove {
+                display: block;
+            }
+            
+            li.disabled {
+                opacity: .75;
+            }
+            
+            /*li {
                 background: #efe;
                 border: 1px solid #696;
                 cursor: pointer;
@@ -101,18 +141,8 @@
             
             li.disabled {
                 opacity: .5;
-            }
+            }*/
             
-        }
-        
-        span.reset {
-            background: #ecc;
-            border: 1px solid #966;
-            color: #933;
-            cursor: pointer;
-            float: right;
-            font-weight: bold;
-            padding: .5em 10px;
         }
         
     }
@@ -127,95 +157,4 @@
         }
     }
         
-}
-
-
-#chart-period-selector-container {
-    
-    $border_color: #aaa;
-    $light_item_background: #ececec;
-    $item_background: #d1d1d1;
-    $selected_item_backgound: #fff;
-    $text_shadow_color: #fff;
-    $box_shadow_color: rgba(0, 0, 0, 0.4);
-    
-    ul {
-        font-size: 12px;
-        line-height: 2em;
-        list-style: none;
-        margin: 20px 0;
-        overflow: hidden;
-        padding: 0 20px;
-        position: relative;
-        
-        li {
-            background: $item_background;
-            background: -o-linear-gradient(top, $light_item_background 50%, $item_background 100%);
-            background: -ms-linear-gradient(top, $light_item_background 50%, $item_background 100%);
-            background: -moz-linear-gradient(top, $light_item_background 50%, $item_background 100%);
-            background: -webkit-linear-gradient(top, $light_item_background 50%, $item_background 100%);
-            background: linear-gradient(top, $light_item_background 50%, $item_background 100%);
-            border: 1px solid $border_color;
-            border-top-left-radius: 6px;
-            border-top-right-radius: 6px;
-            box-shadow: 0 3px 3px $box_shadow_color, inset 0 1px 0 $text_shadow_color;
-            cursor: pointer;
-            display: inline-block;
-            margin: 0 -3px;
-            padding: 0 20px;
-            position: relative;
-            text-shadow: 0 1px $text_shadow_color;
-            z-index: 0;
-        }
-        
-        li.selected {
-            background: $selected_item_backgound;
-            border-bottom-color: $selected_item_backgound;
-            z-index: 2;
-        }
-        
-        li:before,
-        li:after {
-            border: 1px solid $border_color;
-            bottom: -1px;
-            content: " ";
-            height: 5px;
-            position: absolute;
-            width: 5px;
-        }
-        
-        li:before {
-            border-width: 0 1px 1px 0;
-            border-bottom-right-radius: 6px;
-            box-shadow: 2px 2px 0 $item_background;
-            left: -6px;
-        }
-        
-        li:after {
-            border-width: 0 0 1px 1px;
-            border-bottom-left-radius: 6px;
-            box-shadow: -2px 2px 0 $item_background;
-            right: -6px;
-        }
-        
-        li.selected:before {
-            box-shadow: 2px 2px $selected_item_backgound;
-        }
-        
-        li.selected:after {
-            box-shadow: -2px 2px $selected_item_backgound;
-        }
-        
-    }
-    
-    ul:after {
-        border-bottom: 1px solid $border_color;
-        bottom: 0;
-        content: " ";
-        left: 0;
-        position: absolute;
-        width: 100%;
-        z-index: 1;
-    }
-    
 }

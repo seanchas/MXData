@@ -23,7 +23,7 @@ make_instruments_wrapper = (wrapper) ->
 make_instrument_view = (instrument, index, size) ->
     view = $('<li>')
         .attr({ 'data-param': instrument.id })
-        .css('color', scope.colors[index])
+        .css('background-color', scope.background_colors[index])
         .html(instrument.title)
         .toggleClass('disabled', !!instrument.disabled)
     
