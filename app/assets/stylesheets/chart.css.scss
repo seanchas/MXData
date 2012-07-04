@@ -5,7 +5,8 @@
     
     #chart_tabs_container {
         
-        background: image-url('chart_tabs_bg.png') repeat-x center center;
+        background-image: -webkit-linear-gradient(top, #f7f7f7, #fefefe, #f7f7f7);
+
         border-top: 1px solid #c4c4c4;
         
         font-size: 12px;
@@ -38,6 +39,100 @@
                 color: #000;
             }
             
+        }
+        
+        .chart_types_wrapper {
+            
+            li {
+                line-height: 0;
+                position: relative;
+                padding: 0 5px;
+                padding-top: 20px;
+            }
+            
+            li span {
+                background-color: #fff;
+                background-position: center center;
+                background-repeat: no-repeat;
+                border: 1px solid #d5d5d5;
+                border-radius: 3px;
+                box-shadow: 0 1px 2px #ddd;
+                display: block;
+                height: 19px;
+                margin-top: -50%;
+                overflow: hidden;
+                text-indent: 19px;
+                width: 19px;
+            }
+            
+            li[data-type=candles] {
+                span {
+                    background-image: image-url('icons/chart_candles.png');
+                }
+
+                span:hover {
+                    background-image: image-url('icons/chart_candles_hover.png');
+                }
+            }
+            
+            li[data-type=candles].selected {
+                span {
+                    background-image: image-url('icons/chart_candles_active.png');
+                }
+
+                span:hover {
+                    background-image: image-url('icons/chart_candles_active_hover.png');
+                }
+            }
+            
+            li[data-type=stockbar] {
+                span {
+                    background-image: image-url('icons/chart_bars.png');
+                }
+
+                span:hover {
+                    background-image: image-url('icons/chart_bars_hover.png');
+                }
+            }
+            
+            li[data-type=stockbar].selected {
+                span {
+                    background-image: image-url('icons/chart_bars_active.png');
+                }
+
+                span:hover {
+                    background-image: image-url('icons/chart_bars_active_hover.png');
+                }
+            }
+            
+            li[data-type=line] {
+                span {
+                    background-image: image-url('icons/chart_line.png');
+                }
+
+                span:hover {
+                    background-image: image-url('icons/chart_line_hover.png');
+                }
+            }
+            
+            li[data-type=line].selected {
+                span {
+                    background-image: image-url('icons/chart_line_active.png');
+                }
+
+                span:hover {
+                    background-image: image-url('icons/chart_line_active_hover.png');
+                }
+            }
+            
+            li.selected span {
+                background-color: #888;
+                border-color: #bcbcbc;
+            }
+            
+            li.selected {
+                background-color: transparent;
+            }
         }
     
         div.left {

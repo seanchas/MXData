@@ -26,7 +26,7 @@ make_types_view = (wrapper) ->
     for item in data
         container.append $('<li>')
             .attr('data-type', item.id)
-            .html(item.title)
+            .html($('<span>').html(item.title).attr('title', item.title))
 
     wrapper.append container
 
