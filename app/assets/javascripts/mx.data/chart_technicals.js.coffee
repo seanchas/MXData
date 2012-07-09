@@ -8,7 +8,7 @@ $       = jQuery
 cache = kizzy('data.chart.technicals')
 
 
-max_technicals              = 5
+max_technicals              = 10
 max_identical_technicals    = 3
 
 
@@ -16,74 +16,126 @@ technicals_descriptors  = mx.cs.technicals()
 
 
 
-make_technicals_factory = (wrapper) ->
-    list = $('<select>')
-    
-    list.append $('<option>').html('Добавить')
+
+make_anchors_view = (wrapper) ->
+    $('<ul>')
+        .addClass('anchors clearfix')
+        .appendTo(wrapper)
+
+
+make_factory_anchor_view = (wrapper) ->
+    $('<li>')
+        .addClass('anchor factory')
+        .html($('<span>').html('Новый индикатор'))
+        .appendTo(wrapper)
+
+
+make_factory_child_view = (anchor) ->
+    view    = $('<li>')
+        .addClass('child')
+
+    wrapper = $('<ul>')
+        .addClass('factory clearfix')
+        .appendTo(view)
     
     for descriptor in technicals_descriptors
-        list.append $('<option>')
-            .attr('value', descriptor.id)
-            .html(descriptor.title)
+        wrapper.append $('<li>')
+            .data('id', descriptor.id)
+            .html($('<span>').html(descriptor.title))
     
-    wrapper.append list
+    anchor.data('child', view)
     
-    list.wrap $('<div>').addClass('factory')
+    view
+        .data('anchor', anchor)
+        .insertAfter(anchor)
     
-    list
+    view.hide()
 
 
-
-make_technical = (wrapper, id, values = []) ->
+make_technical_anchor_view = (wrapper, id, values) ->
     descriptor = _.first(descriptor for descriptor in technicals_descriptors when descriptor.id == id) ; return unless descriptor?
     
-    view = $('<li>').addClass('technical').html(descriptor.title)
-    view.append $('<a>').addClass('remove').attr('href', '#').html('-')
+    view = $('<li>')
+        .addClass('anchor technical')
+        .html($('<span>').html(descriptor.title))
+        .insertBefore($('.anchor', wrapper).last())
     
-    if descriptor.params and _.size(descriptor.params) > 0
-        params_view = $('<ul>')
-
-        for param, index in descriptor.params
-
-            param_view          = $('<li>').html(param.title)
-            param_value_view    = switch param.value_type
-                when 'select'
-                    make_select_from_param param, values[index]
-                else
-                    make_text_input_from_param param, values[index]
-            
-            param_view.append   param_value_view
-            params_view.append  param_view
-
-        view.append params_view
-    
-    wrapper.append view
+    make_technical_child_view view
     
     view
 
 
+make_technical_child_view = (anchor) ->
+    view = $('<li>')
+        .addClass('child')
+    
+    wrapper = $('<ul>')
+        .addClass('technical clearfix')
+        .appendTo(view)
+    
+    wrapper.append $('<li>').addClass('remove').html($('<span>').html('Удалить'))
 
-make_select_from_param = (param, value = undefined) ->
-    view = $('<select>')
-        .attr({ name: param.id })
+    view.insertAfter(anchor.siblings('.anchor').last())
     
-    for item in eval(param.value_range)
-        view.append $('<option>').attr('value', item.id).html(item.title)
+    anchor.data('child', view)
+    view.data('anchor', anchor)
     
-    view.val(value?.value ? param.value)
+    view.hide()
+
+
+###
+
+make_technicals_factory_controller = (wrapper) ->
+    $('<div>')
+        .addClass('factory_controller anchor')
+        .append($('<span>').html('Новый индикатор'))
+        .appendTo(wrapper)
+    
+
+
+make_technicals_factory_view = (controller) ->
+    view = $('<ul>')
+        .addClass('factory view')
+    
+    for descriptor in technicals_descriptors
+        $('<li>')
+            .addClass('technical')
+            .data('id', descriptor.id)
+            .html(descriptor.title)
+            .appendTo(view)
+    
+    view
+        .hide()
+        .insertAfter(controller)
+
+
+make_technical_view = (controller, id, values = []) ->
+    descriptor = _.first(descriptor for descriptor in technicals_descriptors when descriptor.id == id) ; return unless descriptor?
+    
+    view = $('<div>')
+        .addClass('technical anchor')
+        .data('id', id)
+        .html(descriptor.title)
+        .css('background-color', scope.background_colors[0])
+        .insertBefore(controller)
+    
+    make_technical_params_view view
     
     view
 
 
-
-make_text_input_from_param = (param, value = undefined) ->
-    view = $('<input>')
-        .attr({ type: 'text', name: param.id })
-        .val(value?.value ? param.value)
+make_technical_params_view = (technical, values = []) ->
+    descriptor = _.first(descriptor for descriptor in technicals_descriptors when descriptor.id == technical.data('id')) ; return unless descriptor?
     
-    view
-
-
+    view = $('<div>')
+        .addClass('technical_params view')
+        .data('anchor', technical)
+        .hide()
+    
+    view.append $('<div>').data('id', descriptor.id).addClass('remove').html($('<span>').html('Удалить'))
+    
+    technical.data('view', view)
+###    
 
 widget = (wrapper, options = {}) ->
     wrapper                 = $(wrapper); return if _.size(wrapper) == 0
@@ -91,10 +143,7 @@ widget = (wrapper, options = {}) ->
     technicals              = []
     deferred                = new $.Deferred
 
-
-    technicals_factory      = null
-    technicals_list         = $ 'ul.list', wrapper
-
+    anchors_view            = null
     
     ready_for_render        = $.when technicals_descriptors
     
@@ -122,7 +171,7 @@ widget = (wrapper, options = {}) ->
         return if _.size(technicals) >= max_technicals
         return if _.size(technical for technical in technicals when technical.id == id) >= max_identical_technicals
         
-        view = make_technical technicals_list, id, values
+        view = make_technical_anchor_view anchors_view, id, values
         technicals.push { id: id, values: serialize_technical_view view }
         
         technicals_changed = true
@@ -131,19 +180,45 @@ widget = (wrapper, options = {}) ->
         broadcast()
     
     remove_technical_at = (index) ->
+        
+        console.log index
+        
         technicals = _.without technicals, technicals[index]
-        $('li.technical', technicals_list).eq(index).remove()
+        remove_technical_view $('.anchor', wrapper).eq(index)
 
         technicals_changed = true
         cache.set "technicals", technicals
         
         broadcast()
     
-    # utilities
+    remove_technical_view = (anchor) ->
+        view = anchor.data('child')
+        hide_child_view view, -> anchor.remove() ; view.remove()
+
+
+    toggle_child_view_for_anchor = (anchor) ->
+        child = $ anchor.data('child') ; return if _.size(child) == 0
+        if child.is(':visible') then hide_child_view(child) else show_child_view(child)
+
+    show_child_view = (view, callback) ->
+        view = $ view
+        
+        hide_child_view(v) for v in view.siblings('.child').not(view) when $(v).is(':visible')
+        
+        view.data('anchor').addClass('active') if view.data('anchor')?
+        view.show('blind', {}, 'fast', callback) if view.is(':hidden')
+
+    hide_child_view = (view, callback) ->
+        view = $ view
+        view.data('anchor').removeClass('active') if view.data('anchor')?
+        view.hide( 'blind', {}, 'fast', callback) if view.is(':visible')
+            
+        # utilities
     
     serialize_technical_view = (view) ->
         $('input,select', view).serializeArray()
     
+
     serialize = ->
         technicals_views = $('li.technical', technicals_list)
 
@@ -154,23 +229,24 @@ widget = (wrapper, options = {}) ->
         cache.set "technicals", technicals
         
         broadcast()
+    
 
     # render technicals
     
     ready_for_render.then ->
-        technicals_factory = make_technicals_factory wrapper
+        anchors_view        = make_anchors_view wrapper
+        factory_anchor_view = make_factory_anchor_view anchors_view
         
-        technicals_factory.on 'change', (event) ->
-            add_technical technicals_factory.val() ; technicals_factory.blur().val(0)
-        
-        technicals_list.on 'click', 'a.remove', (event) ->
-            event.preventDefault() ; remove_technical_at $('li.technical', technicals_list).index $(@).closest('li')
-        
-        technicals_list.on 'change', 'input, select', (event) ->
-            serialize()
+        make_factory_child_view factory_anchor_view
         
         add_cached_technicals()
-
+        
+        anchors_view.on 'click', '.anchor', -> toggle_child_view_for_anchor $ @
+        
+        wrapper.on 'click', 'ul.factory li', -> add_technical $(@).data('id')
+        
+        wrapper.on 'click', 'ul.technical li.remove', -> anchor = $(@).closest('.child').data('anchor') ; remove_technical_at $('.anchor', anchors_view).index(anchor)
+        
         deferred.resolve()
     
     # return

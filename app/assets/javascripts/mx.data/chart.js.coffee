@@ -239,6 +239,7 @@ create_inline_technicals = (data_sources, instruments, technicals, offset, optio
     
     total                   = _.size instruments
     effective_instruments   = (instrument for instrument in instruments when !instrument.disabled)
+    technical_index         = 0
 
     if _.size(effective_instruments) < 3
         
@@ -252,12 +253,14 @@ create_inline_technicals = (data_sources, instruments, technicals, offset, optio
             for serie in technical.data
                 serie_options = $.extend true, {}, default_candles_series_options,
                     name:   options.technicals_meta[technicals[index].id].title
-                    color:  scope.colors[total + index]
+                    color:  scope.colors[total + technical_index]
                     type:   if technicals[index].id == 'psar' then 'scatter' else cs_to_hs_types[technical.type] # TODO: REMOVE THIS HARDCODED PSAR!
                     data:   serie
                     yAxis:  0
             
                 series.push serie_options
+            
+            technical_index++
     
     series:     series
     yAxis:      yAxis
