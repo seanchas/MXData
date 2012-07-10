@@ -85,10 +85,10 @@ make_technical_child_view = (anchor, descriptor, values) ->
         
         thead.append $('<tr>').append($('<td>').attr('colspan', 3).html('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'))
         
-        for param in descriptor.params
+        for param, index in descriptor.params
             row = $('<tr>').appendTo tbody
             row.append $('<th>').html(param.title)
-            row.append $('<td>').addClass('value').append make_input_view(param, values[param.id])
+            row.append $('<td>').addClass('value').append make_input_view(param, values[index]?.value)
             row.append $('<td>').addClass('hint').html('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.')
 
     # remove button
