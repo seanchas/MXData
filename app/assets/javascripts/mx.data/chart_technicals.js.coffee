@@ -78,12 +78,13 @@ make_technical_child_view = (anchor, descriptor, values) ->
         .addClass('technical clearfix')
         .appendTo(view)
 
-    unless _.isEmpty(descriptor.params)
-        wrapper.append $('<li>').html('<table><thead></thead><tbody></tbody></table>')
-        thead = $('thead', wrapper)
-        tbody = $('tbody', wrapper)
+    wrapper.append $('<li>').html('<table><thead></thead><tbody></tbody></table>')
+    thead = $('thead', wrapper)
+    tbody = $('tbody', wrapper)
         
-        thead.append $('<tr>').append($('<td>').attr('colspan', 3).html('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'))
+    thead.append $('<tr>').append($('<td>').attr('colspan', 3).html('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'))
+
+    unless _.isEmpty(descriptor.params)
         
         for param, index in descriptor.params
             row = $('<tr>').appendTo tbody
@@ -200,7 +201,7 @@ widget = (wrapper, options = {}) ->
         view.data('anchor').removeClass('active') if view.data('anchor')?
         view.hide( 'blind', {}, 'fast', callback) if view.is(':visible')
             
-        # utilities
+    # utilities
     
     serialize_technical_view = (view) ->
         $('input,select', $(view).data('child')).serializeArray()
@@ -216,6 +217,11 @@ widget = (wrapper, options = {}) ->
         cache.set "technicals", technicals
         
         broadcast()
+    
+    colorize = (colors_indices) ->
+        technicals_views = $('li.technical', wrapper)
+        for color_index, index in colors_indices
+            $('span', technicals_views[index]).css('background-color', scope.background_colors[color_index])
     
 
     # render technicals
@@ -235,6 +241,8 @@ widget = (wrapper, options = {}) ->
         wrapper.on 'click', 'ul.technical li.remove', -> anchor = $(@).closest('.child').data('anchor') ; remove_technical_at $('.anchor', anchors_view).index(anchor)
         
         wrapper.on 'change', 'input, select', serialize
+        
+        $(window).on 'chart:indicators:colors', (event, colors_indices) -> colorize colors_indices
         
         deferred.resolve()
     

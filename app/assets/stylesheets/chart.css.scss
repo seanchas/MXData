@@ -414,6 +414,11 @@
                 background-color: #00b50a;
             }
             
+            li.factory span::before {
+                content: '+';
+                margin-right: .5em;
+            }
+            
         
         }
         

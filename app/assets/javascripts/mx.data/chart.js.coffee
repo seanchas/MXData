@@ -36,7 +36,7 @@ scrollbar_height = 15
 
 default_chart_options =
     chart:
-        alignTicks: false
+        alignTicks: true
         spacingTop: 1
         spacingLeft: 1
         spacingRight: 1
@@ -122,7 +122,7 @@ create_candles = (data_sources, instruments, chart_type) ->
     
     yAxis.push $.extend true, {}, default_candles_yAxis_options,
         opposite:       true
-        gridLineWidth:  0
+        #gridLineWidth:  0
 
 
     effective_instruments_size  = _.size(instrument for instrument in instruments when !instrument.disabled)
@@ -484,6 +484,28 @@ update = (container, data_sources, instruments, technicals, chart_type, options 
     chart
 
 
+
+
+calculate_technicals_colors_indices = (technicals, instruments, data_sources) ->
+    total_instruments           = _.size instruments
+    effective_instrument_index  = _.first(index for instrument, index in instruments when !instrument.disabled)
+    
+    inline_instrument_index = 0
+    
+    result = []
+    
+    for technical in data_sources[instruments[effective_instrument_index].id].technicals
+        if technical.inline
+            result.push total_instruments + inline_instrument_index
+            inline_instrument_index++
+        else
+            result.push effective_instrument_index
+    
+    result
+
+
+
+
 widget = (wrapper, options = {}) ->
     wrapper = $(wrapper); return if _.size(wrapper) == 0
     
@@ -547,6 +569,7 @@ widget = (wrapper, options = {}) ->
             should_rebuild          = false
             
             $(window).trigger 'chart:render:complete'
+            $(window).trigger 'chart:indicators:colors', [calculate_technicals_colors_indices(technicals.data(), instruments.data(), data_sources)]
             
     delayed_render = ->
         if should_rebuild == true and chart?
