@@ -12,7 +12,12 @@ max_technicals              = 10
 max_identical_technicals    = 3
 
 
-technicals_descriptors  = mx.cs.technicals()
+technicals_descriptors      = mx.cs.technicals()
+
+technicals_descriptors_hash = _.once ->
+    _.reduce technicals_descriptors, (memo, technical_descriptor) ->
+        memo[technical_descriptor.id] = technical_descriptor ; memo
+    , {}
 
 
 
@@ -214,9 +219,19 @@ widget = (wrapper, options = {}) ->
             technical.values = serialize_technical_view technicals_views[index]
 
         technicals_changed = true
+
+        update_technicals_values()
+
         cache.set "technicals", technicals
         
         broadcast()
+    
+    update_technicals_values = ->
+        technicals_views = $('li.technical', wrapper)
+        for technical, index in technicals
+            view = $('span', technicals_views.eq(index))
+            view.html("#{technicals_descriptors_hash()[technical.id].title} (#{_.pluck(technical.values, 'value').join(', ')})") unless _.isEmpty(technical.values)
+            
     
     colorize = (colors_indices) ->
         technicals_views = $('li.technical', wrapper)
@@ -233,6 +248,7 @@ widget = (wrapper, options = {}) ->
         make_factory_child_view factory_anchor_view
         
         add_cached_technicals()
+        update_technicals_values()
         
         anchors_view.on 'click', '.anchor', -> toggle_child_view_for_anchor $ @
         
