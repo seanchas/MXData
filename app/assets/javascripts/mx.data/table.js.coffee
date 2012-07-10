@@ -243,8 +243,10 @@ widget = (wrapper, market_object) ->
                     
             table_body.empty()
 
-            for record, index in data when _.include securities, "#{record.BOARDID}:#{record.SECID}"
-                table_body.append render_body_row record, filtered_columns, index + 1
+            index = 1
+            for record in data when _.include securities, "#{record.BOARDID}:#{record.SECID}"
+                table_body.append render_body_row record, filtered_columns, index
+                index++
             
             render_chart_instruments()
         
@@ -289,14 +291,16 @@ widget = (wrapper, market_object) ->
             
             for column in filtered_columns
                 list.append $("<li>")
+                    .addClass('field')
                     .attr('data-name', column.name)
                     .toggleClass("visible", column._is_visible)
                     .html("<span title=\"#{column.title}\">#{column.short_title}</span>: <span class=\"value\">#{record[column.name] ? '&mdash;'}</span>")
-                
-            button = $("<button>").html("Готово")
             
             filter_cell.append list
-            filter_cell.append button
+
+            filter_cell.append $('<button>').addClass('done').html('Готово')
+            filter_cell.append $('<button>').addClass('remove').data('param', row.data('param')).html('Удалить')
+                
             filter_row.append filter_cell
             row.after filter_row
             
@@ -364,7 +368,7 @@ widget = (wrapper, market_object) ->
         $(event.currentTarget).toggleClass('visible')
     
 
-    onFilterButtonClick = (event) ->
+    onFilterButtonDoneClick = (event) ->
         cell            = $(event.currentTarget).parent('td')
         
         sorted_columns  = []
@@ -391,7 +395,10 @@ widget = (wrapper, market_object) ->
         should_render_head = true
         render(true)
         
-        
+
+    onFilterButtonRemoveClick = ->
+        render_is_locked = false
+        removeSecurity $(@).data('param')
     
     #
     # event listeners
@@ -403,14 +410,13 @@ widget = (wrapper, market_object) ->
     
     table.on "click", "tbody tr.row", onRowClick
 
-    table.on "click", "tbody tr.filter li", onFilterColumnClick
+    table.on "click", "tbody tr.filter li.field", onFilterColumnClick
     
-    table.on "click", "tbody tr.filter button", onFilterButtonClick
+    table.on "click", "tbody tr.filter button.done", onFilterButtonDoneClick
+    table.on "click", "tbody tr.filter button.remove", onFilterButtonRemoveClick
     
     table.on "click", "tbody tr.row td.chart", onChartCellClick
 
-    table.on "click", "tbody tr.row td.remove", onRemoveCellClick
-    
     $(window).on "chart:instruments:changed", (event, instruments, message) ->
         render_chart_instruments instruments
     

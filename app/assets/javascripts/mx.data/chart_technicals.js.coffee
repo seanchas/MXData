@@ -252,7 +252,7 @@ widget = (wrapper, options = {}) ->
         
         anchors_view.on 'click', '.anchor', -> toggle_child_view_for_anchor $ @
         
-        wrapper.on 'click', 'ul.factory li', -> add_technical $(@).data('id')
+        wrapper.on 'click', 'ul.factory li', -> add_technical $(@).data('id') ; update_technicals_values()
         
         wrapper.on 'click', 'ul.technical li.remove', -> anchor = $(@).closest('.child').data('anchor') ; remove_technical_at $('.anchor', anchors_view).index(anchor)
         

@@ -1,3 +1,15 @@
+@mixin rounded_button {
+    border: 2px solid #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 1px #ddd;
+    color: #fff;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    padding: .5em 10px;
+}
+        
+
 #tables {
     
     margin: 0 auto;    
@@ -124,8 +136,25 @@
                         border-color: #ffc500;
                     }
                     
+                    
                 }
                 
+                button.done,
+                button.remove {
+                    @include rounded_button;
+                    margin: .5em 0;
+                }
+                    
+                button.done {
+                    background-color: #00b50a;
+                    float: left;
+                }
+                    
+                button.remove {
+                    background-color: #ff552a;
+                    float: right;
+                }
+
             }
         
         }
