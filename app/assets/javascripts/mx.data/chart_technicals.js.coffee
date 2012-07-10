@@ -16,6 +16,11 @@ technicals_descriptors  = mx.cs.technicals()
 
 
 
+serialize_view = (view) ->
+    $('input,select', view).serializeArray()
+
+
+
 
 make_anchors_view = (wrapper) ->
     $('<ul>')
@@ -60,19 +65,33 @@ make_technical_anchor_view = (wrapper, id, values) ->
         .html($('<span>').html(descriptor.title))
         .insertBefore($('.anchor', wrapper).last())
     
-    make_technical_child_view view
+    make_technical_child_view view, descriptor, values
     
     view
 
 
-make_technical_child_view = (anchor) ->
+make_technical_child_view = (anchor, descriptor, values) ->
     view = $('<li>')
         .addClass('child')
     
     wrapper = $('<ul>')
         .addClass('technical clearfix')
         .appendTo(view)
-    
+
+    unless _.isEmpty(descriptor.params)
+        wrapper.append $('<li>').html('<table><thead></thead><tbody></tbody></table>')
+        thead = $('thead', wrapper)
+        tbody = $('tbody', wrapper)
+        
+        thead.append $('<tr>').append($('<td>').attr('colspan', 3).html('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'))
+        
+        for param in descriptor.params
+            row = $('<tr>').appendTo tbody
+            row.append $('<th>').html(param.title)
+            row.append $('<td>').addClass('value').append make_input_view(param, values[param.id])
+            row.append $('<td>').addClass('hint').html('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.')
+
+    # remove button
     wrapper.append $('<li>').addClass('remove').html($('<span>').html('Удалить'))
 
     view.insertAfter(anchor.siblings('.anchor').last())
@@ -83,59 +102,27 @@ make_technical_child_view = (anchor) ->
     view.hide()
 
 
-###
 
-make_technicals_factory_controller = (wrapper) ->
-    $('<div>')
-        .addClass('factory_controller anchor')
-        .append($('<span>').html('Новый индикатор'))
-        .appendTo(wrapper)
-    
+make_input_view = (param, value) ->
+    switch param.value_type
+        when 'integer', 'float'
+            make_text_input_view param, value
+        when 'select'
+            make_select_view param, value
 
+make_text_input_view = (param, value) ->
+    $('<input>')
+        .attr({ type: 'text', name: param.id })
+        .val(value ? param.value)
 
-make_technicals_factory_view = (controller) ->
-    view = $('<ul>')
-        .addClass('factory view')
+make_select_view = (param, value) ->
+    select = $('<select>').attr('name', param.id)
     
-    for descriptor in technicals_descriptors
-        $('<li>')
-            .addClass('technical')
-            .data('id', descriptor.id)
-            .html(descriptor.title)
-            .appendTo(view)
-    
-    view
-        .hide()
-        .insertAfter(controller)
+    for item in eval(param.value_range)
+        select.append $('<option>').attr('value', item.id).html(item.title)
 
+    select.val(value ? param.value)
 
-make_technical_view = (controller, id, values = []) ->
-    descriptor = _.first(descriptor for descriptor in technicals_descriptors when descriptor.id == id) ; return unless descriptor?
-    
-    view = $('<div>')
-        .addClass('technical anchor')
-        .data('id', id)
-        .html(descriptor.title)
-        .css('background-color', scope.background_colors[0])
-        .insertBefore(controller)
-    
-    make_technical_params_view view
-    
-    view
-
-
-make_technical_params_view = (technical, values = []) ->
-    descriptor = _.first(descriptor for descriptor in technicals_descriptors when descriptor.id == technical.data('id')) ; return unless descriptor?
-    
-    view = $('<div>')
-        .addClass('technical_params view')
-        .data('anchor', technical)
-        .hide()
-    
-    view.append $('<div>').data('id', descriptor.id).addClass('remove').html($('<span>').html('Удалить'))
-    
-    technical.data('view', view)
-###    
 
 widget = (wrapper, options = {}) ->
     wrapper                 = $(wrapper); return if _.size(wrapper) == 0
@@ -216,11 +203,11 @@ widget = (wrapper, options = {}) ->
         # utilities
     
     serialize_technical_view = (view) ->
-        $('input,select', view).serializeArray()
+        $('input,select', $(view).data('child')).serializeArray()
     
 
     serialize = ->
-        technicals_views = $('li.technical', technicals_list)
+        technicals_views = $('li.technical', wrapper)
 
         for technical, index in technicals
             technical.values = serialize_technical_view technicals_views[index]
@@ -246,6 +233,8 @@ widget = (wrapper, options = {}) ->
         wrapper.on 'click', 'ul.factory li', -> add_technical $(@).data('id')
         
         wrapper.on 'click', 'ul.technical li.remove', -> anchor = $(@).closest('.child').data('anchor') ; remove_technical_at $('.anchor', anchors_view).index(anchor)
+        
+        wrapper.on 'change', 'input, select', serialize
         
         deferred.resolve()
     

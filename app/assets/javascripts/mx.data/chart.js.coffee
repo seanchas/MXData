@@ -60,8 +60,6 @@ default_chart_options =
     plotOptions:
         ohlc:
             lineWidth: 2
-        column:
-            lineWidth: 1
         scatter:
             marker:
                 radius: 2
