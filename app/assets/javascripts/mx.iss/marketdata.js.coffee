@@ -22,9 +22,11 @@ fetch = (engine, market, params) ->
             'securities':   params.join(',')
         dataType: 'jsonp'
     .then (json) ->
-        deferred.resolve prepare scope.merge_columns_and_data(json?.securities), scope.merge_columns_and_data(json?.marketdata)
+        data.push(prepare(scope.merge_columns_and_data(json?.securities), scope.merge_columns_and_data(json?.marketdata))...)
 
-    deferred.promise()
+        deferred.resolve(data)
+
+    deferred.promise({ data: data })
 
 
 $.extend scope,

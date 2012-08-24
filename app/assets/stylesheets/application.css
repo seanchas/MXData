@@ -11,13 +11,13 @@ body {
     font-family: 'calibri', 'trebuchet ms', arial, sans-serif;
 }
 
-.clearfix:before,
-.clearfix:after {
+.clearfix::before,
+.clearfix::after {
     content: "";
     display: table;
 }
 
-.clearfix:after {
+.clearfix::after {
     clear: both;
 }
 

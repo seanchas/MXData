@@ -10,6 +10,8 @@ prepare = (data) ->
 fetch = (engine, market) ->
     deferred = new $.Deferred
     
+    data = {}
+    
     $.ajax
         url: "#{scope.url_prefix}/engines/#{engine}/markets/#{market}/securities/columns/filters.jsonp?callback=?"
         data:
@@ -17,9 +19,12 @@ fetch = (engine, market) ->
             'iss.only': 'filters'
         dataType: 'jsonp'
     .then (json) ->
-        deferred.resolve prepare scope.merge_columns_and_data json?.filters
+        for key, value of prepare(scope.merge_columns_and_data json?.filters)
+            data[key] = value
+        
+        deferred.resolve(data)
     
-    deferred.promise()
+    deferred.promise({ data: data })
     
 
 $.extend scope,

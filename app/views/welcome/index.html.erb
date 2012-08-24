@@ -19,7 +19,7 @@
 
 
 
-<div id="chart">
+<div id="chart" style="display: none;">
     
     <div id="chart_instruments_container" class="instruments_wrapper">
     </div>
@@ -43,6 +43,10 @@
 
 </div>
 
+
+
+<div id="filters">
+</div>
 
 
 <div id="tables">
@@ -75,7 +79,7 @@
                 
                 var cached_chart_instruments    = mx.data.caches.chart_instruments();
                 var chart_instruments           = [];
-                
+                /*
                 _.each(bootstrap, function(records, key) {
                     
                     // chart instruments
@@ -92,13 +96,15 @@
                 
                 
                 if (!cached_chart_instruments) mx.data.caches.chart_instruments(chart_instruments);
-                        
+                  */      
                 
-                _.each(metadata.markets, function(market) { mx.data.table($("#tables"), market); });
+                var tables = _.map(metadata.markets, function(market) { mx.data.table($("#tables"), market); });
 
-                mx.data.chart($('#chart'));
+                // mx.data.chart($('#chart'));
 
                 mx.data.quote_search("#quote_search");
+                
+                // mx.data.table_columns_filter($('#filters'), 'stock', 'index');
 
             })
 
