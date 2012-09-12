@@ -192,6 +192,7 @@ widget = (wrapper, engine, market) ->
     deferred.promise(
         columns:    -> filtered_columns 
         view:       -> source_columns_view
+        update_filtered_columns_order: update_filtered_columns_order
     )
     
 

@@ -9,10 +9,38 @@ prepare = (securities, marketdata) ->
     _.reduce _.keys(securities), ((memo, key) -> memo.push _.extend(securities[key], marketdata[key]); memo), []
 
 
-fetch = (engine, market, params) ->
+
+fetch2 = (engine, market, params, options = {}) ->
+    deferred = new $.Deferred
+    
+    data = {}
+    
+    options.only ||= 'securities,marketdata'
+    
+    $.ajax
+        url: "#{scope.url_prefix}/engines/#{engine}/markets/#{market}/securities.jsonp?callback=?"
+        data:
+            'iss.meta':     'off'
+            'iss.only':     [options.only, 'dataversion'].join(',')
+            'securities':   params.join(',')
+        dataType: 'jsonp'
+    .then (json) ->
+        for key, value of json
+            if _.isObject(value) and value.columns? and value.data?
+                value = scope.merge_columns_and_data(value)
+            data[key] = value
+        deferred.resolve(data)        
+    
+    deferred.promise({ data: data })
+
+
+
+fetch = (engine, market, params, options = {}) ->
     deferred = new $.Deferred
 
     data = []
+    
+    options.only ||= 'securities,marketdata'
     
     $.ajax
         url: "#{scope.url_prefix}/engines/#{engine}/markets/#{market}/securities.jsonp?callback=?"
@@ -31,3 +59,4 @@ fetch = (engine, market, params) ->
 
 $.extend scope,
     marketdata: fetch
+    marketdata2: fetch2

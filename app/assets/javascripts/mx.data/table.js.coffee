@@ -9,36 +9,7 @@ cache   = kizzy('data.table')
 default_filter  = 'preview'
 
 
-maximum_active_columns = 10
-
-
-prepare_columns = (filters, columns, options = {}) ->
-    
-    filters                 = filters[default_filter]
-    valid_columns           = _.reject columns, (column) -> !!column.is_system
-    
-    visible_columns_ids     = _.pluck(filters, 'id')
-    hidden_columns_ids      = _.difference(_.pluck(valid_columns, 'id'), visible_columns_ids)
-    
-    data = []
-
-    for id in visible_columns_ids
-        continue if !!columns[id].is_system
-        data.push(_.tap(columns[id], (column) -> column.is_hidden = 0))
-    
-    for id in hidden_columns_ids
-        continue if !!columns[id].is_system
-        data.push(_.tap(columns[id], (column) -> column.is_hidden = 1))
-    
-    if options.cached_sort?
-        column = columns[options.cached_sort.column_id]
-        column.is_sort_field = options.cached_sort.direction if column?
-    
-    unless _.find(data, (column) -> !!column.is_sort_field)
-        _.find(data, (column) -> !!column.is_ordered)?.is_sort_field = 1
-    
-    data
-
+# main container
 
 make_table_container_view = (wrapper, descriptor) ->
     container = $('<div>')
@@ -61,151 +32,150 @@ make_table_container_view = (wrapper, descriptor) ->
         .addClass('records')
         .html('<thead></thead><tbody></tbody>')
     
+    table_head_view = $('thead', container)
+    
+    table_head_view.append($('<tr>').addClass('columns'))
+    
     container.appendTo(wrapper).hide()
 
 
+# table head columns
 
-make_table_header_columns_view = (columns, options = {}) ->
-    row_view = $('<tr>')
-        .addClass('columns')
+render_table_head_columns = (container, columns, options = {}) ->
+    cells = container.children()
     
     for column in columns
-        cell_view = $('<td>')
-            .data({ id: column.id, type: column.type })
-            .attr('title', column.title)
-            .addClass(column.type)
-            .toggleClass('sortable', !!column.is_ordered)
+
+        cell = _.first(cell for cell in cells when $(cell).data('id') == column.id)
         
-        if options.sort_column == column
-            cell_view
-                .addClass('sort_field')
-                .toggleClass('asc', column.is_sort_field > 0)
-                .toggleClass('desc', column.is_sort_field < 0)
-        
-        cell_content_view = $('<span>')
-            .html(column.short_title)
-        
-        cell_content_view.appendTo(cell_view)
-        cell_view.appendTo(row_view)
-
-    row_view
-
-
-
-make_table_header_columns_filter_container_view = (columns, options = {}) ->
-    row_view = $('<tr>')
-        .addClass('columns_filter_container')
-    
-    row_view.append(
-        $('<td>')
-            .attr('colspan', columns.length)
-    )
-    
-    row_view
-
-
-
-render_table_head = (container, columns, options = {}) ->
-    container.empty()
-    
-    container.append(make_table_header_columns_view(columns, options))
-
-    container.append(make_table_header_columns_filter_container_view(columns, options))
+        unless cell?
+            cell = render_table_head_column_cell(column, options)
+            container.append(cell)
     
     container
-    
 
 
-render_table_body = (container, columns, records, options = {}) ->
-    prev_rows = $('tr', container).detach()
+render_table_head_column_cell = (column, options = {}) ->
+    cell = $('<td>')
+        .data({ id: column.id, type: column.type })
+        .attr('title', column.title)
+        .addClass(column.type)
+        .toggleClass('sortable', !!column.is_ordered)
+        .append($('<span>').html(column.short_title))
     
-    container.empty()
+    cell
+
+
+# table body rows
+
+render_table_body_rows = (container, records, columns, options = {}) ->
+    rows = container.children()
     
-    if options.sort_column?
-        records = _.sortBy(records, (column) -> column[options.sort_column.name])
-        records = records.reverse() if options.sort_column.is_sort_field < 0
+    for record in records
+        
+        row = _.first(row for row in rows when $(row).data('id') == [record.BOARDID, record.SECID].join(':'))
+        
+        unless row?
+            row = render_table_body_row(record, columns, options)
+            container.append(row)
+        
+        row = $(row)
+        
+        render_table_body_row_cells(row, record, columns, options)
     
-    for record, index in records
-        
-        row_view = $('<tr>')
-            .data({ 'board': record.BOARDID, 'id': record.SECID, 'record': record })
-            .addClass('record anchor')
-            .toggleClass('even', (index + 1) % 2 == 0)
-            .toggleClass('odd', (index + 1) % 2 == 1)
-        
-        
-        for column in columns
+    container
             
-            value               = record[column.name]
-            value_for_render    = scope.utils.render_marketdata_record_value(column.name, record, column)
+
+render_table_body_row = (record, columns, options = {}) ->
+    row = $('<tr>')
+        .data({ id: [record.BOARDID, record.SECID].join(':') })
+    
+    row
+
+
+render_table_body_row_cells = (row, record, columns, options = {}) ->
+    cells = row.children()
+    
+    for column in columns
+
+        cell = _.first(cell for cell in cells when $(cell).data('id') == column.id)
+        
+        unless cell?
+            cell = render_table_body_row_cell(record, column, options)
+            row.append(cell)
+        
+        cell = $(cell)
+        
+        render_table_body_row_cell_content(cell, record, column, options)
+    
+    row
+
+
+render_table_body_row_cell = (record, column, options = {}) ->
+    cell = $('<td>')
+        .data({ id: column.id })
+        .addClass(column.type)
+
+    cell
+
+
+render_table_body_row_cell_content = (cell, record, column, options = {}) ->
+    value               = record[column.name]
+    value_for_render    = scope.utils.render_marketdata_record_value(column.name, record, column)
+    trend               = record.trends[column.name]
+    
+    if trend?
+        cell.toggleClass('up', trend.value > 0)
+        cell.toggleClass('down', trend.value < 0)
+        cell.toggleClass('trend_by_self', trend.self)
+        cell.toggleClass('trend_by_other', !trend.self)
+    
+    cell
+        .data({ value: value })
+        .html($('<span>').html(value_for_render))
+    
+    cell
+
+
+colorize_table_body_cell_changes = (container) ->
+    cells = $('.trend_by_other', container)
+    
+    for cell in cells
+
+        cell            = $(cell)
+        cell_content    = $('span', cell)
+        
+        previous_value              = cell.data('previous_value')
+        current_value               = cell.data('value')
+        
+        previous_value_for_render   = cell.data('previous_value_for_render')
+        current_value_for_render    = cell_content.html()
+        
+        cell.data('previous_value', current_value)
+        cell.data('previous_value_for_render', current_value_for_render)
+        
+        if current_value_for_render? and previous_value_for_render?
+
+            constant        = ''
+            volatile        = ''
             
-            cell_view = $('<td>')
-                .data('name', column.name)
-                .addClass(column.type)
-                .toggleClass('link', !!column.is_linked)
-                .append($('<span>').html(value_for_render ? '&mdash;'))
+            sign            = if current_value > previous_value then 'up' else if current_value < previous_value then 'down' else undefined
             
-            # trends
-            trend = record.trends[column.name]
-            if trend?
-                cell_view.toggleClass('up',   trend.value > 0)
-                cell_view.toggleClass('down', trend.value < 0)
-                cell_view.toggleClass('trend_by_self', trend.self)
-                cell_view.toggleClass('trend_by_other', !trend.self)
+            if current_value_for_render.length == previous_value_for_render.length
                 
-                unless trend.self
-                    cell_view.data('value', value)
-                    cell_view.data('value_for_render', value_for_render)
+                offset = 0
+                for i in [0 .. current_value_for_render.length - 1]
+                    break if current_value_for_render[i] != previous_value_for_render[i] ; ++offset
                 
-            cell_view.appendTo(row_view)
-        
-        row_view.appendTo(container)
-        
-        
-    for row in container.children()
-        row         = $(row)
-        prev_row    = $(_.find(prev_rows, (prev_row) -> prev_row = $(prev_row) ; prev_row.data('board') == row.data('board') and prev_row.data('id') == row.data('id')))
-        
-        for cell in row.children('.trend_by_other')
-            cell        = $(cell)
-            prev_cell   = $(_.find(prev_row.children(), (prev_cell) -> prev_cell = $(prev_cell) ; prev_cell.data('name') == cell.data('name')))
-
-            value       = cell.data('value')
-            prev_value  = prev_cell.data('value')
-            
-            continue unless value? and prev_value?
-            
-            sign        = if value > prev_value then 'up' else if value < prev_value then 'down' else undefined
-            
-            value       = cell.data('value_for_render')
-            prev_value  = prev_cell.data('value_for_render')
-            
-            if value? and prev_value?
-
-                before  = ''
-                after   = ''
-            
-                if value.length == prev_value.length
-                    
-                    index = 0
-                    for i in [0..value.length - 1]
-                        break if value[i] != prev_value[i]
-                        index++
-                    
-                    before  = value.slice(0, index)
-                    after   = value.slice(index)
-                    
-                else
-                    after = value
-            
-                html = $('<span>').html(before)
-                html.append($('<em>').addClass(sign).html(after))
+                constant    = current_value_for_render.slice(0, offset)
+                volatile    = current_value_for_render.slice(offset)
                 
-                cell.html(html)
+            else
+                volatile = current_value_for_render
             
-        
-    prev_rows.remove()
-        
+            cell_content.html(constant)
+            cell_content.append($('<em>').addClass(sign).html(volatile))
+       
 
 widget = (wrapper, descriptor) ->
     wrapper = $(wrapper) ; return if _.isEmpty(wrapper)
@@ -228,6 +198,10 @@ widget = (wrapper, descriptor) ->
 
     filters_source          = mx.iss.marketdata_filters(engine, market)
     columns_source          = mx.iss.marketdata_columns(engine, market)
+
+    securities_source       = undefined
+    marketdata_source       = undefined
+
     records_source          = undefined
 
     ready_for_render        = $.when columns_source, filters_source, columns_filter
@@ -241,6 +215,13 @@ widget = (wrapper, descriptor) ->
     prepared_columns        = undefined
     
     reload_timer            = undefined
+    
+    securities_data_version = 0
+    marketdata_data_version = 0
+    
+    securities_data         = undefined
+    marketdata_data         = undefined
+    
     
     # tickers
     
@@ -256,7 +237,7 @@ widget = (wrapper, descriptor) ->
     
     update = ->
         cache.set([cache_key, 'securities'].join(':'), tickers)
-        reload()
+        refresh()
     
     
     # logic
@@ -266,8 +247,9 @@ widget = (wrapper, descriptor) ->
 
     # render
     
-    render = (force = false) ->
-        return unless can_render()
+    render1 = (force = false) ->
+        unless force
+            return unless can_render()
         
         columns_filter.view().detach()
         
@@ -276,6 +258,8 @@ widget = (wrapper, descriptor) ->
         prepared_columns ?= prepare_columns(filters_source.data, columns_source.data, { cached_sort: cache.get([cache_key, 'sort_order'].join(':')) })
 
         active_columns = _.filter(prepared_columns, (column) -> _.include(columns_filter.columns(), column.id))
+        
+        active_columns = _.sortBy(active_columns, (column) -> _.indexOf(columns_filter.columns(), column.id) )
         
         sort_column = _.find(prepared_columns, (column) -> !!column.is_sort_field)
         
@@ -326,8 +310,32 @@ widget = (wrapper, descriptor) ->
             
             stop: ->
                 sort_in_progress = false
+                columns_filter.update_filtered_columns_order(_.map($('tr.columns td', table_head_view), (cell) -> $(cell).data('id')))
 
         })
+    
+    
+    render = ->
+        
+        # prepare records
+        records = (_.extend({}, securities_data[key], marketdata_data[key]) for key of securities_data)
+        records = (records[key] = scope.utils.prepare_marketdata_record(record, columns_source.data) for key, record of records)
+        
+        # prepare columns
+        columns = (columns_source.data[column] for column in columns_filter.columns())
+
+        # render table head
+        render_table_head_columns($('tr.columns', table_head_view), columns)
+        
+        # render table body
+        render_table_body_rows(table_body_view, records, columns)
+        
+        # post process
+        colorize_table_body_cell_changes(table_body_view)
+        
+        # toggle table visibility
+        table_container_view.toggle(!_.isEmpty(records))
+        
         
 
     # view manipulation
@@ -354,16 +362,50 @@ widget = (wrapper, descriptor) ->
 
     # data manupulation
     
+    load = ->
+        return if _.isEmpty(tickers)
+
+        marketdata_source = mx.iss.marketdata2(engine, market, tickers.sort(), { only: 'marketdata' })
+        
+        $.when(marketdata_source).then ->
+        
+            marketdata_data_version = _.first(marketdata_source.data.dataversion).version
+        
+            return refresh() unless marketdata_data_version == securities_data_version
+            
+            marketdata_data = _.reduce(marketdata_source.data.marketdata, ((memo, record) -> memo["#{record.BOARDID}:#{record.SECID}"] = record ; memo), {})
+            
+            render()
+            
+            reload()
+        
+        
+    
+
     reload = ->
+        clearTimeout(reload_timer)
+        reload_timer = _.delay(load, 5000)
+        
+
+    # refresh - reload securities and marketdata
+    
+    refresh = ->
         return if _.isEmpty(tickers)
         
-        records_source = mx.iss.marketdata(engine, market, tickers.sort())
+        securities_source = marketdata_source = mx.iss.marketdata2(engine, market, tickers.sort())
+        
+        $.when(securities_source, marketdata_source).then ->
 
-        records_source.then render
+            securities_data_version = marketdata_data_version = _.first(securities_source.data.dataversion).version
+
+            securities_data = _.reduce(securities_source.data.securities, ((memo, record) -> memo["#{record.BOARDID}:#{record.SECID}"] = record ; memo), {})
+            marketdata_data = _.reduce(marketdata_source.data.marketdata, ((memo, record) -> memo["#{record.BOARDID}:#{record.SECID}"] = record ; memo), {})
+            
+            render()
+            
+            reload()
         
-        clearTimeout(reload_timer) ; reload_timer = _.delay(reload, 5000)
-        
-        
+    
 
     # ready for render
 
@@ -371,20 +413,20 @@ widget = (wrapper, descriptor) ->
 
         add_cached_tickers()
         
-        reload()
+        refresh()
         
-        table_head_view.on 'click', 'td.sortable',          -> sort_records_by $(@)
+        #table_head_view.on 'click', 'td.sortable',          -> sort_records_by $(@)
 
-        $(window).on 'security:selected', (event, data) ->
-            return unless data.engine == engine and data.market == market
-            add_ticker([data.board, data.param].join(':'))
+        #$(window).on 'security:selected', (event, data) ->
+        #    return unless data.engine == engine and data.market == market
+        #    add_ticker([data.board, data.param].join(':'))
             
         
-        $(window).on 'table:filtered_columns:updated', (event, data) ->
-            return unless data.engine == engine and data.market == market
-            render(true)
+        #$(window).on 'table:filtered_columns:updated', (event, data) ->
+        #    return unless data.engine == engine and data.market == market
+        #    render(true)
 
-        table_container_view.on 'click', 'div.columns_filter_trigger', toggle_columns_filter_visibility
+        #table_container_view.on 'click', 'div.columns_filter_trigger', toggle_columns_filter_visibility
         
         
         deferred.resolve()
