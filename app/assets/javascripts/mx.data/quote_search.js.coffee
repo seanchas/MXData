@@ -5,394 +5,349 @@ scope   = root['mx']['data']
 $       = jQuery
 
 
-search_query_threshold  = 3
-search_timeout          = 300
-deactivation_timeout    = 50
+security_groups         = mx.iss.security_groups()
+security_groups_hash    = undefined
+metadata                = mx.iss.metadata()
+
+
+
+locales =
+    results:
+        empty:
+            ru: 'Ничего не найдено'
+            en: 'Nothing has been found'
+
+
 
 KEY_ESC         = 27
-KEY_ENTER       = 13
-KEY_UP          = 38
-KEY_DOWN        = 40
-KEY_PAGE_UP     = 33
-KEY_PAGE_DOWN   = 34
 
 
-build_securities_list = (wrapper) ->
-    container = $('<div>').addClass('quote_search_securities_container')
-    
-    table = $('<table>')
-        .html('<thead></thead><tbody></tbody>')
-    
-    container.html(table)
-    container.hide()
-    
-    offset = wrapper.offset()
-    
-    offset.top = offset.top + wrapper.outerHeight() + 2
-    
-    wrapper.after(container)
-
-    container.offset(offset)
-    
-    container
+search_delay    = 250
+query_threshold = 3
 
 
-build_boards_list = (wrapper) ->
-    container = $('<div>').addClass('quote_search_boards_container')
-    
-    table = $('<table>')
-        .html('<thead></thead><tbody></tbody>')
-    
-    container.html table
-    container.hide()
-    
-    offset      = wrapper.offset()
-    offset.top  = offset.top + wrapper.outerHeight() + 2
-    
-    wrapper.after container
-    container.offset offset
 
-    container
+# NB!!! Delete and replace with common utility function
+
+render_date = (string) ->
+    date = new Date(Date.parse(string))
+    f = (n) -> if n < 10 then "0#{n}" else n
+    "#{f date.getDate()}.#{f(date.getMonth() + 1)}.#{date.getFullYear()}"
 
 
-render_securities_list = (container, groups, records, security_groups) ->
+populate_security_groups_hash = ->
+    security_groups_hash = _.reduce security_groups.data, 
+        (memo, item) ->
+            memo[item.name] = item ; memo
+    , {}
+
+
+
+make_filter_view = (container) ->
+    view = $('<div>')
+        .addClass('filter')
+
+    view
+        .appendTo(container)
+
+
+
+make_result_view = (container) ->
+    view = $('<div>')
+        .addClass('result')
+        .appendTo(container)
     
-    find_security_group = (group) ->
-        _.first(g for g in security_groups when g.name == group)
+    calculate_result_view_max_height(view)
     
-    for group in groups
+    view
+
+
+calculate_result_view_max_height = (view) ->
+    view.css('max-height', $(window).height() - view.offset().top - 20)
+
+
+clear_search_results = (container) ->
+    container.empty()
+
+
+collect_emitters = (data) ->
+    emitters = []
+    emitters_ids = []
+    
+    for record in data
+        if record.emitent_id
+            unless _.include(emitters_ids, record.emitent_id)
+                emitters_ids.push(record.emitent_id)
+                emitters.push({ id: record.emitent_id, name: record.emitent_title })
+    
+    emitters
+
+
+
+render_results = (container, data) ->
+    clear_search_results(container)
+    
+    current_group   = undefined
+    group_container = undefined
+    
+    
+    render_emitters(container, collect_emitters(data))
+    
+    
+    groups_container = $('<ul>')
+        .addClass('groups')
+        .appendTo(container)
+
+    for record in data
         
-        row     = $('<tr>')
-        cell    = $('<td>')
-        list    = $('<ul>')
+        unless current_group == record.group
+            group = make_group(record.group).appendTo(groups_container)
+            group_container = $('ul', group)
+            current_group = record.group
 
-        for record in records[group]
-            list.append $('<li>')
-                .attr('data-param', "#{record.primary_boardid}:#{record.secid}")
-                .html(record.shortname)
-                .append($('<span>').addClass('title').html(record.name))
+        group_container.append(make_record(record))
 
-        cell.append         list
-        row.append          $('<th>').html(find_security_group(group).title)
-        row.append          cell
-        container.append    row
-    
-
-render_boards_list = (container, boards) ->
-    for board in boards
-        
-        row = $('<tr>')
-            .data('param', board)
-        
-        row.append $('<th>').html(board.boardid)
-        row.append $('<td>').addClass('title').html(board.title)
-        
-        container.append row
-        
+    container.append(make_empty) if _.isEmpty(data)
 
 
-widget = (wrapper, options = {}) ->
-    wrapper = $(wrapper); return if _.size(wrapper) == 0
-    
-    container       = $('tr', wrapper)
-    query_input     = $('td.query input', wrapper)
-    clear_button    = $('td.clear', wrapper)
-    busy_spinner    = $('td.busy', wrapper)
-    
-    timeout_for_deactivation    = undefined
-    timeout_for_process_query   = undefined
-    pending_query               = undefined
-    pending_promise             = undefined
-    
-    securities_list_wrapper     = build_securities_list wrapper
-    securities_list             = $ 'tbody', securities_list_wrapper
-    security                    = undefined
-    
-    boards_list_wrapper         = build_boards_list wrapper
-    boards_list                 = $ 'tbody', boards_list_wrapper
-    
-    items                       = undefined
-    selected_item               = undefined
-    items_list                  = undefined
-    
-    last_cursor_position        = undefined
-    mouse_locked                = false
-    
-    # data sources
-    
-    security_groups = mx.iss.security_groups()
 
-    # fsm
+render_emitters = (container, data) ->
+    emitters_container = $('<ul>')
+        .addClass('emitters')
+        .appendTo(container)
     
-    machine = StateMachine.create
-        initial: 'inactive'
-        events: [
-            { name: 'next',         from: 'inactive',   to: 'initial'   }
-            { name: 'next',         from: 'initial',    to: 'quotes'    }
-            { name: 'next',         from: 'quotes',     to: 'boards'    }
+    $('<li>')
+        .addClass('title')
+        .html('Эмитенты')
+        .appendTo(emitters_container)
+    
+    for record in data
+        render_emitter(emitters_container, record)
 
-            { name: 'prev',         from: 'boards',     to: 'initial'   }
-            { name: 'prev',         from: 'quotes',     to: 'initial'   }
-            { name: 'prev',         from: 'initial',    to: 'inactive'  }
-            { name: 'prev',         from: 'inactive',   to: 'inactive'  }
+
+render_emitter = (container, data) ->
+    emitter = $('<li>')
+        .data('id', data.id)
+        .addClass('emitter')
+        .appendTo(container)
+    
+    $('<span>')
+        .addClass('name')
+        .html(data.name)
+        .appendTo(emitter)
+    
+    emitter
+
+
+
+toggle_emitter_securities = (element) ->
+    list = $('ul.records', element)
+    
+    if list.length > 0
+        $('ul.records', element.closest('ul.emitters')).not(list).hide()
+        list.toggle()
+    else
+        return if element.data('securities-query-performed') == true ; element.data('securities-query-performed', true)
+
+        mx.iss.emitter_securities(element.data('id')).done (data) ->
+            render_emitter_securities(element, data).hide()
+            toggle_emitter_securities(element)
             
-            { name: 'on',           from: 'inactive',   to: 'initial'   }
-            { name: 'off',          from: '*',          to: 'inactive'  }
-        ]
-        callbacks:
-            onenterinitial:     ->
 
-            onenterquotes:      ->
-                items_list      = securities_list_wrapper
-
-            onenterboards:      ->
-                query_input.val('')
-                items_list      = boards_list_wrapper
-                add_tag _.last(security.split(':'))
-
-            onenterinactive:    ->
-                pending_query   = undefined
-                wrapper.removeClass 'active'
-                query_input.blur()
-
-            onleaveinitial:     ->
-
-            onleavequotes:      ->
-                hide_quotes()
-                items           = undefined
-                selected_item   = undefined
-                items_list      = undefined
-
-            onleaveboards:      ->
-                items           = undefined
-                selected_item   = undefined
-                security        = undefined
-                remove_tag()
-                hide_boards()
-
-            onleaveinactive:    ->
-                wrapper.addClass 'active'
+render_emitter_securities = (container, data) ->
+    securities_container = $('<ul>')
+        .addClass('records')
+        .appendTo(container)
     
-    # utilities
+    for record in data
+        render_emitter_security(securities_container, record)
     
-    add_tag = (name) ->
-        remove_tag()
-        container.prepend $('<td>').addClass('tag').html($('<div>').html(name))
+    securities_container
 
-    remove_tag = ->
-        $('td.tag', wrapper).remove()
-    
-    hide_quotes = ->
-        securities_list_wrapper.hide()
-        securities_list.empty()
-    
-    hide_boards = ->
-        boards_list_wrapper.hide()
-        boards_list.empty()
-    
-    # search
-    
-    quotes_search_with_query_check = (query) ->
-        machine.prev() if query.length < search_query_threshold and machine.current == 'quotes'
 
-        return if pending_query == query
-        pending_query = query
+render_emitter_security = (container, data) ->
+    security = $('<li>')
+        .data('id', data.SECID)
+        .addClass('record')
+        .appendTo(container)
+    
+    $('<span>')
+        .addClass('shortname')
+        .html(data.SHORTNAME)
+        .appendTo(security)
+    
+    $('<strong>')
+        .addClass('type')
+        .html(data.SECURITY_TYPE)
+        .appendTo(security)
 
-        return if query.length < search_query_threshold
+    $('<em>')
+        .addClass('name')
+        .html(data.NAME)
+        .appendTo(security)
+    
+    security
+
+
+make_group = (id) ->
+    $('<li>')
+        .addClass('group')
+        .append($('<span>').html(security_groups_hash[id]?.title))
+        .append($('<ul>').addClass('records'))
+
+
+make_record = (record) ->
+    $('<li>')
+        .data('id', record.secid ? '')
+        .addClass('record')
+        .append($('<span>').html(record.shortname))
+        .append($('<em>').html(record.name))
+        .append($('<em>').html(record.emitent_title))
         
-        search_quotes()
-    
-    search_quotes = ->
-        busy_spinner.show()
-        mx.iss.quote_search(pending_query, { group_by: 'group', is_traded: 1 }).done on_quotes_search_complete
-    
-    search_boards = ->
-        busy_spinner.show()
-        mx.iss.security_boards(_.last(security.split(':')), { is_traded: 1 }).done on_boards_search_complete
 
-    on_quotes_search_complete = (data) ->
-        machine.next() unless machine.current == 'quotes'
-        hide_quotes()
-        
-        groups = [] ; records = {}
-        
-        for record in data
-            groups.push record.group unless _.include groups, record.group
-            (records[record.group] ?= []).push record
-        
-        render_securities_list securities_list, groups, records, security_groups
-        securities_list_wrapper.show()
-        
-        items           = $('li', securities_list_wrapper)
-        selected_item   = items.first()
-        render_selected_item()
-        
-        busy_spinner.hide()
+
+make_empty = ->
+    $('<li>')
+        .addClass('empty')
+        .html(locales.results.empty['ru'])
+
+
+
+render_boards_list = (data) ->
+    boards_list = $('<ul>')
+        .addClass('boards')
     
-    on_boards_search_complete = (data) ->
-        machine.next() unless machine.current == 'boards'
-        hide_boards()
-        
-        render_boards_list boards_list, data
-        boards_list_wrapper.show()
-
-        items           = $('tr', boards_list_wrapper)
-        selected_item   = items.first()
-        render_selected_item()
-
-        busy_spinner.hide()
+    for record in data when !!record.is_traded
+        make_board(record).appendTo(boards_list)
     
-    # navigation
+    boards_list
+
+
+make_board = (record) ->
+    board = $('<li>')
+        .addClass('board')
+        .append($('<strong>').html(record.boardid))
+        .append($('<span>').html(record.title))
     
-    render_selected_item = ->
-        return unless items and selected_item and items_list
+    if record.listed_from and record.listed_till
+        $('<em>')
+            .append($('<span>').html('Листинг'))
+            .append($('<span>').html(render_date record.listed_from))
+            .append($('<span>').html(render_date record.listed_till))
+            .appendTo(board)
+    
+    ###
+    if record.history_from and record.history_till
+        $('<em>')
+            .append($('<span>').html('История'))
+            .append($('<span>').html(render_date record.listed_from))
+            .append($('<span>').html(render_date record.listed_till))
+            .appendTo(board)
+    ###
+    
+    board
 
-        items.removeClass 'selected'
-        selected_item.addClass 'selected'
-        
-        scroll_top      = items_list.scrollTop()
-        item_top        = selected_item.offset().top
-        item_height     = selected_item.outerHeight()
-        wrapper_top     = items_list.offset().top
-        wrapper_height  = items_list.innerHeight()
 
-        top_overlap     = item_top - wrapper_top
-        bottom_overlap  = (wrapper_top + wrapper_height) - (item_top + item_height)
+
+toggle_record_boards = (element) ->
+    boards_list = $('ul.boards', element)
+    
+    # if exists - hide all other boards lists, toggle visibility of this boards list
+    
+    if boards_list.length > 0
+        $('ul.boards', element.closest('.result')).not(boards_list).hide()
+        boards_list.toggle()
+        return
+    
+    # if not exists — load boards for given security, show boards list
+
+    # do nothing if already looking for security boards
+    return if element.data('boards_query_performed') ; element.data('boards_query_performed', true)
+
+    performed_query = mx.iss.security_boards(element.data('id'), { is_traded: 1 })
+    
+    performed_query.done ->
+        render_boards_list(performed_query.data).appendTo(element).hide()
+        toggle_record_boards(element)
+
+
+widget = (container, options = {}) ->
+    container = $(container) ; return if container.length == 0
+    
+    query_input_view    = undefined
+    filter_view         = undefined
+    result_view         = undefined
+    
+    
+    search_timeout      = undefined
+    performed_query     = undefined
+    performed_search    = undefined
+    
+
+    filter_markets  = scope.quote_search_filter_markets()
+
+
+    ready = $.when(metadata, security_groups, filter_markets)
+    
+    
+    search = (query) ->
+        performed_query  = query
+        performed_search = mx.iss.quote_search(performed_query, { group_by: 'group', is_traded: 1 })
+
+        performed_search.done ->
+            render_results(result_view, performed_search.data) if query == performed_search.query
         
-        if top_overlap < 0
-            items_list.scrollTop(scroll_top + top_overlap)
+                
+    
+    observe_window_keyboard_events = (event) ->
+        switch event.keyCode
+            when KEY_ESC
+                if query_input_view.is(':focus')
+                    query_input_view.blur()
+                else
+                    query_input_view.select()
+    
+
+    observe_query_input = (event) ->
+        
+        query = $.trim(query_input_view.val())
+
+        clearTimeout search_timeout
+
+        if query.length < query_threshold
+            clear_search_results(result_view)
+            performed_query = undefined
             return
         
-        if bottom_overlap < 0
-            items_list.scrollTop(scroll_top - bottom_overlap)
+        if performed_query == query
             return
-            
+        else
+            search_timeout = _.delay(search, search_delay, query)
+        
+        
     
-    select_prev_item = ->
-        return unless items and selected_item
-        return if selected_item.data('param') == items.first().data('param')
+    ready.then ->
+        
+        populate_security_groups_hash()
+        
+        query_input_view    = $('input[type=text]', container)
+        filter_view         = make_filter_view(container)
+        result_view         = make_result_view(container)
 
-        selected_item = $(items[items.index(selected_item) - 1])
-        render_selected_item()
+        filter_view.append(filter_markets.view())
         
-    
-    select_next_item = ->
-        return unless items and selected_item
-        return if selected_item.data('param') == items.last().data('param')
-        
-        selected_item = $(items[items.index(selected_item) + 1])
-        render_selected_item()
-    
-    visible_items_in = (container) ->
-        container_top     = container.offset().top
-        container_height  = container.innerHeight()
-        
-        _.filter items, (item) ->
-            item = $(item)
-            
-            item_top        = item.offset().top
-            item_height     = item.outerHeight()
 
-            top_visible     = item_top + item_height - container_top > 0
-            bottom_visible  = item_top - container_top < container_height
-            
-            return top_visible and bottom_visible
+        $(window).on 'keyup', observe_window_keyboard_events
         
-    
-    page_up = ->
-        scroll_top      = items_list.scrollTop()
-        wrapper_height  = items_list.innerHeight()
-        items_list.scrollTop(scroll_top - wrapper_height)
-        
-        no_move = Math.abs(scroll_top - items_list.scrollTop()) < wrapper_height
-        
-        visible = visible_items_in(items_list)
-        
-        selected_item = $ if no_move then _.first visible else _.last visible
-        render_selected_item()
+        $(window).on 'resize', -> calculate_result_view_max_height(result_view)
 
-    page_down = ->
-        scroll_top      = items_list.scrollTop()
-        wrapper_height  = items_list.innerHeight()
-        items_list.scrollTop(scroll_top + items_list.innerHeight())
+        query_input_view.on 'keyup', observe_query_input
         
-        no_move = Math.abs(scroll_top - items_list.scrollTop()) < wrapper_height
-        
-        visible = visible_items_in(items_list)
+        result_view.on 'click', 'li.record > span', (event) -> toggle_record_boards($(@).closest('li'))
 
-        selected_item = $ if no_move then _.last visible else _.first visible
-        render_selected_item()
-    
-    accept_selected_item = (event) ->
-        switch machine.current
-            when 'quotes' then accept_quote event, selected_item.data('param')
-            when 'boards' then accept_board event, selected_item.data('param')
-    
-    accept_quote = (event, quote) ->
-        security = quote
-        hide_quotes()
-        machine.next()
-        search_boards()
-    
-    accept_board = (event, board) ->
-        machine.off() unless event.shiftKey == true
-        $(window).trigger("security:selected", { engine: board.engine, market: board.market, board: board.boardid, param: board.secid })
-
-    # event listeners
-    
-    $.when(security_groups).then ->
-    
-        query_input.on 'focus', (event) ->
-            clearTimeout timeout_for_deactivation
-            machine.on() if machine.current == 'inactive'
-    
-        query_input.on 'blur', (event) ->
-            clearTimeout timeout_for_deactivation ; timeout_for_deactivation = _.delay ( -> machine.off() ), deactivation_timeout
-    
-        query_input.on 'keydown', (event) ->
-            mouse_locked = true
-        
-            switch event.keyCode
-                when KEY_PAGE_UP    then page_up()                      ; return false
-                when KEY_PAGE_DOWN  then page_down()                    ; return false
-                when KEY_UP         then select_prev_item()             ; return false
-                when KEY_DOWN       then select_next_item()             ; return false
-                when KEY_ENTER      then accept_selected_item(event)    ; return false
+        result_view.on 'click', 'li.emitter > span', (event) -> toggle_emitter_securities($(@).closest('li'))
 
 
-        query_input.on 'keyup', (event) ->
-            if event.keyCode == KEY_ESC
-                query_input.blur() if machine.current == 'initial' ; return machine.prev()
-            if machine.current == 'initial' or machine.current == 'quotes'
-                clearTimeout timeout_for_process_query ; timeout_for_process_query = _.delay ( -> quotes_search_with_query_check query_input.val() ), search_timeout
-    
-        # quotes events
-    
-        securities_list.on 'click', 'li', (event) ->
-            query_input.focus()
-            accept_quote event, $(event.currentTarget).data('param')
-    
-        securities_list.on 'mouseenter', 'li', (event) ->
-            if mouse_locked then mouse_locked = false ; return
-            selected_item = $(event.currentTarget)
-            render_selected_item()
-    
-        boards_list.on 'click', 'tr', (event) ->
-            query_input.focus()
-            accept_board event, $(event.currentTarget).data('param')
 
-        boards_list.on 'mouseenter', 'tr', (event) ->
-            if mouse_locked then mouse_locked = false ; return
-            selected_item = $(event.currentTarget)
-            render_selected_item()
-    
-        # window events
-
-        $(document).on 'focusout', (event) ->
-            query_input.val('')
-    
-    return
-        
-    
 $.extend scope,
     quote_search: widget

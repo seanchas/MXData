@@ -6,19 +6,28 @@ $       = jQuery
 fetch = (query, options = {}) ->
     deferred = new $.Deferred
     
-    $.ajax
-        url: "#{scope.url_prefix}/securities.jsonp?callback=?"
+    data = []
+    
+    options.group_by    ||= ''
+    options.is_traded   ||= ''
+    
+    xhr = $.ajax
+        url: "#{scope.url_prefix}/securities.json"
         data:
             q:              query
-            group_by:     if options.group_by then options.group_by else ''
-            is_trading:   if options.is_traded then options.is_traded else ''
+            group_by:       options.group_by
+            is_trading:     options.is_traded
             'iss.meta':     'off'
             'iss.only':     'securities'
-        dataType: 'jsonp'
-    .then (json) ->
-        deferred.resolve scope.merge_columns_and_data json?.securities
+        dataType: 'json'
+    .done (json) ->
+        data.push(scope.merge_columns_and_data(json?.securities)...)
+        deferred.resolve(data)
     
-    deferred.promise()
+    deferred.promise 
+        data:   data
+        xhr:    xhr
+        query:  query
 
 
 $.extend scope,

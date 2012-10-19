@@ -18,7 +18,7 @@ fetch = (ticker) ->
         data.push(scope.merge_columns_and_data(json?.securitygroups)...)
         deferred.resolve data
     
-    deferred.promise(data)
+    deferred.promise({ data: data })
 
 
 $.extend scope,

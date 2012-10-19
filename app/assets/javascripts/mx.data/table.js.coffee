@@ -35,6 +35,7 @@ make_table_container_view = (wrapper, descriptor) ->
     table_head_view = $('thead', container)
     
     table_head_view.append($('<tr>').addClass('columns'))
+    table_head_view.append($('<tr>').addClass('columns_filter'))
     
     container.appendTo(wrapper).hide()
 
@@ -52,6 +53,12 @@ render_table_head_columns = (container, columns, options = {}) ->
             cell = render_table_head_column_cell(column, options)
             container.append(cell)
     
+    ids = _.pluck(columns, 'id')
+    
+    for cell in cells
+        cell = $(cell)
+        cell.remove() unless _.include(ids, cell.data('id'))
+    
     container
 
 
@@ -64,6 +71,21 @@ render_table_head_column_cell = (column, options = {}) ->
         .append($('<span>').html(column.short_title))
     
     cell
+
+
+render_table_head_columns_filter_cell = (container, columns, view, options = {}) ->
+    cell = _.first($('td', container))
+    
+    unless cell
+        cell = $('<td>')
+            .append(view)
+            .appendTo(container)
+    
+    cell = $(cell)
+    
+    cell.attr('colspan', _.size(columns))
+    
+    container
 
 
 # table body rows
@@ -108,6 +130,12 @@ render_table_body_row_cells = (row, record, columns, options = {}) ->
         
         render_table_body_row_cell_content(cell, record, column, options)
     
+    ids = _.pluck(columns, 'id')
+    
+    for cell in cells
+        cell = $(cell)
+        cell.remove() unless _.include(ids, cell.data('id'))
+
     row
 
 
@@ -132,7 +160,7 @@ render_table_body_row_cell_content = (cell, record, column, options = {}) ->
     
     cell
         .data({ value: value })
-        .html($('<span>').html(value_for_render))
+        .html($('<span>').html(value_for_render || '&mdash;'))
     
     cell
 
@@ -326,6 +354,8 @@ widget = (wrapper, descriptor) ->
 
         # render table head
         render_table_head_columns($('tr.columns', table_head_view), columns)
+        render_table_head_columns_filter_cell($('tr.columns_filter', table_head_view), columns, columns_filter.view())
+        
         
         # render table body
         render_table_body_rows(table_body_view, records, columns)
@@ -335,6 +365,38 @@ widget = (wrapper, descriptor) ->
         
         # toggle table visibility
         table_container_view.toggle(!_.isEmpty(records))
+        
+            # activate columns sort
+        $('tr.columns', table_head_view).sortable({
+            containment:    $('tr.columns', table_head_view)
+            tolerance:      'pointer'
+            helper:         'clone'
+            placeholder:    'ui-sortable-placeholder'
+            appendTo:       table_head_view
+            
+            start:          (event, ui) ->
+                ui.placeholder.addClass(ui.item.data('type')).html(ui.item.html())
+                active_sortable_index = $('tr.columns', table_head_view).children().not(ui.item).index(ui.placeholder)
+            
+            change:         (event, ui) ->
+                index = $('tr.columns', table_head_view).children().not(ui.item).index(ui.placeholder)
+                
+                _.each(table_body_view.children(), (row) ->
+                    row     = $(row)
+                    cell    = $(row.children()[active_sortable_index])
+                    
+                    if active_sortable_index > index
+                        cell.insertBefore(row.children()[index])
+                    else
+                        cell.insertAfter(row.children()[index])
+                )
+                
+                active_sortable_index = index
+            
+            stop:           (event, ui) ->
+                columns_filter.update_filtered_columns_order(_.map($('tr.columns', table_head_view).children(), (cell) -> $(cell).data('id')))
+                
+        })
         
         
 
@@ -354,6 +416,10 @@ widget = (wrapper, descriptor) ->
         cache.set([cache_key, 'sort_order'].join(':'), { column_id: column.id, direction: column.is_sort_field })
         
         render()
+    
+    
+    append_external_views = ->
+        
     
     
     toggle_columns_filter_visibility = ->
@@ -392,6 +458,8 @@ widget = (wrapper, descriptor) ->
     refresh = ->
         return if _.isEmpty(tickers)
         
+        console.log "initial loading: #{engine}/#{market} at #{new Date}"
+        
         securities_source = marketdata_source = mx.iss.marketdata2(engine, market, tickers.sort())
         
         $.when(securities_source, marketdata_source).then ->
@@ -411,22 +479,24 @@ widget = (wrapper, descriptor) ->
 
     ready_for_render.then ->
 
+        append_external_views()
+
         add_cached_tickers()
         
         refresh()
         
         #table_head_view.on 'click', 'td.sortable',          -> sort_records_by $(@)
 
-        #$(window).on 'security:selected', (event, data) ->
-        #    return unless data.engine == engine and data.market == market
-        #    add_ticker([data.board, data.param].join(':'))
+        $(window).on 'security:selected', (event, data) ->
+            return unless data.engine == engine and data.market == market
+            add_ticker([data.board, data.param].join(':'))
             
         
-        #$(window).on 'table:filtered_columns:updated', (event, data) ->
-        #    return unless data.engine == engine and data.market == market
-        #    render(true)
+        $(window).on 'table:filtered_columns:updated', (event, data) ->
+            return unless data.engine == engine and data.market == market
+            render()
 
-        #table_container_view.on 'click', 'div.columns_filter_trigger', toggle_columns_filter_visibility
+        table_container_view.on 'click', 'div.columns_filter_trigger', toggle_columns_filter_visibility
         
         
         deferred.resolve()

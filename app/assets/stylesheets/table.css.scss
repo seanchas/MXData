@@ -48,6 +48,7 @@
             padding-right: 8px;
         }
 
+        /*
         td:first-child {
             padding-left: 16px;
         }
@@ -55,8 +56,10 @@
         td:last-child {
             padding-right: 16px;
         }
+        */
         
         td.number,
+        td.date,
         td.time {
             text-align: right;
         }
