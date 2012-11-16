@@ -10,12 +10,14 @@ security_groups_hash    = undefined
 metadata                = mx.iss.metadata()
 
 
+securities_cache = kizzy('data.table')
+
 
 locales =
     results:
         empty:
-            ru: 'Ничего не найдено'
-            en: 'Nothing has been found'
+            ru: 'По вашему запросу ничего не найдено.'
+            en: 'Your search did not match any documents.'
 
 
 
@@ -24,6 +26,36 @@ KEY_ESC         = 27
 
 search_delay    = 250
 query_threshold = 3
+
+
+
+securities_keys = ->
+    _.map(metadata.markets, (market) -> "#{market.trade_engine_name}:#{market.market_name}:securities")
+
+
+check_links_status = (container) ->
+    caches = _.chain(securities_keys()).map((key) -> securities_cache.get(key)).compact().flatten().value()
+
+    $('span.link.add', container).show()
+    $('span.link.remove', container).hide()
+    
+    _.each($('span.link.add', container), (link) ->
+        link        = $(link)
+        
+        board_id    = link.data('board-id')
+        security_id = undefined
+        
+        if board_id
+            security_id = link.closest('li').data('id')
+        else
+            board_id    = link.closest('li.board').data('id')
+            security_id = link.closest('li.record').data('id')
+        
+        if _.include(caches, "#{board_id}:#{security_id}")
+            link.hide()
+            link.next('span.link.remove').show()
+        
+    )
 
 
 
@@ -84,6 +116,16 @@ collect_emitters = (data) ->
 
 
 
+collect_groups = (data) ->
+    _.reduce(_.uniq(_.map(data, (record) -> record.group)), (memo, id) ->
+        memo.push
+            id: id
+            title: security_groups_hash[id]?.title
+        memo
+    , [])
+
+
+
 render_results = (container, data) ->
     clear_search_results(container)
     
@@ -91,184 +133,45 @@ render_results = (container, data) ->
     group_container = undefined
     
     
-    render_emitters(container, collect_emitters(data))
+    groups = collect_groups(data)
     
+    _.each(groups, (group) ->
+        group.records = _.filter(data, (record) -> record.group == group.id)
+    )
     
-    groups_container = $('<ul>')
-        .addClass('groups')
-        .appendTo(container)
-
-    for record in data
-        
-        unless current_group == record.group
-            group = make_group(record.group).appendTo(groups_container)
-            group_container = $('ul', group)
-            current_group = record.group
-
-        group_container.append(make_record(record))
-
-    container.append(make_empty) if _.isEmpty(data)
-
-
-
-render_emitters = (container, data) ->
-    emitters_container = $('<ul>')
-        .addClass('emitters')
-        .appendTo(container)
+    container.html(ich.query_search_results({ groups: groups }))
     
-    $('<li>')
-        .addClass('title')
-        .html('Эмитенты')
-        .appendTo(emitters_container)
-    
-    for record in data
-        render_emitter(emitters_container, record)
-
-
-render_emitter = (container, data) ->
-    emitter = $('<li>')
-        .data('id', data.id)
-        .addClass('emitter')
-        .appendTo(container)
-    
-    $('<span>')
-        .addClass('name')
-        .html(data.name)
-        .appendTo(emitter)
-    
-    emitter
+    check_links_status(container)
 
 
 
-toggle_emitter_securities = (element) ->
-    list = $('ul.records', element)
-    
-    if list.length > 0
-        $('ul.records', element.closest('ul.emitters')).not(list).hide()
-        list.toggle()
-    else
-        return if element.data('securities-query-performed') == true ; element.data('securities-query-performed', true)
+render_boards = (container, data) ->
+    container.append(ich.query_search_results_boards({ boards: _.filter(data, (record) -> !!record.is_traded ) }).hide())
 
-        mx.iss.emitter_securities(element.data('id')).done (data) ->
-            render_emitter_securities(element, data).hide()
-            toggle_emitter_securities(element)
-            
-
-render_emitter_securities = (container, data) ->
-    securities_container = $('<ul>')
-        .addClass('records')
-        .appendTo(container)
-    
-    for record in data
-        render_emitter_security(securities_container, record)
-    
-    securities_container
-
-
-render_emitter_security = (container, data) ->
-    security = $('<li>')
-        .data('id', data.SECID)
-        .addClass('record')
-        .appendTo(container)
-    
-    $('<span>')
-        .addClass('shortname')
-        .html(data.SHORTNAME)
-        .appendTo(security)
-    
-    $('<strong>')
-        .addClass('type')
-        .html(data.SECURITY_TYPE)
-        .appendTo(security)
-
-    $('<em>')
-        .addClass('name')
-        .html(data.NAME)
-        .appendTo(security)
-    
-    security
-
-
-make_group = (id) ->
-    $('<li>')
-        .addClass('group')
-        .append($('<span>').html(security_groups_hash[id]?.title))
-        .append($('<ul>').addClass('records'))
-
-
-make_record = (record) ->
-    $('<li>')
-        .data('id', record.secid ? '')
-        .addClass('record')
-        .append($('<span>').html(record.shortname))
-        .append($('<em>').html(record.name))
-        .append($('<em>').html(record.emitent_title))
-        
-
-
-make_empty = ->
-    $('<li>')
-        .addClass('empty')
-        .html(locales.results.empty['ru'])
-
-
-
-render_boards_list = (data) ->
-    boards_list = $('<ul>')
-        .addClass('boards')
-    
-    for record in data when !!record.is_traded
-        make_board(record).appendTo(boards_list)
-    
-    boards_list
-
-
-make_board = (record) ->
-    board = $('<li>')
-        .addClass('board')
-        .append($('<strong>').html(record.boardid))
-        .append($('<span>').html(record.title))
-    
-    if record.listed_from and record.listed_till
-        $('<em>')
-            .append($('<span>').html('Листинг'))
-            .append($('<span>').html(render_date record.listed_from))
-            .append($('<span>').html(render_date record.listed_till))
-            .appendTo(board)
-    
-    ###
-    if record.history_from and record.history_till
-        $('<em>')
-            .append($('<span>').html('История'))
-            .append($('<span>').html(render_date record.listed_from))
-            .append($('<span>').html(render_date record.listed_till))
-            .appendTo(board)
-    ###
-    
-    board
-
+    check_links_status(container)
 
 
 toggle_record_boards = (element) ->
+    
     boards_list = $('ul.boards', element)
     
-    # if exists - hide all other boards lists, toggle visibility of this boards list
     
     if boards_list.length > 0
+        # if exists - hide all other boards lists, toggle visibility of this boards list
+        
         $('ul.boards', element.closest('.result')).not(boards_list).hide()
         boards_list.toggle()
-        return
-    
-    # if not exists — load boards for given security, show boards list
+    else
+        # if not exists — load boards for given security, show boards list
 
-    # do nothing if already looking for security boards
-    return if element.data('boards_query_performed') ; element.data('boards_query_performed', true)
+        # do nothing if already looking for security boards
+        return if element.data('boards_query_performed') ; element.data('boards_query_performed', true)
 
-    performed_query = mx.iss.security_boards(element.data('id'), { is_traded: 1 })
+        performed_query = mx.iss.security_boards(element.data('id'), { is_traded: 1 })
     
-    performed_query.done ->
-        render_boards_list(performed_query.data).appendTo(element).hide()
-        toggle_record_boards(element)
+        performed_query.done ->
+            render_boards(element, performed_query.data)
+            toggle_record_boards(element)
 
 
 widget = (container, options = {}) ->
@@ -343,10 +246,7 @@ widget = (container, options = {}) ->
 
         query_input_view.on 'keyup', observe_query_input
         
-        result_view.on 'click', 'li.record > span', (event) -> toggle_record_boards($(@).closest('li'))
-
-        result_view.on 'click', 'li.emitter > span', (event) -> toggle_emitter_securities($(@).closest('li'))
-
+        result_view.on 'click', 'li.record span.boards', (event) -> toggle_record_boards($(@).closest('li'))
 
 
 $.extend scope,

@@ -137,9 +137,11 @@ a img {
 #quote_search .result {
     
     border: 1px solid #ccc;
+    font-size: 15px;
     margin: 10px 0;
     overflow: scroll;
     padding: 0;
+    
     
     ul {
         list-style: none;
@@ -147,154 +149,105 @@ a img {
         padding: 0;
     }
     
-    
-    /* emitters */
-    
-    ul.emitters {
-        
-        font-size: .9em;
-        margin: 0 0 1em;
-        overflow: hidden;
-        
-        li.title {
-            background: #eee;
-            padding: .5em 10px;
-        }
-        
-        li.emitter {
-            
-            padding: .5em 10px;
-
-            > span {
-                border-bottom: 1px dashed #00c;
-                color: #00c;
-            }
-            
-            > span:hover {
-                border-color: #c06;
-                color: #c06;
-                cursor: pointer;
-            }
-            
-            li.record {
-                font-size: 1em;
-                
-                > strong {
-                    color: #666;
-                    margin-left: 1em;
-                }
-            }
-            
-        }
-        
+    li {
+        margin: 0;
+        padding: 0;
     }
     
     ul.groups {
-    }
-    
-    li.group {
         
-        > span {
-            border-top: 1px solid #ccc;
-            display: block;
-            font-size: 90%;
-            padding: .5em 10px;
-            background: #eee;
-        }
-        
-    }
-    
-    
-    li.group:first-child > span {
-        border-top: none;
-    }
-    
-    ul.records {
-        padding: .5em 1em;
-    }
-    
-    li.record {
-        
-        font-size: .9em;
-        margin: .75em 0;
-        
-        > span {
-            color: #00c;
-            border-bottom: 1px dashed #000;
-        }
-        
-        > span:hover {
-            color: #c06;
+        span.link {
+            border-bottom: 1px dashed #039;
+            color: #039;
             cursor: pointer;
-            border-color: #c06;
         }
-        
-        em {
-            color: #666;
-            display: block;
-            font-size: 90%;
-            margin-top: .25em;
-        }
-        
-    }
-    
-    ul.boards {
-        border-top: 1px solid #ccc;
-        margin-top: .5em;
-        margin-left: 20px;
-        overflow: hidden;
-        padding: 0 10px;
-    }
-    
-    li.board {
-
-        float: left;
-        padding: .5em 0;
-        width: 50%;
-
-        strong {
-            color: #999;
-            display: inline-block;
-            font-size: .75em;
-            width: 4em;
-            margin-right: 1em;
-            padding: .5em 0;
-            text-align: center;
-        }
-
-        > span {
-            color: #00c;
-            border-bottom: 1px dashed #00c;
-        }
-        
-        > span:hover {
-            color: #c06;
-            cursor: pointer;
-            border-color: #c06;
-        }
-        
-        > em {
-            font-size: .9em;
-            margin-top: .25em;
-            margin-left: 20px;
             
-            span:first-child::after {
-                content: ': ';
-            }
+        span.link:hover {
+            border-color: #903;
+            color: #903;
+        }
+        
+        > li.empty {
+            color: #999;
+            font-style: italic;
+            padding: .5em 9px;
+        }
 
-            span:last-child::before {
-                content: ' - ';
+        > li.title {
+            
+            background-color: #eee;
+            padding: .5em 9px;
+            
+        }
+        
+        > li.record {
+
+            margin: 1em 9px;
+            
+            > div {
+
+                span.shortname {
+                    font-weight: bold;
+                }
+            
+                span.name,
+                span.boards {
+                    font-size: .8em;
+                }
+            
+                span.name,
+                span.pipe {
+                    color: #999;
+                }
+                
+                span.link {
+                    font-size: .8em;
+                }
+            
             }
+            
+            
+            ul.boards {
+                border-top: 1px solid #ccc;
+                margin-top: 15px;
+                padding: .25em 10px;
+                position: relative;
+                
+                > li {
+                    float: left;
+                    margin: .5em 0;
+                    width: 50%;
+                    
+                    span.id {
+                        color: #999;
+                        display: inline-block;
+                        font-size: .8em;
+                        font-weight: bold;
+                        width: 3em;
+                    }
+                    
+                    span.link {
+                        font-size: .8em;
+                    }
+                    
+                }
+                
+                > li:nth-child(2n + 1) {
+                    clear: left;
+                }
+                
+            }
+            
+            ul.boards::before {
+                content: '--^--';
+                display: 'block';
+                left: 20px;
+                position: absolute;
+                top: -10px;
+            }
+            
         }
         
-        > em:first-child {
-            margin-top: .5em;
-        }
-        
-    }
-    
-    li.board:nth-child(2n + 1) {
-        clear: left;
     }
     
     
