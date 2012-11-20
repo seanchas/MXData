@@ -36,16 +36,12 @@ securities_keys = ->
 check_links_status = (container) ->
     caches = _.chain(securities_keys()).map((key) -> securities_cache().get(key)).compact().flatten().value()
     
-    $('span.link.add', container).show()
-    $('span.link.remove', container).hide()
+    #$('span.link.add', container).show()
+    #$('span.link.remove', container).hide()
     
-    _.each($('span.link.add', container), (link) ->
-        link        = $(link)
-        
-        if _.include(caches, "#{link.data('board-id')}:#{link.data('security-id')}")
-            link.hide()
-            link.next('span.link.remove').show()
-        
+    _.each($('li.record, li.board', container), (item) ->
+        item        = $(item)
+        item.toggleClass('table', _.include(caches, "#{item.data('board-id')}:#{item.data('security-id')}"))
     )
 
 
@@ -158,10 +154,10 @@ toggle_record_boards = (element) ->
         # do nothing if already looking for security boards
         return if element.data('boards_query_performed') ; element.data('boards_query_performed', true)
 
-        performed_query = mx.iss.security_boards(element.data('id'), { is_traded: 1 })
+        performed_query = mx.iss.security_boards(element.data('security-id'), { is_traded: 1 })
     
         performed_query.done ->
-            render_boards(element, element.data('id'), performed_query.data)
+            render_boards(element, element.data('security-id'), performed_query.data)
             toggle_record_boards(element)
 
 
@@ -256,10 +252,10 @@ widget = (container, options = {}) ->
         result_view.on 'click', 'li.record span.boards', (event) -> toggle_record_boards($(@).closest('li'))
         
         result_view.on 'click', 'span.link.add', (event) ->
-            link = $(@) ; add_ticker_to_table(link.data('board-id'), link.data('security-id'))
+            item = $(@).closest('li') ; add_ticker_to_table(item.data('board-id'), item.data('security-id'))
         
         result_view.on 'click', 'span.link.remove', (event) ->
-            link = $(@) ; remove_ticker_from_table(link.data('board-id'), link.data('security-id'))
+            item = $(@).closest('li') ; remove_ticker_from_table(item.data('board-id'), item.data('security-id'))
         
         $(window).on 'global:table:security:added global:table:security:removed', -> _.defer check_links_status, result_view
 

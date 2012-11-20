@@ -475,7 +475,7 @@ widget = (wrapper, descriptor) ->
     # refresh - reload securities and marketdata
     
     refresh = ->
-        console.log "initial loading: #{engine}/#{market} at #{new Date}"
+        # console.log "initial loading: #{engine}/#{market} at #{new Date}"
         
         securities_source = marketdata_source = if _.isEmpty(tickers) then {} else mx.iss.marketdata2(engine, market, tickers.sort())
         

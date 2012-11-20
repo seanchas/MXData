@@ -232,6 +232,34 @@ a img {
                     
                 }
                 
+                > li {
+                
+                    span.link.add {
+                        display: inline;
+                    }
+                
+                    span.link.remove {
+                        display: none;
+                    }
+                
+                }
+                
+                > li.table {
+                    
+                    span.id {
+                        color: #096;
+                    }
+
+                    span.link.add {
+                        display: none;
+                    }
+                
+                    span.link.remove {
+                        display: inline;
+                    }
+
+                }
+                
                 > li:nth-child(2n + 1) {
                     clear: left;
                 }
@@ -248,6 +276,38 @@ a img {
             
         }
         
+        > li.record {
+            
+            > div {
+                
+                span.link.add {
+                    display: inline;
+                }
+                
+                span.link.remove {
+                    display: none;
+                }
+                
+            }
+            
+        }
+        
+        > li.record.table {
+            
+            > div {
+                
+                span.link.add {
+                    display: none;
+                }
+                
+                span.link.remove {
+                    display: inline;
+                }
+                
+            }
+            
+        }
+
     }
     
     
