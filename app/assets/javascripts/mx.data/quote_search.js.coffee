@@ -10,7 +10,7 @@ security_groups_hash    = undefined
 metadata                = mx.iss.metadata()
 
 
-securities_cache = kizzy('data.table')
+securities_cache = -> kizzy('data.table')
 
 
 locales =
@@ -34,24 +34,15 @@ securities_keys = ->
 
 
 check_links_status = (container) ->
-    caches = _.chain(securities_keys()).map((key) -> securities_cache.get(key)).compact().flatten().value()
-
+    caches = _.chain(securities_keys()).map((key) -> securities_cache().get(key)).compact().flatten().value()
+    
     $('span.link.add', container).show()
     $('span.link.remove', container).hide()
     
     _.each($('span.link.add', container), (link) ->
         link        = $(link)
         
-        board_id    = link.data('board-id')
-        security_id = undefined
-        
-        if board_id
-            security_id = link.closest('li').data('id')
-        else
-            board_id    = link.closest('li.board').data('id')
-            security_id = link.closest('li.record').data('id')
-        
-        if _.include(caches, "#{board_id}:#{security_id}")
+        if _.include(caches, "#{link.data('board-id')}:#{link.data('security-id')}")
             link.hide()
             link.next('span.link.remove').show()
         
@@ -145,8 +136,8 @@ render_results = (container, data) ->
 
 
 
-render_boards = (container, data) ->
-    container.append(ich.query_search_results_boards({ boards: _.filter(data, (record) -> !!record.is_traded ) }).hide())
+render_boards = (container, security_id, data) ->
+    container.append(ich.query_search_results_boards({ security_id: security_id, boards: _.filter(data, (record) -> !!record.is_traded ) }).hide())
 
     check_links_status(container)
 
@@ -170,9 +161,25 @@ toggle_record_boards = (element) ->
         performed_query = mx.iss.security_boards(element.data('id'), { is_traded: 1 })
     
         performed_query.done ->
-            render_boards(element, performed_query.data)
+            render_boards(element, element.data('id'), performed_query.data)
             toggle_record_boards(element)
 
+
+
+add_ticker_to_table = (board_id, security_id) ->
+    add_or_remove_table_ticker("add", board_id, security_id)
+
+
+remove_ticker_from_table = (board_id, security_id) ->
+    add_or_remove_table_ticker("remove", board_id, security_id)
+
+
+add_or_remove_table_ticker = (method, board_id, security_id) ->
+    board   = _.find(metadata.boards, (board) -> board.boardid == board_id)
+    market  = _.find(metadata.markets, (market) -> market.market_id == board.market_id)
+    engine  = _.find(metadata.engines, (engine) -> engine.id == board.engine_id)
+    
+    $(window).trigger "global:table:security:#{method}:#{engine.name}:#{market.market_name}", { ticker: "#{board_id}:#{security_id}" }
 
 widget = (container, options = {}) ->
     container = $(container) ; return if container.length == 0
@@ -247,6 +254,14 @@ widget = (container, options = {}) ->
         query_input_view.on 'keyup', observe_query_input
         
         result_view.on 'click', 'li.record span.boards', (event) -> toggle_record_boards($(@).closest('li'))
+        
+        result_view.on 'click', 'span.link.add', (event) ->
+            link = $(@) ; add_ticker_to_table(link.data('board-id'), link.data('security-id'))
+        
+        result_view.on 'click', 'span.link.remove', (event) ->
+            link = $(@) ; remove_ticker_from_table(link.data('board-id'), link.data('security-id'))
+        
+        $(window).on 'global:table:security:added global:table:security:removed', -> _.defer check_links_status, result_view
 
 
 $.extend scope,

@@ -95,7 +95,9 @@ render_table_body_rows = (container, records, columns, options = {}) ->
     
     for record in records
         
-        row = _.first(row for row in rows when $(row).data('id') == [record.BOARDID, record.SECID].join(':'))
+        record.ticker = [record.BOARDID, record.SECID].join(':')
+        
+        row = _.first(row for row in rows when $(row).data('id') == record.ticker)
         
         unless row?
             row = render_table_body_row(record, columns, options)
@@ -104,6 +106,14 @@ render_table_body_rows = (container, records, columns, options = {}) ->
         row = $(row)
         
         render_table_body_row_cells(row, record, columns, options)
+    
+
+    tickers = _.pluck(records, 'ticker')
+    
+
+    for row in rows
+        row = $(row)
+        row.remove() unless _.include(tickers, row.data('id'))
     
     container
             
@@ -254,10 +264,19 @@ widget = (wrapper, descriptor) ->
     # tickers
     
     add_ticker = (ticker) ->
-        tickers.push(ticker) unless _.include(tickers, ticker)
+        unless _.include(tickers, ticker)
+            tickers.push(ticker)
+            $(window).trigger('global:table:security:added', { ticker: ticker })
+
         update()
     
-    remove_ticker = ->
+    remove_ticker = (ticker) ->
+        if _.include(tickers, ticker)
+            tickers = _.without(tickers, ticker)
+            $(window).trigger('global:table:security:removed', { ticker: ticker })
+            
+        update()
+
 
     add_cached_tickers = ->
         tickers = cache.get([cache_key, 'securities'].join(':')) ? []
@@ -456,18 +475,23 @@ widget = (wrapper, descriptor) ->
     # refresh - reload securities and marketdata
     
     refresh = ->
-        return if _.isEmpty(tickers)
-        
         console.log "initial loading: #{engine}/#{market} at #{new Date}"
         
-        securities_source = marketdata_source = mx.iss.marketdata2(engine, market, tickers.sort())
+        securities_source = marketdata_source = if _.isEmpty(tickers) then {} else mx.iss.marketdata2(engine, market, tickers.sort())
         
         $.when(securities_source, marketdata_source).then ->
 
-            securities_data_version = marketdata_data_version = _.first(securities_source.data.dataversion).version
+            unless _.isEmpty(securities_source) and _.isEmpty(marketdata_source)
 
-            securities_data = _.reduce(securities_source.data.securities, ((memo, record) -> memo["#{record.BOARDID}:#{record.SECID}"] = record ; memo), {})
-            marketdata_data = _.reduce(marketdata_source.data.marketdata, ((memo, record) -> memo["#{record.BOARDID}:#{record.SECID}"] = record ; memo), {})
+                securities_data_version = marketdata_data_version = _.first(securities_source.data.dataversion).version
+
+                securities_data = _.reduce(securities_source.data.securities, ((memo, record) -> memo["#{record.BOARDID}:#{record.SECID}"] = record ; memo), {})
+                marketdata_data = _.reduce(marketdata_source.data.marketdata, ((memo, record) -> memo["#{record.BOARDID}:#{record.SECID}"] = record ; memo), {})
+            
+            else
+                
+                securities_data = []
+                marketdata_data = []
             
             render()
             
@@ -486,7 +510,7 @@ widget = (wrapper, descriptor) ->
         refresh()
         
         #table_head_view.on 'click', 'td.sortable',          -> sort_records_by $(@)
-
+        
         $(window).on 'security:selected', (event, data) ->
             return unless data.engine == engine and data.market == market
             add_ticker([data.board, data.param].join(':'))
@@ -498,6 +522,12 @@ widget = (wrapper, descriptor) ->
 
         table_container_view.on 'click', 'div.columns_filter_trigger', toggle_columns_filter_visibility
         
+        
+        $(window).on "global:table:security:add:#{engine}:#{market}", (event, memo) ->
+            add_ticker(memo.ticker)
+        
+        $(window).on "global:table:security:remove:#{engine}:#{market}", (event, memo) ->
+            remove_ticker(memo.ticker)
         
         deferred.resolve()
     

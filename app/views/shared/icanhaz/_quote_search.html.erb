@@ -31,8 +31,8 @@
         <div>
             <span class="boards link">Все режимы</span>
             <span class="pipe">|</span>
-            <span class="add link" data-board-id="{{primary_boardid}}"><em>+</em> Добавить в таблицу в основном режиме</span>
-            <span class="remove link"><em>-</em> Удалить из таблицы в основном режиме</span>
+            <span class="add link" data-board-id="{{primary_boardid}}" data-security-id="{{secid}}"><em>+</em> Добавить в таблицу в основном режиме</span>
+            <span class="remove link" data-board-id="{{primary_boardid}}" data-security-id="{{secid}}"><em>-</em> Удалить из таблицы в основном режиме</span>
         </div>
     </li>
 </script>
@@ -47,8 +47,8 @@
                     <span class="title">{{title}}</span>
                 </div>
                 <div>
-                    <span class="add link"><em>+</em> Добавить в таблицу</span>
-                    <span class="remove link"><em>-</em> Удалить из таблицы</span>
+                    <span class="add link" data-security-id="{{security_id}}" data-board-id="{{boardid}}"><em>+</em> Добавить в таблицу</span>
+                    <span class="remove link" data-security-id="{{security_id}}" data-board-id="{{boardid}}"><em>-</em> Удалить из таблицы</span>
                 </div>
             </li>
         {{/boards}}
