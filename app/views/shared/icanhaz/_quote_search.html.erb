@@ -1,17 +1,15 @@
 <script id="query_search_results" type="text/html">
-    <ul class="groups">
-        {{#groups}}
-            {{> query_search_results_group}}
-        {{/groups}}
-        {{^groups}}
-            <li class="empty">По вашему запросу ничего не найдено</li>
-        {{/groups}}
-    </ul>
+    {{#groups}}
+        {{> query_search_results_group}}
+    {{/groups}}
+    {{^groups}}
+        <li class="empty">По вашему запросу ничего не найдено</li>
+    {{/groups}}
 </script>
 
 
 <script id="query_search_results_group" type="text/html">
-    <li class="group title">
+    <li class="group">
         {{title}}
     </li>
     {{#records}}
@@ -20,38 +18,35 @@
 </script>
 
 
-<script id="query_search_results_record" class="partial" type="text/html">
-    <li class="record" data-security-id="{{secid}}" data-board-id="{{primary_boardid}}">
-        <div class="trigger table"></div>
-        <div>
-            <span class="shortname">{{shortname}}</span>
-        </div>
-        <div>
-            <span class="name">{{name}}</span>
-        </div>
-        <div>
-            <span class="boards link">Все режимы</span>
-            <span class="pipe">|</span>
-            <span class="add link"><em>+</em> Добавить в таблицу в основном режиме</span>
-            <span class="remove link"><em>-</em> Удалить из таблицы в основном режиме</span>
-        </div>
+<script id="query_search_results_record" type="text/html">
+    <li class="security primary" data-id="{{secid}}" data-primary-board-id="{{primary_boardid}}">
+        <p class="shortname">{{shortname}}</p>
+        <p class="fullname">{{name}}</p>
+        
+        <ul class="boards">
+            {{> query_search_results_boards}}
+        </ul>
+        
+        <p class="links">
+            <a href="#" class="primary">Основной режим торгов</a>
+            <a href="#" class="all">Все режимы торгов</a>
+        </p>
     </li>
 </script>
 
 
 <script id="query_search_results_boards" type="text/html">
-    <ul class="boards clearfix">
-        {{#boards}}
-            <li class="board" data-board-id="{{boardid}}" data-security-id="{{security_id}}">
-                <div>
-                    <span class="id">{{boardid}}</span>
-                    <span class="title">{{title}}</span>
-                </div>
-                <div>
-                    <span class="add link"><em>+</em> Добавить в таблицу</span>
-                    <span class="remove link"><em>-</em> Удалить из таблицы</span>
-                </div>
-            </li>
-        {{/boards}}
-    </ul>
+    {{#boards}}
+        {{> query_search_results_board}}
+    {{/boards}}
+</script>
+
+
+<script id="query_search_results_board" type="text/html">
+    <li class="board" data-id="{{boardid}}">
+        <p class="id">{{boardid}}</p>
+        <p class="name">
+            <a href="#">{{board_title}}</a>
+        </p>
+    </li>
 </script>

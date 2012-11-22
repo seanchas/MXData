@@ -4,6 +4,22 @@
 
     width: 1200px;
 
+    ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    
+    li {
+        margin: 0;
+        padding: 0;
+    }
+    
+    p {
+        margin: 0;
+        padding: 0;
+    }
+
     table {
 
         border: 1px solid #ccc;
@@ -133,199 +149,113 @@ a img {
     
 }
 
-
-#quote_search .result {
+#quote_search ul.results {
     
     border: 1px solid #ccc;
     font-size: 15px;
-    margin: 10px 0;
-    overflow: scroll;
-    padding: 0;
+    margin: .5em 0;
+    overflow-y: scroll;
     
-    
-    ul {
-        list-style: none;
-        margin: 0;
-        padding: 0;
+
+    a {
+        border-bottom: 1px dashed #039;
+        color: #039;
+        text-decoration: none;
     }
     
-    li {
-        margin: 0;
-        padding: 0;
+    a:hover {
+        border-color: #903;
+        color: #903;
     }
     
-    ul.groups {
+
+    li.group {
+        background-color: #eee;
+        padding: .5em 9px;
+    }
+    
+
+    li.security {
+
+        margin: 1.25em 0;
+        padding: 0 9px;
         
-        span.link {
-            border-bottom: 1px dashed #039;
-            color: #039;
-            cursor: pointer;
-        }
-            
-        span.link:hover {
-            border-color: #903;
-            color: #903;
+
+        > p.shortname {
+            font-weight: bold;
         }
         
-        > li.empty {
+        > p.fullname {
             color: #999;
-            font-style: italic;
-            padding: .5em 9px;
-        }
-
-        > li.title {
-            
-            background-color: #eee;
-            padding: .5em 9px;
-            
+            font-size: .8em;
         }
         
-        > li.record {
+        > p.links {
+            font-size: .8em;
+        }
+        
 
-            margin: 1em 9px;
-            position: relative;
-            
-            
-            > div.trigger {
-                background: image-url('icons/query_search_table_inactive.png');
-                cursor: pointer;
-                height: 16px;
-                left: 0;
-                position: absolute;
-                top: 1px;
-                width: 16px;
-            }
-            
-            
-            > div {
+        ul.boards {
 
-                span.shortname {
-                    font-weight: bold;
-                    margin-left: 20px;
-                }
+            overflow: hidden;
+            margin: .5em 0;
             
-                span.name,
-                span.boards {
-                    font-size: .8em;
-                }
-            
-                span.name,
-                span.pipe {
+            li.board {
+                
+                float: left;
+                margin: .25em 0;
+                width: 50%;
+                
+                > p.id {
                     color: #999;
-                }
-                
-                span.link {
-                    font-size: .8em;
-                }
-            
-            }
-            
-            
-            ul.boards {
-                border-top: 1px solid #ccc;
-                margin-top: 15px;
-                padding: .25em 10px;
-                position: relative;
-                
-                > li {
                     float: left;
-                    margin: .5em 0;
-                    width: 50%;
-                    
-                    span.id {
-                        color: #999;
-                        display: inline-block;
-                        font-size: .8em;
-                        font-weight: bold;
-                        width: 3em;
-                    }
-                    
-                    span.link {
-                        font-size: .8em;
-                    }
-                    
-                }
-                
-                > li {
-                
-                    span.link.add {
-                        display: inline;
-                    }
-                
-                    span.link.remove {
-                        display: none;
-                    }
-                
-                }
-                
-                > li.table {
-                    
-                    span.id {
-                        color: #096;
-                    }
-
-                    span.link.add {
-                        display: none;
-                    }
-                
-                    span.link.remove {
-                        display: inline;
-                    }
-
-                }
-                
-                > li:nth-child(2n + 1) {
-                    clear: left;
+                    font-size: .8em;
+                    font-weight: bold;
+                    margin-top: .2em;
+                    width: 3em;
                 }
                 
             }
             
-            ul.boards::before {
-                content: '--^--';
-                display: 'block';
-                left: 20px;
-                position: absolute;
-                top: -10px;
+            li.board.active > p.id {
+                color: #093;
             }
-            
+
         }
         
-        > li.record {
-            
-            > div {
-                
-                span.link.add {
-                    display: inline;
-                }
-                
-                span.link.remove {
-                    display: none;
-                }
-                
-            }
-            
+    }
+    
+
+    li.security > p.links {
+
+        a.primary {
+            display: inline;
         }
         
-        > li.record.table {
-            
-            > div.trigger {
-                background-image: image-url('icons/query_search_table_active.png');
-            }
-            
-            > div {
-                
-                span.link.add {
-                    display: none;
-                }
-                
-                span.link.remove {
-                    display: inline;
-                }
-                
-            }
-            
+        a.all {
+            display: none;
         }
 
+    }    
+    
+    li.security.primary > p.links {
+        
+        a.primary {
+            display: none;
+        }
+        
+        a.all {
+            display: inline;
+        }
+
+    }
+    
+    li.security.primary ul.boards {
+        margin: .1em 0;
+    }
+    
+    li.security.primary li.board:not(.primary) {
+        display: none;
     }
     
     

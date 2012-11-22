@@ -8,17 +8,12 @@ $       = jQuery
 security_groups         = mx.iss.security_groups()
 security_groups_hash    = undefined
 metadata                = mx.iss.metadata()
+metadata_engines_hash   = undefined
+metadata_markets_hash   = undefined
+metadata_boards_hash    = undefined
 
 
 securities_cache = -> kizzy('data.table')
-
-
-locales =
-    results:
-        empty:
-            ru: 'По вашему запросу ничего не найдено.'
-            en: 'Your search did not match any documents.'
-
 
 
 KEY_ESC         = 27
@@ -31,19 +26,6 @@ query_threshold = 3
 
 securities_keys = ->
     _.map(metadata.markets, (market) -> "#{market.trade_engine_name}:#{market.market_name}:securities")
-
-
-check_links_status = (container) ->
-    caches = _.chain(securities_keys()).map((key) -> securities_cache().get(key)).compact().flatten().value()
-    
-    #$('span.link.add', container).show()
-    #$('span.link.remove', container).hide()
-    
-    _.each($('li.record, li.board', container), (item) ->
-        item        = $(item)
-        item.toggleClass('table', _.include(caches, "#{item.data('board-id')}:#{item.data('security-id')}"))
-    )
-
 
 
 # NB!!! Delete and replace with common utility function
@@ -61,6 +43,13 @@ populate_security_groups_hash = ->
     , {}
 
 
+populate_metadata_boards_hash = ->
+    metadata_boards_hash = _.reduce metadata.boards,
+        (memo, item) ->
+            memo[item.boardid] = item ; memo
+    , {}
+
+
 
 make_filter_view = (container) ->
     view = $('<div>')
@@ -70,10 +59,9 @@ make_filter_view = (container) ->
         .appendTo(container)
 
 
-
 make_result_view = (container) ->
-    view = $('<div>')
-        .addClass('result')
+    view = $('<ul>')
+        .addClass('results')
         .appendTo(container)
     
     calculate_result_view_max_height(view)
@@ -89,20 +77,6 @@ clear_search_results = (container) ->
     container.empty()
 
 
-collect_emitters = (data) ->
-    emitters = []
-    emitters_ids = []
-    
-    for record in data
-        if record.emitent_id
-            unless _.include(emitters_ids, record.emitent_id)
-                emitters_ids.push(record.emitent_id)
-                emitters.push({ id: record.emitent_id, name: record.emitent_title })
-    
-    emitters
-
-
-
 collect_groups = (data) ->
     _.reduce(_.uniq(_.map(data, (record) -> record.group)), (memo, id) ->
         memo.push
@@ -112,54 +86,71 @@ collect_groups = (data) ->
     , [])
 
 
-
 render_results = (container, data) ->
     clear_search_results(container)
     
-    current_group   = undefined
-    group_container = undefined
-    
-    
     groups = collect_groups(data)
     
-    _.each(groups, (group) ->
-        group.records = _.filter(data, (record) -> record.group == group.id)
+    _.each(groups, (group) -> group.records = _.filter(data, (record) -> record.group == group.id))
+    
+    _.each(data, (record) ->
+        record.boards = []
+        record.boards.push _.find(metadata.boards, (board) -> board.boardid == record.primary_boardid)
     )
     
     container.html(ich.query_search_results({ groups: groups }))
+
+    set_primary_boards(container)
+    set_boards_statuses(container)
+
+
+render_boards = (container, data) ->
+    boards = _.chain(data).reject((board) -> !board.is_traded).map((board) -> metadata_boards_hash[board.boardid]).value()
     
-    check_links_status(container)
-
-
-
-render_boards = (container, security_id, data) ->
-    container.append(ich.query_search_results_boards({ security_id: security_id, boards: _.filter(data, (record) -> !!record.is_traded ) }).hide())
-
-    check_links_status(container)
-
-
-toggle_record_boards = (element) ->
+    container.append(ich.query_search_results_boards({ boards: boards }))
     
-    boards_list = $('ul.boards', element)
+    set_boards_statuses(container)
+
+
+set_primary_boards = (container) ->
+    _.each($('li.security', container), (security) ->
+        security = $(security)
+        _.each($('li.board', security), (board) ->
+            board = $(board) ; board.addClass('primary') if board.data('id') == security.data('primary-board-id')
+        )
+    )
+
+
+set_boards_statuses = (container) ->
+    caches = _.chain(securities_keys()).map((key) -> securities_cache().get(key)).compact().flatten().value()
     
-    
-    if boards_list.length > 0
-        # if exists - hide all other boards lists, toggle visibility of this boards list
-        
-        $('ul.boards', element.closest('.result')).not(boards_list).hide()
-        boards_list.toggle()
+    _.each($('li.board', container), (board) ->
+        board       = $(board)
+        security    = board.closest('li.security')
+        board.toggleClass('active', _.include(caches, [board.data('id'), security.data('id')].join(':')))
+    )
+
+
+toggle_security_boards = (element) ->
+    if element.data('boards-loaded') == true
+        #element.siblings('li.security').addClass('primary')
+        element.toggleClass('primary')
     else
-        # if not exists — load boards for given security, show boards list
+        return if element.data('boards-loaded')? ; element.data('boards-loaded', false)
 
-        # do nothing if already looking for security boards
-        return if element.data('boards_query_performed') ; element.data('boards_query_performed', true)
+        mx.iss.security_boards(element.data('id')).done (data) ->
+            render_boards($('ul.boards', element), _.reject(data, (board) -> board.boardid == element.data('primary-board-id')))
+            element.data('boards-loaded', true) ; toggle_security_boards(element)
 
-        performed_query = mx.iss.security_boards(element.data('security-id'), { is_traded: 1 })
-    
-        performed_query.done ->
-            render_boards(element, element.data('security-id'), performed_query.data)
-            toggle_record_boards(element)
 
+toggle_ticker_in_table = (element) ->
+    board_id    = element.data('id')
+    security_id = element.closest('li.security').data('id')
+
+    if element.hasClass('active')
+        remove_ticker_from_table(board_id, security_id)
+    else
+        add_ticker_to_table(board_id, security_id)
 
 
 add_ticker_to_table = (board_id, security_id) ->
@@ -171,11 +162,12 @@ remove_ticker_from_table = (board_id, security_id) ->
 
 
 add_or_remove_table_ticker = (method, board_id, security_id) ->
-    board   = _.find(metadata.boards, (board) -> board.boardid == board_id)
-    market  = _.find(metadata.markets, (market) -> market.market_id == board.market_id)
-    engine  = _.find(metadata.engines, (engine) -> engine.id == board.engine_id)
+    board   = _.find(metadata.boards,   (board)     -> board.boardid    == board_id)
+    market  = _.find(metadata.markets,  (market)    -> market.market_id == board.market_id)
+    engine  = _.find(metadata.engines,  (engine)    -> engine.id        == board.engine_id)
     
     $(window).trigger "global:table:security:#{method}:#{engine.name}:#{market.market_name}", { ticker: "#{board_id}:#{security_id}" }
+
 
 widget = (container, options = {}) ->
     container = $(container) ; return if container.length == 0
@@ -235,6 +227,7 @@ widget = (container, options = {}) ->
     ready.then ->
         
         populate_security_groups_hash()
+        populate_metadata_boards_hash()
         
         query_input_view    = $('input[type=text]', container)
         filter_view         = make_filter_view(container)
@@ -249,15 +242,18 @@ widget = (container, options = {}) ->
 
         query_input_view.on 'keyup', observe_query_input
         
-        result_view.on 'click', 'li.record span.boards', (event) -> toggle_record_boards($(@).closest('li'))
+
+        result_view.on 'click', 'li.security > p.links a', (event) ->
+            event.preventDefault()
+            toggle_security_boards($(@).closest('li.security'))
         
-        result_view.on 'click', 'span.link.add', (event) ->
-            item = $(@).closest('li') ; add_ticker_to_table(item.data('board-id'), item.data('security-id'))
+
+        result_view.on 'click', 'li.board a', (event) ->
+            event.preventDefault()
+            toggle_ticker_in_table($(@).closest('li.board'))
         
-        result_view.on 'click', 'span.link.remove', (event) ->
-            item = $(@).closest('li') ; remove_ticker_from_table(item.data('board-id'), item.data('security-id'))
-        
-        $(window).on 'global:table:security:added global:table:security:removed', -> _.defer check_links_status, result_view
+
+        $(window).on 'global:table:security:added global:table:security:removed', -> _.defer set_boards_statuses, result_view
 
 
 $.extend scope,
