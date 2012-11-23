@@ -7,7 +7,7 @@ keys = [
     'currencies'
 ]
 
-columns = ['SECID', 'BOARDID', 'SHORTNAME', 'DECIMALS']
+columns = ['BOARDID', 'SECID']
 
 fetch = ->
     deferred = new $.Deferred
@@ -15,12 +15,11 @@ fetch = ->
     data = {}
     
     $.ajax
-        url: "#{scope.url_prefix}/imicex/index.jsonp?callback=?"
+        url: "#{scope.url_prefix}/imicex/index.json"
         data:
             'iss.meta':             'off'
             'indices.columns':      columns.join(',')
             'currencies.columns':   columns.join(',')
-        dataType: 'jsonp'
     .then (json) ->
         for key in keys
             data[key] = scope.merge_columns_and_data json?[key]

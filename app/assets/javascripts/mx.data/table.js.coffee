@@ -11,14 +11,14 @@ default_filter  = 'preview'
 
 # main container
 
-make_table_container_view = (wrapper, descriptor) ->
+make_table_container_view = (wrapper, engine, market) ->
     container = $('<div>')
-        .data({ engine: descriptor.trade_engine_name, market: descriptor.market_name })
+        .data({ engine: engine.name, market: market.name })
         .addClass('table_container')
     
     title = $('<h4>')
         .addClass('title')
-        .html("#{descriptor.trade_engine_title} :: #{descriptor.market_title}")
+        .html("#{engine.title} :: #{market.title}")
         .appendTo(container)
     
     columns_filter_trigger = $('<div>')
@@ -215,27 +215,25 @@ colorize_table_body_cell_changes = (container) ->
             cell_content.append($('<em>').addClass(sign).html(volatile))
        
 
-widget = (wrapper, descriptor) ->
+widget = (wrapper, engine, market) ->
     wrapper = $(wrapper) ; return if _.isEmpty(wrapper)
     
     deferred    = new $.Deferred
     
-    engine      = descriptor.trade_engine_name
-    market      = descriptor.market_name
-    cache_key   = [engine, market].join(':')
+    cache_key   = [engine.name, market.name].join(':')
     
-    table_container_view    = make_table_container_view(wrapper, descriptor)
+    table_container_view    = make_table_container_view(wrapper, engine, market)
     table_view              = $('table', table_container_view)
     table_head_view         = $('thead', table_view)
     table_body_view         = $('tbody', table_view)
     columns_filter_view     = $('div.columns_filter_wrapper', table_container_view)
     
     
-    columns_filter          = scope.table_columns_filter(columns_filter_view, engine, market)
+    columns_filter          = scope.table_columns_filter(columns_filter_view, engine.name, market.name)
 
 
-    filters_source          = mx.iss.marketdata_filters(engine, market)
-    columns_source          = mx.iss.marketdata_columns(engine, market)
+    filters_source          = mx.iss.marketdata_filters(engine.name, market.name)
+    columns_source          = mx.iss.marketdata_columns(engine.name, market.name)
 
     securities_source       = undefined
     marketdata_source       = undefined
@@ -253,6 +251,7 @@ widget = (wrapper, descriptor) ->
     prepared_columns        = undefined
     
     reload_timer            = undefined
+    refresh_timer           = undefined
     
     securities_data_version = 0
     marketdata_data_version = 0
@@ -284,7 +283,9 @@ widget = (wrapper, descriptor) ->
     
     update = ->
         cache.set([cache_key, 'securities'].join(':'), tickers)
-        refresh()
+
+        clearTimeout(refresh_timer)
+        refresh_timer = _.delay(refresh, 100)
     
     
     # logic
@@ -293,74 +294,6 @@ widget = (wrapper, descriptor) ->
         columns_filter.view().is(':hidden') and !sort_in_progress
 
     # render
-    
-    render1 = (force = false) ->
-        unless force
-            return unless can_render()
-        
-        columns_filter.view().detach()
-        
-        $('tr', table_head_view).sortable('destroy')
-
-        prepared_columns ?= prepare_columns(filters_source.data, columns_source.data, { cached_sort: cache.get([cache_key, 'sort_order'].join(':')) })
-
-        active_columns = _.filter(prepared_columns, (column) -> _.include(columns_filter.columns(), column.id))
-        
-        active_columns = _.sortBy(active_columns, (column) -> _.indexOf(columns_filter.columns(), column.id) )
-        
-        sort_column = _.find(prepared_columns, (column) -> !!column.is_sort_field)
-        
-        records     = _.map(records_source.data, (record) -> scope.utils.prepare_marketdata_record(record, columns_source.data))
-
-
-        render_table_head(table_head_view, active_columns, { sort_column: sort_column })
-
-        render_table_body(table_body_view, active_columns, records, { sort_column: sort_column, columns: columns_source.data })
-
-
-        table_container_view.toggle(!_.isEmpty(records_source.data))
-
-
-        $('tr.columns_filter_container td', table_head_view).html(columns_filter.view()) if table_container_view.is(':visible')
-
-        $('tr.columns', table_head_view).sortable({
-            
-            containment:    $('tr.columns', table_head_view)
-            opacity:        .75
-            placeholder:    'ui-sortable-placeholder'
-            tolerance:      'pointer'
-            
-            helper: (event, element) ->
-                table = $('<table>').addClass('records').html('<thead><tr></tr></thead>').appendTo(table_container_view)
-                $('thead tr', table).append(element.clone())
-                table
-            
-            start: (event, ui) ->
-                sort_in_progress = true
-                ui.placeholder.addClass(ui.item.data('type')).html(ui.item.html())
-                active_sortable_index = $('tr td', table_head_view).index(ui.item)
-            
-            change: (event, ui) ->
-                current_index = $('tr td', table_head_view).not(ui.item).index(ui.placeholder)
-                
-                _.each(table_body_view.children(), (row) ->
-                    row     = $(row)
-                    cell    = $(row.children()[active_sortable_index])
-                    
-                    if active_sortable_index > current_index
-                        cell.insertBefore(row.children()[current_index])
-                    else
-                        cell.insertAfter(row.children()[current_index])
-                )
-                
-                active_sortable_index = current_index
-            
-            stop: ->
-                sort_in_progress = false
-                columns_filter.update_filtered_columns_order(_.map($('tr.columns td', table_head_view), (cell) -> $(cell).data('id')))
-
-        })
-    
     
     render = ->
         
@@ -385,7 +318,9 @@ widget = (wrapper, descriptor) ->
         # toggle table visibility
         table_container_view.toggle(!_.isEmpty(records))
         
-            # activate columns sort
+        # activate columns sort
+        $('tr.columns', table_head_view).sortable('remove')
+
         $('tr.columns', table_head_view).sortable({
             containment:    $('tr.columns', table_head_view)
             tolerance:      'pointer'
@@ -450,7 +385,7 @@ widget = (wrapper, descriptor) ->
     load = ->
         return if _.isEmpty(tickers)
 
-        marketdata_source = mx.iss.marketdata2(engine, market, tickers.sort(), { only: 'marketdata' })
+        marketdata_source = mx.iss.marketdata2(engine.name, market.name, tickers.sort(), { only: 'marketdata' })
         
         $.when(marketdata_source).then ->
         
@@ -477,7 +412,7 @@ widget = (wrapper, descriptor) ->
     refresh = ->
         # console.log "initial loading: #{engine}/#{market} at #{new Date}"
         
-        securities_source = marketdata_source = if _.isEmpty(tickers) then {} else mx.iss.marketdata2(engine, market, tickers.sort())
+        securities_source = marketdata_source = if _.isEmpty(tickers) then {} else mx.iss.marketdata2(engine.name, market.name, tickers.sort())
         
         $.when(securities_source, marketdata_source).then ->
 
@@ -512,23 +447,23 @@ widget = (wrapper, descriptor) ->
         #table_head_view.on 'click', 'td.sortable',          -> sort_records_by $(@)
         
         $(window).on 'security:selected', (event, data) ->
-            return unless data.engine == engine and data.market == market
+            return unless data.engine == engine.name and data.market == market.name
             add_ticker([data.board, data.param].join(':'))
             
         
         $(window).on 'table:filtered_columns:updated', (event, data) ->
-            return unless data.engine == engine and data.market == market
+            return unless data.engine == engine.name and data.market == market.name
             render()
 
         table_container_view.on 'click', 'div.columns_filter_trigger', toggle_columns_filter_visibility
         
         
-        $(window).on "global:table:security:add:#{engine}:#{market}", (event, memo) ->
+        $(window).on "global:table:security:add:#{engine.name}:#{market.name}", (event, memo) ->
             add_ticker(memo.ticker)
         
-        $(window).on "global:table:security:remove:#{engine}:#{market}", (event, memo) ->
+        $(window).on "global:table:security:remove:#{engine.name}:#{market.name}", (event, memo) ->
             remove_ticker(memo.ticker)
-        
+
         deferred.resolve()
     
 

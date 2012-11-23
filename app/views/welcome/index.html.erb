@@ -56,89 +56,21 @@
 <script type="text/javascript" charset="utf-8">
 
     $(function() {
-    mx.data.ready.then(function(metadata) {
 
-            function find_engine(engine_id) {
-                return _.find(metadata.engines, function(engine) {
-                    return engine.id == engine_id;
-                });
-            }
-
-            function find_market(market_id) {
-                return _.find(metadata.markets, function(market) {
-                    return market.market_id == market_id;
-                });
-            }
-
-            function find_board(boardid) {
-                return _.find(metadata.boards, function(board) {
-                    return board.boardid == boardid;
-                });
-            }
+        var metadata = mx.data.metadata();
+        
+        metadata.then(function() {
             
-            $.when(mx.iss.bootstrap()).then(function(bootstrap) {
-                
-                var cached_chart_instruments    = mx.data.caches.chart_instruments();
-                var chart_instruments           = [];
-                /*
-                _.each(bootstrap, function(records, key) {
-                    
-                    // chart instruments
-                    var record = _.first(records);
-
-                    chart_instruments.push({
-                        id:         record.SECID,
-                        board:      record.BOARDID,
-                        title:      record.SHORTNAME,
-                        decimals:   record.DECIMALS
-                    })
-
-                });
-                
-                
-                if (!cached_chart_instruments) mx.data.caches.chart_instruments(chart_instruments);
-                  */      
-                
-                var tables = _.map(metadata.markets, function(market) { mx.data.table($("#tables"), market); });
-
-                // mx.data.chart($('#chart'));
-
-                mx.data.quote_search("#quote_search");
-                
-            })
-
-            /*mx.iss.bootstrap().then(function(data) {
-                var instruments         = _.union(data.indices, data.currencies),
-                    boards              = {},
-                    securities          = [],
-                    chart_securities    = [];
-                
-                _.each(instruments, function(security) {
-                    var board = boards[security.BOARDID] || (boards[security.BOARDID] = (function() {
-                        var b = find_board(security.BOARDID);
-                            m = find_market(b.market_id),
-                            e = find_engine(b.engine_id);
-                        return { board: b.boardid, market: m.market_name, engine: e.name };
-                    })());
-                    
-                    securities.push($.extend({}, board, { param: security.SECID }));
-                });
-                    
-
-                _.each(securities, function(security) {
-                    $(window).trigger("security:selected", { engine: security.engine, market: security.market, board: security.board, param: security.param, no_cache: true });
-                });
-                
-                _.each([_.first(data.indices), _.first(data.currencies)], function(security) {
-                    var board = boards[security.BOARDID]
-                    $(window).trigger("security:to:chart", { engine: board.engine, market: board.market, board: board.board, id: security.SECID, title: security.SHORTNAME, no_cache: true });
-                });
-                    
-            });
-            */
+            var tables = _.map(metadata.markets(), function(market) { return mx.data.table($('#tables'), market.engine, market); });
             
-        });
-
+            // mx.data.chart($('#chart'));
+            
+            mx.data.bootstrap(tables);
+            
+            mx.data.quote_search("#quote_search");
+            
+            
+        })
 
     });
 

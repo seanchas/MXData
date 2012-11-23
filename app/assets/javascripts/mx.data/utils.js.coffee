@@ -71,7 +71,6 @@ render_marketdata_record_number_value = (name, record, column) ->
     
     if !!column.has_percent
         value_for_render = value_for_render + '%'
-        
     
     value_for_render
 
