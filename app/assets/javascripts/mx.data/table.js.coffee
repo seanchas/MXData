@@ -12,32 +12,7 @@ default_filter  = 'preview'
 # main container
 
 make_table_container_view = (wrapper, engine, market) ->
-    container = $('<div>')
-        .data({ engine: engine.name, market: market.name })
-        .addClass('table_container')
-    
-    title = $('<h4>')
-        .addClass('title')
-        .html("#{engine.title} :: #{market.title}")
-        .appendTo(container)
-    
-    columns_filter_trigger = $('<div>')
-        .addClass('columns_filter_trigger')
-        .append($('<span>').html('Поля'))
-        .appendTo(title)
-    
-    container.append($('<div>').addClass('columns_filter_wrapper').hide())
-    
-    container.append $('<table>')
-        .addClass('records')
-        .html('<thead></thead><tbody></tbody>')
-    
-    table_head_view = $('thead', container)
-    
-    table_head_view.append($('<tr>').addClass('columns'))
-    table_head_view.append($('<tr>').addClass('columns_filter'))
-    
-    container.appendTo(wrapper).hide()
+    container = ich.table({ engine: engine, market: market }).appendTo(wrapper).hide()
 
 
 # table head columns
@@ -63,14 +38,8 @@ render_table_head_columns = (container, columns, options = {}) ->
 
 
 render_table_head_column_cell = (column, options = {}) ->
-    cell = $('<td>')
-        .data({ id: column.id, type: column.type })
-        .attr('title', column.title)
-        .addClass(column.type)
+    ich.table_column_cell({ column: column })
         .toggleClass('sortable', !!column.is_ordered)
-        .append($('<span>').html(column.short_title))
-    
-    cell
 
 
 render_table_head_columns_filter_cell = (container, columns, view, options = {}) ->
@@ -260,6 +229,9 @@ widget = (wrapper, engine, market) ->
     marketdata_data         = undefined
     
     
+    columns_sorter_is_active    = false
+    
+    
     # tickers
     
     add_ticker = (ticker) ->
@@ -304,10 +276,48 @@ widget = (wrapper, engine, market) ->
         # prepare columns
         columns = (columns_source.data[column] for column in columns_filter.columns())
 
-        # render table head
-        render_table_head_columns($('tr.columns', table_head_view), columns)
-        render_table_head_columns_filter_cell($('tr.columns_filter', table_head_view), columns, columns_filter.view())
+        unless columns_sorter_is_active
+
+            # render table head
+            render_table_head_columns($('tr.columns', table_head_view), columns)
+            render_table_head_columns_filter_cell($('tr.columns_filter', table_head_view), columns, columns_filter.view())
         
+            # activate columns sort
+        
+            $('tr.columns', table_head_view).sortable('remove')
+        
+            $('tr.columns', table_head_view).sortable({
+                containment:    $('tr.columns', table_head_view)
+                tolerance:      'pointer'
+                helper:         'clone'
+                placeholder:    'ui-sortable-placeholder'
+                appendTo:       table_head_view
+            
+                start:          (event, ui) ->
+                    columns_sorter_is_active = true
+                    ui.placeholder.addClass(ui.item.data('type')).html(ui.item.html())
+                    active_sortable_index = $('tr.columns', table_head_view).children().not(ui.item).index(ui.placeholder)
+            
+                change:         (event, ui) ->
+                    index = $('tr.columns', table_head_view).children().not(ui.item).index(ui.placeholder)
+                
+                    _.each(table_body_view.children(), (row) ->
+                        row     = $(row)
+                        cell    = $(row.children()[active_sortable_index])
+                    
+                        if active_sortable_index > index
+                            cell.insertBefore(row.children()[index])
+                        else
+                            cell.insertAfter(row.children()[index])
+                    )
+                
+                    active_sortable_index = index
+            
+                stop:           (event, ui) ->
+                    columns_sorter_is_active = false
+                    columns_filter.update_filtered_columns_order(_.map($('tr.columns', table_head_view).children(), (cell) -> $(cell).data('id')))
+                
+            })
         
         # render table body
         render_table_body_rows(table_body_view, records, columns)
@@ -318,39 +328,6 @@ widget = (wrapper, engine, market) ->
         # toggle table visibility
         table_container_view.toggle(!_.isEmpty(records))
         
-        # activate columns sort
-        $('tr.columns', table_head_view).sortable('remove')
-
-        $('tr.columns', table_head_view).sortable({
-            containment:    $('tr.columns', table_head_view)
-            tolerance:      'pointer'
-            helper:         'clone'
-            placeholder:    'ui-sortable-placeholder'
-            appendTo:       table_head_view
-            
-            start:          (event, ui) ->
-                ui.placeholder.addClass(ui.item.data('type')).html(ui.item.html())
-                active_sortable_index = $('tr.columns', table_head_view).children().not(ui.item).index(ui.placeholder)
-            
-            change:         (event, ui) ->
-                index = $('tr.columns', table_head_view).children().not(ui.item).index(ui.placeholder)
-                
-                _.each(table_body_view.children(), (row) ->
-                    row     = $(row)
-                    cell    = $(row.children()[active_sortable_index])
-                    
-                    if active_sortable_index > index
-                        cell.insertBefore(row.children()[index])
-                    else
-                        cell.insertAfter(row.children()[index])
-                )
-                
-                active_sortable_index = index
-            
-            stop:           (event, ui) ->
-                columns_filter.update_filtered_columns_order(_.map($('tr.columns', table_head_view).children(), (cell) -> $(cell).data('id')))
-                
-        })
         
         
 
