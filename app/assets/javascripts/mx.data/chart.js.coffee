@@ -122,7 +122,6 @@ create_candles = (data_sources, instruments, chart_type) ->
     
     yAxis.push $.extend true, {}, default_candles_yAxis_options,
         opposite:       true
-        #gridLineWidth:  0
 
 
     effective_instruments_size  = _.size(instrument for instrument in instruments when !instrument.disabled)
@@ -137,7 +136,8 @@ create_candles = (data_sources, instruments, chart_type) ->
         candles_data    = candles["#{if effective_chart_type == 'line' then 'line' else 'candles'}_data"]
         
         candles_serie_options = $.extend true, {}, default_candles_series_options,
-            name:   instrument.title
+            id:     "candles:#{index}"
+            name:   instrument.title || instrument.id
             color:  scope.colors[index]
             type:   cs_to_hs_types[effective_chart_type]
             data:   candles_data
@@ -195,7 +195,8 @@ create_volumes = (data_sources, instruments) ->
         volumes = _.first data_sources[instrument.id].volumes
         
         volumes_serie_options = $.extend true, {}, default_volumes_series_options,
-            name:   instrument.title
+            id:     "volumes:#{index}"
+            name:   instrument.title || instrument.id
             color:  scope.colors[index]
             type:   cs_to_hs_types[volumes.type]
             data:   volumes.data
@@ -250,9 +251,10 @@ create_inline_technicals = (data_sources, instruments, technicals, offset, optio
             
             for serie in technical.data
                 serie_options = $.extend true, {}, default_candles_series_options,
+                    id:     "inline technicals:#{technical_index}"
                     name:   options.technicals_meta[technicals[index].id].title
                     color:  scope.colors[total + technical_index]
-                    type:   if technicals[index].id == 'psar' then 'scatter' else cs_to_hs_types[technical.type] # TODO: REMOVE THIS HARDCODED PSAR!
+                    type:   cs_to_hs_types[technical.type]
                     data:   serie
                     yAxis:  0
             
@@ -292,6 +294,7 @@ create_separate_technicals = (data_sources, instruments, technicals, offset, opt
     
     yAxis_offset_index  = 3
     effective_offset    = 0
+    technical_index     = 0
 
     [effective_instrument, effective_index]  = _.first([instrument, index] for instrument, index in instruments when !instrument.disabled)
     data_source                                         = data_sources[effective_instrument.id].technicals
@@ -306,6 +309,7 @@ create_separate_technicals = (data_sources, instruments, technicals, offset, opt
         for serie in technical.data
             
             serie_options = $.extend true, {}, default_candles_series_options,
+                id:     "separate technicals:#{technical_index}"
                 name:   options.technicals_meta[technicals[index].id].title
                 color:  scope.colors[effective_index]
                 type:   cs_to_hs_types[technical.type]
@@ -316,6 +320,8 @@ create_separate_technicals = (data_sources, instruments, technicals, offset, opt
         
         effective_offset += volumes_yAxis_margin + volumes_yAxis_height
 
+        technical_index++
+        
     series:     series
     yAxis:      yAxis
     offset:     effective_offset
@@ -353,8 +359,6 @@ calculate_extremes = (chart, options) ->
     max: max
 
 create = (container, data_sources, instruments, technicals, chart_type, options = {}) ->
-    
-    t0 = new Date
     
     series  = []
     xAxis   = []
@@ -419,12 +423,16 @@ create = (container, data_sources, instruments, technicals, chart_type, options 
         CHART
     ###
 
-    t1 = new Date
-
     chart_options = $.extend true, {}, default_chart_options,
         chart:
             renderTo:   _.first(container)
             height:     offset
+        tooltip:
+
+            formatter: ->
+                render_tooltips chart, @
+                
+
         series: series
         xAxis:  xAxis
         yAxis:  yAxis
@@ -436,10 +444,8 @@ create = (container, data_sources, instruments, technicals, chart_type, options 
     { min, max } = calculate_extremes chart, options
     _.first(chart.xAxis).setExtremes(min, max, true, false)
     
-    t2 = new Date
-    
     container.css 'height', chart.chartHeight
-    
+
     chart
 
 
@@ -487,7 +493,8 @@ update = (container, data_sources, instruments, technicals, chart_type, options 
 
 
 calculate_technicals_colors_indices = (technicals, instruments, data_sources) ->
-    total_instruments           = _.size instruments
+    total_instruments           = _.size instruments ; return [] if total_instruments == 0
+    
     effective_instrument_index  = _.first(index for instrument, index in instruments when !instrument.disabled)
     
     inline_instrument_index = 0
@@ -503,6 +510,90 @@ calculate_technicals_colors_indices = (technicals, instruments, data_sources) ->
     
     result
 
+
+
+render_tooltips = (chart, state) ->
+
+    # clear tooltips
+    
+    $('.tooltip', chart.container).remove()
+    
+    # prepare data
+    
+    __points = _.reduce(state.points, (memo, points) ->
+        [id, index] = points.series.options.id.split(':')
+        ((memo[id] ||= [])[index] ||= []).push(points)
+        memo
+    , {})
+
+    # candles and inline technicals
+    
+    tooltip = $('<ul>')
+        .addClass('tooltip')
+        .css('top', 0)
+        .appendTo(chart.container)
+    
+    # candles
+
+    _.each(__points['candles'], (points) -> render_points_for_tooltip(tooltip, points))
+
+    # inline technicals
+    
+    _.each(__points['inline technicals'], (points) -> render_points_for_tooltip(tooltip, points))
+    
+    # volumes
+    
+    offset = candles_yAxis_margin + candles_yAxis_height
+
+    tooltip = $('<ul>')
+        .addClass('tooltip')
+        .css('top', offset)
+        .appendTo(chart.container)
+    
+    _.each(__points['volumes'], (points) -> render_points_for_tooltip(tooltip, points))
+
+    
+    # separate technicals
+    
+    offset = candles_yAxis_margin + candles_yAxis_height + volumes_yAxis_margin + volumes_yAxis_height
+    
+    _.each(__points['separate technicals'], (points, index) ->
+        
+        tooltip = $('<ul>')
+            .addClass('tooltip')
+            .css('top', offset + (volumes_yAxis_margin + volumes_yAxis_height) * index)
+            .appendTo(chart.container)
+        
+        render_points_for_tooltip(tooltip, points)
+        
+    )
+    
+    false
+
+render_points_for_tooltip = (container, points) ->
+    view = $('<li>')
+        .appendTo(container)
+    
+    $('<em>')
+        .html(points[0].series.name)
+        .css('color', points[0].series.color)
+        .appendTo(view)
+
+    _.each(points, (point) -> render_point_for_tooltip(view, point))
+
+
+render_point_for_tooltip = (container, point) ->
+    switch point.series.type
+        when 'line', 'column'
+            $('<span>')
+                .html(point.point.y)
+                .appendTo(container)
+        when 'candlestick', 'ohlc'
+            _.each(['open', 'high', 'low', 'close'], (key) ->
+                $('<span>')
+                    .html(key + ': ' + point.point[key])
+                    .appendTo(container)
+            )
 
 
 
@@ -571,6 +662,7 @@ widget = (wrapper, options = {}) ->
             $(window).trigger 'chart:render:complete'
             $(window).trigger 'chart:indicators:colors', [calculate_technicals_colors_indices(technicals.data(), instruments.data(), data_sources)]
             
+
     delayed_render = ->
         if should_rebuild == true and chart?
             chart.showLoading()

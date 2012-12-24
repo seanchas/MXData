@@ -86,8 +86,8 @@ make_technical_child_view = (anchor, descriptor, values) ->
     wrapper.append $('<li>').html('<table><thead></thead><tbody></tbody></table>')
     thead = $('thead', wrapper)
     tbody = $('tbody', wrapper)
-        
-    thead.append $('<tr>').append($('<td>').attr('colspan', 3).html('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'))
+    
+    thead.append $('<tr>').append($('<td>').attr('colspan', 3).html(descriptor.description))
 
     unless _.isEmpty(descriptor.params)
         
@@ -95,7 +95,7 @@ make_technical_child_view = (anchor, descriptor, values) ->
             row = $('<tr>').appendTo tbody
             row.append $('<th>').html(param.title)
             row.append $('<td>').addClass('value').append make_input_view(param, values[index]?.value)
-            row.append $('<td>').addClass('hint').html('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.')
+            row.append $('<td>').addClass('hint').html(param.description)
 
     # remove button
     wrapper.append $('<li>').addClass('remove').html($('<span>').html('Удалить'))
@@ -173,8 +173,6 @@ widget = (wrapper, options = {}) ->
         broadcast()
     
     remove_technical_at = (index) ->
-        
-        console.log index
         
         technicals = _.without technicals, technicals[index]
         remove_technical_view $('.anchor', wrapper).eq(index)

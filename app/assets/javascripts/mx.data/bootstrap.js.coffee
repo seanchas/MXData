@@ -34,6 +34,10 @@ fetch = (tables) ->
                     $(window).trigger "global:table:security:add:#{board.engine.name}:#{board.market.name}", { ticker: "#{ticker.BOARDID}:#{ticker.SECID}" }
             )
         
+        _.each keys, (key) ->
+            ticker = bootstrap.data[key][0]
+            $(window).trigger "security:to:chart", { id: ticker.SECID, board: ticker.BOARDID }
+        
         cache.set('complete', true)
 
 

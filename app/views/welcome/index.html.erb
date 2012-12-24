@@ -21,7 +21,7 @@
 
 
 
-<div id="chart" style="display: none;">
+<div id="chart">
     
     <div id="chart_instruments_container" class="instruments_wrapper">
     </div>
@@ -64,7 +64,7 @@
             
             var tables = _.map(metadata.markets(), function(market) { return mx.data.table($('#tables'), market.engine, market); });
             
-            // mx.data.chart($('#chart'));
+            mx.data.chart($('#chart'));
             
             mx.data.bootstrap(tables);
             

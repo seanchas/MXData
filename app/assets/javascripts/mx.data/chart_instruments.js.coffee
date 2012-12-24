@@ -24,7 +24,7 @@ make_instrument_view = (instrument, index, size) ->
     view = $('<li>')
         .attr({ 'data-param': instrument.id })
         .css('background-color', scope.background_colors[index])
-        .html(instrument.title)
+        .html(instrument.title || instrument.id)
         .toggleClass('disabled', !!instrument.disabled)
     
     if instrument.failure?
@@ -85,7 +85,7 @@ widget = (wrapper) ->
     
     
     add_cached = ->
-        add instrument for instrument in scope.caches.chart_instruments()
+        add instrument for instrument in scope.caches.chart_instruments() || []
         
     
     add = (data) ->
