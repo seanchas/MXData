@@ -518,6 +518,8 @@ render_tooltips = (chart, state) ->
     
     $('.tooltip', chart.container).remove()
     
+    date = new Date(state.points[0].x - 4 * 60 * 60 * 1000)
+    
     # prepare data
     
     __points = _.reduce(state.points, (memo, points) ->
@@ -532,6 +534,13 @@ render_tooltips = (chart, state) ->
         .addClass('tooltip')
         .css('top', 0)
         .appendTo(chart.container)
+    
+    # date
+    
+    $('<li>')
+        .addClass('date')
+        .html(Highcharts.dateFormat('%Y-%m-%d %H:%M', date))
+        .appendTo(tooltip)
     
     # candles
 
@@ -550,6 +559,11 @@ render_tooltips = (chart, state) ->
         .css('top', offset)
         .appendTo(chart.container)
     
+    $('<li>')
+        .addClass('date')
+        .html(Highcharts.dateFormat('%Y-%m-%d %H:%M', date))
+        .appendTo(tooltip)
+    
     _.each(__points['volumes'], (points) -> render_points_for_tooltip(tooltip, points))
 
     
@@ -564,6 +578,12 @@ render_tooltips = (chart, state) ->
             .css('top', offset + (volumes_yAxis_margin + volumes_yAxis_height) * index)
             .appendTo(chart.container)
         
+        $('<li>')
+            .addClass('date')
+            .html(Highcharts.dateFormat('%Y-%m-%d %H:%M', date))
+            .appendTo(tooltip)
+    
+
         render_points_for_tooltip(tooltip, points)
         
     )

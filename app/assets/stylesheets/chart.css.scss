@@ -462,6 +462,10 @@
             
         }
         
+        li.date {
+            font-weight: bold;
+        }
+        
         li em::after {
             content: ' : ';
         }
