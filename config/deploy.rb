@@ -1,5 +1,3 @@
-$:.unshift(File.expand_path('./lib', ENV['rvm_path']))
-
 load 'deploy/assets'
 
 require "rvm/capistrano"
@@ -17,7 +15,6 @@ set :deploy_to,   "/export/depo/ror/linux/appservers/#{application}"
 set :deploy_via,  :copy
 
 set :rvm_ruby_string, "1.9.2@quotes"
-set :rvm_type,        :user
 
 server "beta", :app, :web, :primary => true
 

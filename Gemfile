@@ -13,10 +13,10 @@ gem 'routing-filter'
 gem 'jquery-rails'
 
 gem 'capistrano'
+gem 'rvm-capistrano'
 
 group :production do
-    gem 'libv8'
-    gem 'therubyracer'
+    gem 'therubyracer', '0.10.2', :platforms => :ruby
 end
 
 group :test do
