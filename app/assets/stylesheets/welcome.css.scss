@@ -7,7 +7,7 @@
 html,
 body {
   height: 100%;
-  margin: 0 auto;
+  margin: .5em auto 0;
   padding: 0;
 }
 
@@ -25,7 +25,8 @@ body {
 }
 
 #content {
-  padding-bottom: 6em;
+  margin-bottom: 3em;
+  padding-bottom: 2em;
 }
 
 #footer {
@@ -67,7 +68,7 @@ body[lang=en] #header a.logo {
 // footer
 
 #footer {
-    background-color: #ccc;
+    background-color: #eee;
     padding: .5em 10px;
     
     p {
