@@ -130,10 +130,11 @@ DEPENDENCIES
   capistrano
   coffee-rails (~> 3.2)
   jquery-rails
+  libv8
   rails (~> 3.2)
   routing-filter
   rvm-capistrano
   sass-rails (~> 3.2)
-  therubyracer (= 0.10.2)
+  therubyracer
   turn (= 0.8.2)
   uglifier

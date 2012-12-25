@@ -16,7 +16,8 @@ gem 'capistrano'
 gem 'rvm-capistrano'
 
 group :production do
-    gem 'therubyracer', '0.10.2', :platforms => :ruby
+  gem 'libv8',        :platform => :ruby
+  gem 'therubyracer', :platform => :ruby
 end
 
 group :test do

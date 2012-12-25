@@ -518,7 +518,7 @@ render_tooltips = (chart, state) ->
     
     $('.tooltip', chart.container).remove()
     
-    date = new Date(state.points[0].x - 4 * 60 * 60 * 1000)
+    date = new Date(state.points[0].x)
     
     # prepare data
     
