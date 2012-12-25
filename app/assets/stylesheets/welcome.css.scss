@@ -12,10 +12,12 @@ body {
 }
 
 body {
+    background: #eee;
     width: 1240px;
 }
 
 #body {
+    background: #fff;
     font-size: 15px;
     height: auto;
     min-height: 100%;
@@ -65,7 +67,7 @@ body[lang=en] #header a.logo {
 // footer
 
 #footer {
-    background-color: #eee;
+    background-color: #ccc;
     padding: .5em 10px;
     
     p {
