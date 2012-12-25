@@ -1,5 +1,6 @@
 <%= render "shared/icanhaz/quote_search" %>
 <%= render "shared/icanhaz/table" %>
+<%= render "shared/icanhaz/table_information_row" %>
 
 <div id="quote_search">
     <table>
@@ -57,10 +58,12 @@
 <script type="text/javascript" charset="utf-8">
 
     $(function() {
-
-        var metadata = mx.data.metadata();
+        
+    var metadata = mx.data.metadata();
         
         metadata.then(function() {
+            
+            mx.data.quote_search("#quote_search");
             
             var tables = _.map(metadata.markets(), function(market) { return mx.data.table($('#tables'), market.engine, market); });
             
@@ -68,11 +71,8 @@
             
             mx.data.bootstrap(tables);
             
-            mx.data.quote_search("#quote_search");
-            
-            
         })
-
+        
     });
 
 </script>

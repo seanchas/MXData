@@ -60,7 +60,7 @@ render_table_head_columns_filter_cell = (container, columns, view, options = {})
 # table body rows
 
 render_table_body_rows = (container, records, columns, options = {}) ->
-    rows = container.children()
+    rows = container.children('tr.ticker')
     
     for record in records
         
@@ -75,6 +75,9 @@ render_table_body_rows = (container, records, columns, options = {}) ->
         row = $(row)
         
         render_table_body_row_cells(row, record, columns, options)
+        
+        if information_row = row.data('information-row')
+            $('td', information_row).attr('colspan', row.children().length)
     
 
     tickers = _.pluck(records, 'ticker')
@@ -82,13 +85,20 @@ render_table_body_rows = (container, records, columns, options = {}) ->
 
     for row in rows
         row = $(row)
-        row.remove() unless _.include(tickers, row.data('id'))
+        remove_row(row) unless _.include(tickers, row.data('id'))
     
     container
             
 
+remove_row = (row) ->
+    if information_row = row.data('information-row')
+        information_row.remove()
+    row.remove()
+
+
 render_table_body_row = (record, columns, options = {}) ->
     row = $('<tr>')
+        .addClass('ticker')
         .data({ id: [record.BOARDID, record.SECID].join(':') })
     
     row
@@ -182,7 +192,61 @@ colorize_table_body_cell_changes = (container) ->
             
             cell_content.html(constant)
             cell_content.append($('<em>').addClass(sign).html(volatile))
+
+
+
+
+toggle_ticker_information = (row) ->
+    information_row = row.data('information-row') ? render_information_row(row)
+    information_row.toggle()
+
+
+
+render_information_row = (row) ->
+    cells = $('td', row)
+    
+    result = $('<tr>')
+        .addClass('info')
+        .toggleClass('chart', row.hasClass('chart'))
+        .append(
+            $('<td>')
+                .attr('colspan', cells.length)
+                .html('information row')
+        )
+        .insertAfter(row)
+        .hide()
+    
+    row.data('information-row', result)
+    result.data('widget', mx.data.table_information_row(_.first(result.children()), row.data('id')))
+    
+    result
+
+
+process_chart_tickers = (container, tickers) ->
+    rows = $('tr.ticker', container)
+
+    _.each rows, hide_chart_state
+
+    chart_rows = _.select(rows, (row) -> _.include(tickers, $(row).data('id')))
+
+    _.each chart_rows, show_chart_state
        
+
+change_chart_state = (row, state) ->
+    row = $(row)
+    
+    row.toggleClass('chart', state)
+
+    if information_row = row.data('information-row')
+        information_row.toggleClass('chart', row.hasClass('chart'))
+
+
+show_chart_state = (row) ->
+    change_chart_state(row, true)
+    
+hide_chart_state = (row) ->
+    change_chart_state(row, false)
+
 
 widget = (wrapper, engine, market) ->
     wrapper = $(wrapper) ; return if _.isEmpty(wrapper)
@@ -212,6 +276,7 @@ widget = (wrapper, engine, market) ->
     ready_for_render        = $.when columns_source, filters_source, columns_filter
     
     tickers                 = []
+    chart_tickers           = []
     
     
     sort_in_progress        = false
@@ -268,6 +333,7 @@ widget = (wrapper, engine, market) ->
     # render
     
     render = ->
+        return unless deferred.state() == 'resolved'
         
         # prepare records
         records = (_.extend({}, securities_data[key], marketdata_data[key]) for key of securities_data)
@@ -284,7 +350,10 @@ widget = (wrapper, engine, market) ->
         
             # activate columns sort
         
-            $('tr.columns', table_head_view).sortable('remove')
+            try
+                $('tr.columns', table_head_view).sortable('destroy')
+            catch error
+                false
         
             $('tr.columns', table_head_view).sortable({
                 containment:    $('tr.columns', table_head_view)
@@ -324,6 +393,7 @@ widget = (wrapper, engine, market) ->
         
         # post process
         colorize_table_body_cell_changes(table_body_view)
+        process_chart_tickers(table_body_view, chart_tickers)
         
         # toggle table visibility
         table_container_view.toggle(!_.isEmpty(records))
@@ -347,10 +417,6 @@ widget = (wrapper, engine, market) ->
         cache.set([cache_key, 'sort_order'].join(':'), { column_id: column.id, direction: column.is_sort_field })
         
         render()
-    
-    
-    append_external_views = ->
-        
     
     
     toggle_columns_filter_visibility = ->
@@ -387,8 +453,7 @@ widget = (wrapper, engine, market) ->
     # refresh - reload securities and marketdata
     
     refresh = ->
-        # console.log "initial loading: #{engine}/#{market} at #{new Date}"
-        
+
         securities_source = marketdata_source = if _.isEmpty(tickers) then {} else mx.iss.marketdata2(engine.name, market.name, tickers.sort())
         
         $.when(securities_source, marketdata_source).then ->
@@ -409,19 +474,19 @@ widget = (wrapper, engine, market) ->
             
             reload()
         
+    #
     
-
-    # ready for render
+    add_cached_tickers()
+    
+    $(window).on 'chart:instruments:changed', (event, instruments, message) ->
+        chart_tickers = _.map(instruments, (ticker) -> [ticker.board, ticker.id].join(':'))
+        render()
+        
+    #
 
     ready_for_render.then ->
 
-        append_external_views()
-
-        add_cached_tickers()
-        
         refresh()
-        
-        #table_head_view.on 'click', 'td.sortable',          -> sort_records_by $(@)
         
         $(window).on 'security:selected', (event, data) ->
             return unless data.engine == engine.name and data.market == market.name
@@ -434,13 +499,21 @@ widget = (wrapper, engine, market) ->
 
         table_container_view.on 'click', 'div.columns_filter_trigger', toggle_columns_filter_visibility
         
+        # ticker information
+        
+        table_container_view.on 'click', 'tr.ticker', (event) ->
+            toggle_ticker_information($(@))
+        
+        # tickers manipulation
         
         $(window).on "global:table:security:add:#{engine.name}:#{market.name}", (event, memo) ->
             add_ticker(memo.ticker)
         
         $(window).on "global:table:security:remove:#{engine.name}:#{market.name}", (event, memo) ->
             remove_ticker(memo.ticker)
-
+        
+        # chart manipulations
+        
         deferred.resolve()
     
 

@@ -174,10 +174,6 @@
                 color: #c00;
             }
             
-            tr.even td {
-                background-color: #f5f5f5;
-            }
-            
             td.chart {
 
                 vertical-align: middle;
@@ -199,6 +195,9 @@
                 
             }
             
+            tr.info td {
+                padding: 0;
+            }
             
         }
         

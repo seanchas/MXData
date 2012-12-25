@@ -78,9 +78,9 @@ fetch_2 = (param, options = {}) ->
         query_data = _.reduce(query_data, ((container, value, key) -> container[key] = value if value? ; container ), {})
         
         $.ajax
-            url:        "#{scope.url_prefix}/engines/#{engine}/markets/#{market}/boardgroups/#{group}/securities/#{id}.hs?callback=?"
+            url:        "#{scope.url_prefix}/engines/#{engine}/markets/#{market}/boardgroups/#{group}/securities/#{id}.hs"
             data:       $.extend query_data, technicals_params
-            dataType:   'jsonp'
+            dataType:   'json'
         .then (json) ->
             if json.candles?
                 candles                 = json.candles[0]
@@ -93,8 +93,6 @@ fetch_2 = (param, options = {}) ->
                 result[key] = value
             
             deferred.resolve result
-            
-            t1 = new Date
             
     deferred.promise(result)
 

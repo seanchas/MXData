@@ -55,7 +55,7 @@ widget = (wrapper) ->
     instruments_changed = true
 
 
-    ready_for_render    = $.when bootstrap_data
+    ready_for_render    = $.when true
 
     sort_in_progress    = false
     
@@ -90,11 +90,19 @@ widget = (wrapper) ->
     
     add = (data) ->
         return if _.size(instruments) >= max_instruments
+        
+        if _.isString(data)
+            [board, id] = data.split(':')
+            data = { board: board, id: id }
+        
         return if _.size(instrument for instrument in instruments when instrument.id == data.id)
         
         instruments.push data
         
         update 'add'
+    
+    del = (data) ->
+        remove _.last(data.split(':'))
     
 
     remove = (param) ->
@@ -145,6 +153,7 @@ widget = (wrapper) ->
             remove $(@).closest('li').data('param')
         
         $(window).on 'security:to:chart', (event, data) -> add data
+        $(window).on 'security:from:chart', (event, data) -> del data
         
         $(window).on 'chart:render:complete', (event) -> render()
         
@@ -154,6 +163,8 @@ widget = (wrapper) ->
             update: reorder
 
         deferred.resolve()
+        
+        broadcast('init')
     
 
     deferred.promise({ data: -> instruments })

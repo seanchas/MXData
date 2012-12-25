@@ -714,8 +714,6 @@ widget = (wrapper, options = {}) ->
     refresh = ->
         clearTimeout refresh_timeout
         
-        delete data_sources
-        
         data_sources = _.reduce instruments.data(), (memo, instrument) ->
             memo[instrument.id] = data_source_for_instrument instrument ; memo
         , {}

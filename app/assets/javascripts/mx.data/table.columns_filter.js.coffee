@@ -99,7 +99,7 @@ enable_inactive_source_columns = (wrapper) ->
 
 disable_active_source_columns = (wrapper) ->
     wrapper = $(wrapper) ; return if wrapper.length == 0
-    $('input::checked', wrapper).prop('disabled', true)
+    $('input:checked', wrapper).prop('disabled', true)
 
 
 enable_active_source_columns = (wrapper) ->

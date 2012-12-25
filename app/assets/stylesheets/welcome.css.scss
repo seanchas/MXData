@@ -1,3 +1,77 @@
 // Place all the styles related to the welcome controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+// sticky footer
+
+html,
+body {
+  height: 100%;
+  margin: 0 auto;
+  padding: 0;
+}
+
+body {
+    width: 1240px;
+}
+
+#body {
+    font-size: 15px;
+    height: auto;
+    min-height: 100%;
+    position: relative;
+}
+
+#content {
+  padding-bottom: 6em;
+}
+
+#footer {
+  background-color: #fff;
+  height: 2em;
+  margin-top: -2em;
+  position: relative;
+}
+
+
+// header
+
+#header {
+
+    padding: 1em 10px;
+    position: relative;
+    
+    a.logo {
+        background-position: left center;
+        background-repeat: no-repeat;
+        display: block;
+        height: 51px;
+        overflow: hidden;
+        padding-left: 210px;
+        width: 0;
+    }
+    
+}
+
+body[lang=ru] #header a.logo {
+    background-image: image_url('logo_ru.png');
+}
+
+body[lang=en] #header a.logo {
+    background-image: image_url('logo_en.png');
+}
+
+
+// footer
+
+#footer {
+    background-color: #eee;
+    padding: .5em 10px;
+    
+    p {
+        font-size: 12px;
+        margin: 0;
+        padding: 0;
+    }
+    
+}
