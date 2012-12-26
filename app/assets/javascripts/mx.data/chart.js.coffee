@@ -118,10 +118,10 @@ create_candles = (data_sources, instruments, chart_type) ->
     series  = []
     yAxis   = []
 
-    yAxis.push $.extend true, {}, default_candles_yAxis_options
-    
     yAxis.push $.extend true, {}, default_candles_yAxis_options,
         opposite:       true
+    
+    yAxis.push $.extend true, {}, default_candles_yAxis_options
 
 
     effective_instruments_size  = _.size(instrument for instrument in instruments when !instrument.disabled)
