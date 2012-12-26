@@ -12,12 +12,14 @@ body {
 }
 
 body {
-    background: #eee;
+    background: #e0e0e0;
     width: 1240px;
 }
 
 #body {
     background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
     font-size: 15px;
     height: auto;
     min-height: 100%;
@@ -25,14 +27,12 @@ body {
 }
 
 #content {
-  margin-bottom: 3em;
-  padding-bottom: 2em;
+    padding-bottom: 2em;
 }
 
 #footer {
   background-color: #fff;
   height: 2em;
-  margin-top: -2em;
   position: relative;
 }
 
@@ -41,7 +41,7 @@ body {
 
 #header {
 
-    padding: 1em 10px;
+    padding: 1em 20px;
     position: relative;
     
     a.logo {
@@ -68,7 +68,7 @@ body[lang=en] #header a.logo {
 // footer
 
 #footer {
-    background-color: #eee;
+    background-color: #e0e0e0;
     padding: .5em 10px;
     
     p {

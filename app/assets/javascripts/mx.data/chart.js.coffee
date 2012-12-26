@@ -118,12 +118,6 @@ create_candles = (data_sources, instruments, chart_type) ->
     series  = []
     yAxis   = []
 
-    yAxis.push $.extend true, {}, default_candles_yAxis_options,
-        opposite:       true
-    
-    yAxis.push $.extend true, {}, default_candles_yAxis_options
-
-
     effective_instruments_size  = _.size(instrument for instrument in instruments when !instrument.disabled)
     effective_index             = 0
     
@@ -150,6 +144,26 @@ create_candles = (data_sources, instruments, chart_type) ->
         series.push candles_serie_options
         
         effective_index++
+    
+    
+    yAxis.push $.extend true, {}, default_candles_yAxis_options,
+        opposite:       true
+    
+    yAxis.push $.extend true, {}, default_candles_yAxis_options
+    
+    
+    if (effective_instruments_size <= 2)
+        $.extend yAxis[0],
+            labels:
+                style:
+                    color: series[0].color
+
+    if (effective_instruments_size == 2)
+        $.extend yAxis[1],
+            labels:
+                style:
+                    color: series[1].color
+
     
     series:     series
     yAxis:      yAxis

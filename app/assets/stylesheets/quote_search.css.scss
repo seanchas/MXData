@@ -85,7 +85,8 @@
             padding: 0 4px 0 0;
 
             span {
-                background: #fcc;
+                background: image-url('icons/close-icon.svg') no-repeat center center;
+                background-size: 100%;
                 cursor: pointer;
                 display: block;
                 width: 20px;

@@ -175,6 +175,7 @@ widget = (container, options = {}) ->
     query_input_view    = undefined
     filter_view         = undefined
     result_view         = undefined
+    close_button        = $('td.clear', container)
     
     
     search_timeout      = undefined
@@ -206,11 +207,13 @@ widget = (container, options = {}) ->
                     query_input_view.select()
     
 
-    observe_query_input = (event) ->
+    observe_query_input = ->
         
         query = $.trim(query_input_view.val())
 
         clearTimeout search_timeout
+        
+        close_button.toggle(query.length > 0)
 
         if query.length < query_threshold
             clear_search_results(result_view)
@@ -241,6 +244,11 @@ widget = (container, options = {}) ->
         $(window).on 'resize', -> calculate_result_view_max_height(result_view)
 
         query_input_view.on 'keyup', observe_query_input
+
+        
+        close_button.on 'click', ->
+            query_input_view.val('')
+            observe_query_input()
         
 
         result_view.on 'click', 'li.security > p.links a', (event) ->
@@ -254,7 +262,7 @@ widget = (container, options = {}) ->
         
 
         $(window).on 'global:table:security:added global:table:security:removed', -> _.defer set_boards_statuses, result_view
-
+        
 
 $.extend scope,
     quote_search: widget

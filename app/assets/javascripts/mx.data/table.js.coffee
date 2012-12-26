@@ -249,6 +249,19 @@ hide_chart_state = (row) ->
     change_chart_state(row, false)
 
 
+
+colorize_rows = (table) ->
+    rows = $('tr.ticker', table)
+    
+    rows
+        .removeClass('even')
+        .removeClass('odd')
+    
+    rows.filter(':even').addClass('even')
+    rows.filter(':odd').addClass('odd')
+
+
+
 widget = (wrapper, engine, market) ->
     wrapper = $(wrapper) ; return if _.isEmpty(wrapper)
     
@@ -396,6 +409,7 @@ widget = (wrapper, engine, market) ->
         
         # post process
         colorize_table_body_cell_changes(table_body_view)
+        colorize_rows(table_body_view)
         process_chart_tickers(table_body_view, chart_tickers)
         
         # toggle table visibility

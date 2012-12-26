@@ -2,10 +2,10 @@ table.records {
     
     div.information_row_wrapper {
         
-        background: #eee;
+        background: #fff;
         border-top: 1px solid #ccc;
         border-bottom: 1px solid #ccc;
-        margin-top: 12px;
+        margin: 12px 0;
         padding: 1em 10px;
         position: relative;
         
@@ -91,7 +91,7 @@ table.records {
     div.information_row_wrapper::after {
         border-left: 11px solid transparent;
         border-right: 11px solid transparent;
-        border-bottom: 11px solid #eee;
+        border-bottom: 11px solid #fff;
         height: 0;
         margin-top: -10px;
         margin-left: -6px;
