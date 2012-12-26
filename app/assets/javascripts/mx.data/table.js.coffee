@@ -310,6 +310,8 @@ widget = (wrapper, engine, market) ->
     
     columns_sorter_is_active    = false
     
+    access_marker           = 'denied'
+    
     
     # tickers
     
@@ -357,7 +359,7 @@ widget = (wrapper, engine, market) ->
         
         # prepare columns
         columns = (columns_source.data[column] for column in columns_filter.columns())
-
+        
         unless columns_sorter_is_active
 
             # render table head
@@ -415,6 +417,9 @@ widget = (wrapper, engine, market) ->
         # toggle table visibility
         table_container_view.toggle(!_.isEmpty(records))
         
+        # set access status flag
+        table_container_view.removeClass('denied granted').addClass(access_marker)
+        
         
         
 
@@ -449,6 +454,8 @@ widget = (wrapper, engine, market) ->
         
         $.when(marketdata_source).then ->
         
+            access_marker = marketdata_source.data['x-marker']
+            
             marketdata_data_version = _.first(marketdata_source.data.dataversion).version
         
             return refresh() unless marketdata_data_version == securities_data_version
@@ -476,6 +483,10 @@ widget = (wrapper, engine, market) ->
         $.when(securities_source, marketdata_source).then ->
 
             unless _.isEmpty(securities_source) and _.isEmpty(marketdata_source)
+
+                access_marker = marketdata_source.data['x-marker']
+                
+                console.log access_marker
 
                 securities_data_version = marketdata_data_version = _.first(securities_source.data.dataversion).version
 

@@ -18,17 +18,22 @@ fetch2 = (engine, market, params, options = {}) ->
     options.only ||= 'securities,marketdata'
     
     $.ajax
-        url: "#{scope.url_prefix}/engines/#{engine}/markets/#{market}/securities.jsonp?callback=?"
+        url: "#{scope.url_prefix}/engines/#{engine}/markets/#{market}/securities.json"
         data:
             'iss.meta':     'off'
             'iss.only':     [options.only, 'dataversion'].join(',')
             'securities':   params.join(',')
-        dataType: 'jsonp'
-    .then (json) ->
+        dataType: 'json'
+        xhrFields:
+            withCredentials: true
+    .then (json, status, xhr) ->
         for key, value of json
             if _.isObject(value) and value.columns? and value.data?
                 value = scope.merge_columns_and_data(value)
             data[key] = value
+        
+        data['x-marker'] = xhr.getResponseHeader('X-MicexPassport-Marker')
+
         deferred.resolve(data)        
     
     deferred.promise({ data: data })
@@ -43,15 +48,15 @@ fetch = (engine, market, params, options = {}) ->
     options.only ||= 'securities,marketdata'
     
     $.ajax
-        url: "#{scope.url_prefix}/engines/#{engine}/markets/#{market}/securities.jsonp?callback=?"
+        url: "#{scope.url_prefix}/engines/#{engine}/markets/#{market}/securities.json"
         data:
             'iss.meta':     'off'
             'iss.only':     'securities,marketdata'
             'securities':   params.join(',')
-        dataType: 'jsonp'
-    .then (json) ->
+        dataType: 'json'
+    .then (json, status, xhr) ->
         data.push(prepare(scope.merge_columns_and_data(json?.securities), scope.merge_columns_and_data(json?.marketdata))...)
-
+        
         deferred.resolve(data)
 
     deferred.promise({ data: data })

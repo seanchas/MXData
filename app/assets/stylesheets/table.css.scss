@@ -19,6 +19,13 @@
         margin-top: 4em;
     }
     
+    .denied h4 {
+        background: image_url('icons/time-icon.svg') no-repeat left center;
+        background-size: 20px;
+        padding-left: 25px;
+    }
+    
+    
     h4 div.columns_filter_trigger {
         cursor: pointer;
         font-size: 12px;
@@ -48,16 +55,6 @@
             padding-right: 8px;
         }
 
-        /*
-        td:first-child {
-            padding-left: 16px;
-        }
-            
-        td:last-child {
-            padding-right: 16px;
-        }
-        */
-        
         td.number,
         td.date,
         td.time {
