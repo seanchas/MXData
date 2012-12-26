@@ -257,7 +257,15 @@ create_inline_technicals = (data_sources, instruments, technicals, offset, optio
                     type:   cs_to_hs_types[technical.type]
                     data:   serie
                     yAxis:  0
-            
+                
+                if technicals[index].id == 'psar'
+                    serie_options = $.extend serie_options,
+                        lineWidth: 0
+                        marker:
+                            enabled: true
+                            radius: 2
+                            symbol: 'circle'
+                
                 series.push serie_options
             
             technical_index++
