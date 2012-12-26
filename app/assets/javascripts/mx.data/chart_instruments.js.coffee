@@ -66,22 +66,25 @@ widget = (wrapper) ->
         instruments_wrapper.append make_instrument_view instrument, index, _.size(instruments) for instrument, index in instruments
     
 
-    update = (message) ->
+    update = (message, data) ->
         instruments_changed = true
         scope.caches.chart_instruments instruments
         
         render()
         
-        broadcast message
+        broadcast message, data
         
 
-    broadcast = (message) ->
+    broadcast = (message, ticker) ->
         return unless deferred.state() == 'resolved'
         return unless instruments_changed
         
         instruments_changed = false
         
         $(window).trigger 'chart:instruments:changed', [instruments, message]
+        
+        if (message == 'add' or message == 'remove')
+            $(window).trigger 'chart:tickers', { ticker: [ticker.board, ticker.id].join(':'), message: message }
     
     
     add_cached = ->
@@ -89,7 +92,8 @@ widget = (wrapper) ->
         
     
     add = (data) ->
-        return if _.size(instruments) >= max_instruments
+        if _.size(instruments) >= max_instruments
+            return $(window).trigger 'chart:tickers', { message: 'too many tickers', count: max_instruments }
         
         if _.isString(data)
             [board, id] = data.split(':')
@@ -99,14 +103,16 @@ widget = (wrapper) ->
         
         instruments.push data
         
-        update 'add'
+        update 'add', instrument
     
     del = (data) ->
         remove _.last(data.split(':'))
     
 
     remove = (param) ->
-        return if _.size(instruments) == 1
+        if _.size(instruments) == 1
+            return $(window).trigger 'chart:tickers', { message: 'too little tickers' }
+            
         
         instrument = _.first(instrument for instrument in instruments when instrument.id == param)
         return unless instrument?
@@ -115,7 +121,7 @@ widget = (wrapper) ->
         
         _.first(instruments).disabled = false if should_be_enabled()
         
-        update 'remove'
+        update 'remove', instrument
         
         
 

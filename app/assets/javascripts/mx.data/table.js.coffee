@@ -118,7 +118,7 @@ render_table_body_row_cells = (row, record, columns, options = {}) ->
         cell = $(cell)
         
         render_table_body_row_cell_content(cell, record, column, options)
-    
+        
     ids = _.pluck(columns, 'id')
     
     for cell in cells
@@ -228,8 +228,9 @@ process_chart_tickers = (container, tickers) ->
     _.each rows, hide_chart_state
 
     chart_rows = _.select(rows, (row) -> _.include(tickers, $(row).data('id')))
-
-    _.each chart_rows, show_chart_state
+    
+    _.each chart_rows, (row) ->
+        show_chart_state row
        
 
 change_chart_state = (row, state) ->
@@ -304,22 +305,24 @@ widget = (wrapper, engine, market) ->
             tickers.push(ticker)
             $(window).trigger('global:table:security:added', { ticker: ticker })
 
-        update()
+            update(ticker, 'add')
     
     remove_ticker = (ticker) ->
         if _.include(tickers, ticker)
             tickers = _.without(tickers, ticker)
             $(window).trigger('global:table:security:removed', { ticker: ticker })
             
-        update()
+            update(ticker, 'remove')
 
 
     add_cached_tickers = ->
         tickers = cache.get([cache_key, 'securities'].join(':')) ? []
     
     
-    update = ->
+    update = (ticker, message) ->
         cache.set([cache_key, 'securities'].join(':'), tickers)
+        
+        $(window).trigger 'table:tickers', { ticker: ticker, message: message }
 
         clearTimeout(refresh_timer)
         refresh_timer = _.delay(refresh, 100)
@@ -516,7 +519,6 @@ widget = (wrapper, engine, market) ->
         
         deferred.resolve()
     
-
     deferred.promise
         tickers: -> tickers
     

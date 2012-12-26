@@ -78,3 +78,30 @@ body[lang=en] #header a.logo {
     }
     
 }
+
+// notice
+
+#purr-container {
+	position: fixed;
+	right: 10px;
+	top: 10px;
+
+    .notice {
+        font-size: 13px;
+        position: relative;
+        width: 250px;
+        
+        margin-bottom: 10px;
+    
+        .content {
+            background-color: #ccc;
+            border: 2px solid #999;
+            border-radius: 5px;
+            opacity: .75;
+            padding: .5em 10px;
+        }
+    
+    }
+
+}
+
