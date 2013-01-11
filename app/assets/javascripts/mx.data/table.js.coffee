@@ -486,8 +486,6 @@ widget = (wrapper, engine, market) ->
 
                 access_marker = marketdata_source.data['x-marker']
                 
-                console.log access_marker
-
                 securities_data_version = marketdata_data_version = _.first(securities_source.data.dataversion).version
 
                 securities_data = _.reduce(securities_source.data.securities, ((memo, record) -> memo["#{record.BOARDID}:#{record.SECID}"] = record ; memo), {})

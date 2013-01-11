@@ -63,5 +63,5 @@ fetch = (engine, market, params, options = {}) ->
 
 
 $.extend scope,
-    marketdata: fetch
+    marketdata: fetch2
     marketdata2: fetch2

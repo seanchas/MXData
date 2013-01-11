@@ -61,6 +61,16 @@ MxData::Application.routes.draw do
       :locale => I18n.default_locale
     }
   
+  get '/(:locale)/test',
+    :to => 'welcome#test',
+    :as => :root,
+    :constraints => {
+      :locale => /[a-z]{2}/
+    },
+    :defaults => {
+      :locale => I18n.default_locale
+    }
+  
   
   #root :to => 'welcome#index'
   

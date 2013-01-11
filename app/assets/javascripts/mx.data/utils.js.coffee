@@ -79,3 +79,5 @@ $.extend scope,
     utils:
         prepare_marketdata_record: prepare_marketdata_record
         render_marketdata_record_value: render_marketdata_record_value
+        number_with_delimiter: number_with_delimiter
+        number_with_precision: number_with_precision
