@@ -5,3 +5,19 @@
  *= require_self
  *= require_tree . 
 */
+
+html,
+body {
+    font-family: 'calibri', 'trebuchet ms', arial, sans-serif;
+}
+
+.clearfix::before,
+.clearfix::after {
+    content: "";
+    display: table;
+}
+
+.clearfix::after {
+    clear: both;
+}
+

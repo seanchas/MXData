@@ -1,3 +1,107 @@
 // Place all the styles related to the welcome controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+// sticky footer
+
+html,
+body {
+  height: 100%;
+  margin: .5em auto 0;
+  padding: 0;
+}
+
+body {
+    background: #e0e0e0;
+    width: 1240px;
+}
+
+#body {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 15px;
+    height: auto;
+    min-height: 100%;
+    position: relative;
+}
+
+#content {
+    padding-bottom: 2em;
+}
+
+#footer {
+  background-color: #fff;
+  height: 2em;
+  position: relative;
+}
+
+
+// header
+
+#header {
+
+    padding: 1em 20px;
+    position: relative;
+    
+    a.logo {
+        background-position: left center;
+        background-repeat: no-repeat;
+        display: block;
+        height: 51px;
+        overflow: hidden;
+        padding-left: 210px;
+        width: 0;
+    }
+    
+}
+
+body[lang=ru] #header a.logo {
+    background-image: image_url('logo_ru.png');
+}
+
+body[lang=en] #header a.logo {
+    background-image: image_url('logo_en.png');
+}
+
+
+// footer
+
+#footer {
+    background-color: #e0e0e0;
+    padding: .5em 10px;
+    
+    p {
+        font-size: 12px;
+        margin: 0;
+        padding: 0;
+    }
+    
+}
+
+// notice
+
+#purr-container {
+	position: fixed;
+	right: 10px;
+	top: 10px;
+
+    .notice {
+        font-size: 13px;
+        position: relative;
+        width: 250px;
+        
+        margin-bottom: 10px;
+    
+        .content {
+            background-color: #ccc;
+            border: 2px solid #999;
+            border-radius: 5px;
+            opacity: .75;
+            padding: .5em 10px;
+        }
+    
+    }
+
+}
+

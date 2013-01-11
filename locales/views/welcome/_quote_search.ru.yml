@@ -1,0 +1,4 @@
+ru:
+    welcome:
+        quote_search:
+            placeholder: 'Поиск котировки'

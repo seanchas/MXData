@@ -1,0 +1,101 @@
+table.records {
+    
+    div.information_row_wrapper {
+        
+        background: #fff;
+        border-top: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        margin: 12px 0;
+        padding: 1em 10px;
+        position: relative;
+        
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            
+            li {
+                margin: 0;
+                padding: 0;
+            }
+        }
+        
+        ul.controls {
+            
+            font-size: .8em;
+            position: absolute;
+            right: 10px;
+            top: .75em;
+            
+            li {
+                float: left;
+                margin-left: 10px;
+            }
+            
+            li.link span {
+                border-bottom: 1px dashed #039;
+                color: #039;
+            }
+            
+            li.link span:hover {
+                border-color: #903;
+                color: #903;
+            }
+            
+        }
+        
+    }
+    
+    tr.info {
+
+        li.link.add_to_chart {
+            display: block;
+        }
+
+        li.link.remove_from_chart {
+            display: none;
+        }
+
+    }
+    
+    tr.info.chart {
+
+        li.link.add_to_chart {
+            display: none;
+        }
+
+        li.link.remove_from_chart {
+            display: block;
+        }
+
+    }
+    
+    div.information_row_wrapper::before,
+    div.information_row_wrapper::after {
+        content: '';
+        left: 50%;
+        position: absolute;
+        top: 0;
+    }
+    
+    div.information_row_wrapper::before {
+        border-left: 11px solid transparent;
+        border-right: 11px solid transparent;
+        border-bottom: 11px solid #ccc;
+        height: 0;
+        margin-top: -11px;
+        margin-left: -6px;
+        width: 0;
+    }
+    
+    div.information_row_wrapper::after {
+        border-left: 11px solid transparent;
+        border-right: 11px solid transparent;
+        border-bottom: 11px solid #fff;
+        height: 0;
+        margin-top: -10px;
+        margin-left: -6px;
+        width: 0;
+    }
+    
+}

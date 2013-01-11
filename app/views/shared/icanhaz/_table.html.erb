@@ -1,0 +1,34 @@
+<script id="table" type="text/html">
+    <div class="table_container" data-engine="{{engine.name}}" data-market="{{market.name}}">
+
+        <h4 class="title">
+            {{engine.title}} :: {{market.title}}
+            
+            <div class="columns_filter_trigger">
+                <span>Поля</span>
+            </div>
+            
+        </h4>
+        
+        <div class="columns_filter_wrapper" style="display: none;"></div>
+        
+        <table class="records">
+            <thead>
+                <tr class="columns">
+                </tr>
+                <tr class="columns_filter">
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
+    </div>
+</script>
+
+
+<script id="table_column_cell" type="text/html">
+    <td title="{{column.title}}" class="{{column.type}}" data-id="{{column.id}}" data-type="{{column.type}}">
+        <span>{{column.short_title}}</span>
+    </td>
+</script>

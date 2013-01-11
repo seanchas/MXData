@@ -1,13 +1,79 @@
-<div id="test">
+<%= render "shared/icanhaz/notification" %>
+<%= render "shared/icanhaz/quote_search" %>
+<%= render "shared/icanhaz/table" %>
+<%= render "shared/icanhaz/table_information_row" %>
+
+<div id="quote_search">
+    <table>
+        <tbody>
+            <tr>
+                <td class="query">
+                    <input type="text" name="query" value="" autocomplete="off" />
+                </td>
+                <td class="busy" style="display: none;">
+                    <span></span>
+                </td>
+                <td class="clear" style="display: none;">
+                    <span></span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
+
+<div id="chart">
+    
+    <div id="chart_instruments_container" class="instruments_wrapper">
+    </div>
+
+    <div id="technicals" class="technicals_wrapper">
+    </div>
+
+    <div id="chart_tabs_container">
+        
+        <div class="left chart_candle_widths_wrapper">
+        </div>
+        
+        <div class="right chart_types_wrapper">
+        </div>
+        
+    </div>
+    
+    <div id="chart_container" class="chart_wrapper" style="background-color: #eee;">
+    </div>
+    
+
+</div>
+
+
+
+<div id="filters">
+</div>
+
+
+<div id="tables">
 </div>
 
 <script type="text/javascript" charset="utf-8">
-$(function() {
-    
-    mx.data.marketdata_table("#test", {
-        engine: 'stock',
-        market: 'shares'
+
+    $(function() {
+        
+    var metadata = mx.data.metadata();
+        
+        metadata.then(function() {
+            
+            mx.data.quote_search("#quote_search");
+            
+            var tables = _.map(metadata.markets(), function(market) { return mx.data.table($('#tables'), market.engine, market); });
+            
+            mx.data.chart($('#chart'));
+            
+            mx.data.bootstrap(tables);
+            
+        })
+        
     });
-    
-});
+
 </script>

@@ -50,8 +50,30 @@ MxData::Application.routes.draw do
   # You can have the root of your site routed with "root"
   # just remember to delete public/index.html.
   
-  root :to => 'welcome#index'
-
+  
+  get '/(:locale)',
+    :to => 'welcome#index',
+    :as => :root,
+    :constraints => {
+      :locale => /[a-z]{2}/
+    },
+    :defaults => {
+      :locale => I18n.default_locale
+    }
+  
+  get '/(:locale)/test',
+    :to => 'welcome#test',
+    :as => :root,
+    :constraints => {
+      :locale => /[a-z]{2}/
+    },
+    :defaults => {
+      :locale => I18n.default_locale
+    }
+  
+  
+  #root :to => 'welcome#index'
+  
   # See how all your routes lay out with "rake routes"
 
   # This is a legacy wild controller route that's not recommended for RESTful applications.

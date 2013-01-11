@@ -1,0 +1,60 @@
+
+
+.security_info .orderbook_container {
+
+    width: 20%;
+    
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+        width: 100%;
+        
+        thead {
+            
+            td {
+                border-bottom: 1px solid #ccc;
+            }
+            
+            td.buy {
+                text-align: left;
+            }
+            
+            td.sell {
+                text-align: right;
+            }
+        }
+        
+        td {
+            text-align: right;
+            white-space: nowrap;
+            width: 1%;
+        }
+        
+        td.bar {
+
+            position: relative;
+            width: 50%;
+
+            div {
+                height: .75em;
+                margin-top: -.37em;
+                position: absolute;
+                top: 50%;
+            }
+            
+        }
+        
+        td.bar.buy div {
+            background-color: #31a354;
+            right: 0;
+        }
+
+        td.bar.sell div {
+            background-color: #e6550d;
+            left: 0;
+        }
+        
+        
+    }
+    
+}

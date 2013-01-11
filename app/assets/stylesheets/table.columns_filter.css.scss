@@ -1,0 +1,115 @@
+#tables {
+    
+    tr.columns_filter {
+        
+        td {
+            border-bottom: 2px solid #ccc;
+            color: #000 !important;
+            padding: 0 !important;
+            white-space: normal !important;
+
+            ul.source_list {
+                list-style: none;
+                margin: .5em 10px;
+                padding: 0;
+            
+                li {
+                    float: left;
+                    font-size: 12px;
+                    width: 25%;
+                
+                    div {
+                    
+                        margin: .5em 5px;
+                        padding: .5em 5px;
+                    
+                        input {
+                            margin: 0;
+                            margin-right: .5em;
+                            vertical-align: top;
+                        }
+                    
+                        em {
+                            color: #666;
+                            display: block;
+                            font-size: 11px;
+                            margin-top: .5em;
+                        }
+                    
+                    }
+                
+                }
+            
+                li.active div {
+                    background-color: #eee;
+                }
+            
+                li:nth-child(4n + 1) {
+                    clear: left;
+                }
+            
+            }
+
+        }
+        
+    }
+    
+}
+
+
+.columns_filter_wrapper {
+
+    ul.source_list {
+
+        list-style: none;
+        margin: .5em 10px;
+        padding: 0;
+        
+        li {
+            float: left;
+            font-size: 12px;
+            width: 25%;
+            
+            div {
+                margin: .5em 5px;
+                padding: .5em 5px;
+
+                input {
+                    margin: 0;
+                    margin-right: .5em;
+                    vertical-align: top;
+                }
+            
+                em {
+                    color: #666;
+                    display: block;
+                    font-size: 11px;
+                    margin-top: .5em;
+                }
+            
+            }
+            
+        }
+        
+        li.active div {
+            background-color: #eee;
+        }
+        
+        li:nth-child(4n + 1) {
+            clear: left;
+        }
+
+    }
+    
+    ul.source_list.disabled {
+        
+        li:not(.active) {
+            color: #999;
+            em {
+                color: #ccc;
+            }
+        }
+        
+    }
+    
+}
