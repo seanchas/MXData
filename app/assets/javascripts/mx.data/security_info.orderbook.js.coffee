@@ -11,6 +11,15 @@ metadata = mx.data.metadata()
 reload_timeout  = 15 * 1000
 
 
+locales =
+    buy:
+        ru: 'Покупка'
+        en: 'Buy'
+    sell:
+        ru: 'Продажа'
+        en: 'Sell'
+
+
 render = (data) ->
     table       = $('<table>')
         .html('<thead></thead><tbody></tbody>')
@@ -25,7 +34,7 @@ render = (data) ->
     $('<td>')
         .addClass('buy')
         .attr('colspan', 2)
-        .html('Покупка')
+        .html(locales.buy[mx.locale()])
         .appendTo(header_row)
     
     $('<td>')
@@ -34,7 +43,7 @@ render = (data) ->
     $('<td>')
         .addClass('sell')
         .attr('colspan', 2)
-        .html('Продажа')
+        .html(locales.sell[mx.locale()])
         .appendTo(header_row)
     
     data.max_quantity = _.chain(data).pluck('QUANTITY').max().value()

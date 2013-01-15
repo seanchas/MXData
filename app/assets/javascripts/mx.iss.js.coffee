@@ -1,5 +1,6 @@
 ##= require jquery
 ##= require underscore
+##= require mx.locale
 ##= require_self
 ##= require_tree ./mx.iss
 
@@ -41,7 +42,7 @@ fetch = (name, args...) ->
     
     $.ajax
         url: scope.url_prefix + descriptor.url(args...)
-        data: $.extend(descriptor.xhr_data(args...), { 'iss.meta': 'off' })
+        data: $.extend(descriptor.xhr_data(args...), { 'iss.meta': 'off', 'lang': mx.locale() })
         cache: false
         dataType: 'json'
         xhrFields:
