@@ -17,7 +17,7 @@ $.extend scope.fetch_descriptors,
             "#{engine}:#{market}:#{board}:#{id}"
         url: (engine, market, board, id) ->
             "/engines/#{engine}/markets/#{market}/boards/#{board}/securities/#{id}/orderbook.json"
-        xhr_data: (engine, market, board, id) ->
+        xhr_data: ->
             'iss.only': 'orderbook'
         parse: (json, engine, market, board, id) ->
             scope.merge_columns_and_data(json?.orderbook)

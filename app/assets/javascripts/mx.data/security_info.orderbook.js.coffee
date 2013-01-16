@@ -5,7 +5,7 @@ scope   = root['mx']['data']
 $       = jQuery
 
 
-metadata = mx.data.metadata()
+metadata        = mx.data.metadata()
 
 
 reload_timeout  = 15 * 1000

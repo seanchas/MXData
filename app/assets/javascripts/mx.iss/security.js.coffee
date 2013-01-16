@@ -3,7 +3,7 @@ scope   = root['mx']['iss']
 $       = jQuery
 
 
-fetch = (ticker, options = {}) ->
+fetch2 = (ticker, options = {}) ->
     deferred = new $.Deferred
     
     data = {}
@@ -22,5 +22,21 @@ fetch = (ticker, options = {}) ->
     deferred.promise({ data: data })
 
 
+fetch = ->
+    scope.fetch 'security', arguments...
+
+
 $.extend scope,
     security: fetch
+
+$.extend scope.fetch_descriptors,
+    security:
+        cache_key: (id) ->
+            "#{id}"
+        url: (id) ->
+            "/securities/#{id}.json"
+        xhr_data: ->
+            'iss.only': 'description,boards'
+        parse: (json, id) ->
+            description:    scope.merge_columns_and_data(json?.description)
+            boards:         scope.merge_columns_and_data(json?.boards)
