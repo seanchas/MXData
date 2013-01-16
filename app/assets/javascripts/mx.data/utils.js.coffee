@@ -1,3 +1,5 @@
+##= require mx.locale
+
 root    = @
 scope   = root['mx']['data']
 
@@ -8,8 +10,8 @@ $       = jQuery
 number_with_delimiter = (value, options = {}) ->
     return value unless value? or _.isNumber(value)
     
-    delimiter               = options.delimiter ? ' '
-    separator               = options.separator ? '.'
+    delimiter               = options.delimiter ? mx.locales.number.precision.format.delimiter[mx.locale()]
+    separator               = options.separator ? mx.locales.number.precision.format.separator[mx.locale()]
     [integer, fractional]   = value.toString().split('.')
     
     integer = integer.replace /(\d)(?=(\d{3})+(?!\d))/g, '$1' + delimiter
