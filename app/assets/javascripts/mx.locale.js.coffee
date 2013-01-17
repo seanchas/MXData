@@ -24,4 +24,3 @@ root['mx'].locales =
                 delimiter:
                     ru: ' '
                     en: ','
-
