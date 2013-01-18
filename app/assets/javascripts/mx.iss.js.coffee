@@ -29,7 +29,7 @@ fetch = (name, args...) ->
     descriptor = scope.fetch_descriptors[name] ; return undefined unless descriptor?
     
     options         = _.last(args) ; options = {} unless _.isObject(options) and !_.isArray(options)
-    cache_key       = JSON.stringify([name, (descriptor.cache_key ? _.identity)(args...)])
+    cache_key       = JSON.stringify([name, (descriptor.cache_key ? _.identity)(args...), mx.locale()])
     cached_request  = requests_cache[cache_key]
 
     if cached_request?

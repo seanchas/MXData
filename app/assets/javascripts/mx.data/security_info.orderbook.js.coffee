@@ -116,7 +116,7 @@ widget = (ticker) ->
 
             orderbook   = orderbook.result
             access      = orderbook['x-marker']
-            html        = render(orderbook.data)    unless  orderbook.error?
+            html        = render(orderbook.data)    unless  orderbook.error? or orderbook.data.length == 0
             error       = orderbook.error           if      orderbook.error?
 
             $(window).trigger "security-info:orderbook:loaded:#{ticker}"

@@ -3,23 +3,20 @@ scope   = root['mx']['iss']
 $       = jQuery
 
 
-fetch = (param, options = {}) ->
-    deferred = new $.Deferred
-    
-    data = []
-    
-    $.ajax
-        url: "#{scope.url_prefix}/emitters/#{param}/securities.json"
-        data:
-            'iss.meta': 'off'
-            'iss.only': 'securities'
-        dataType: 'json'
-    .then (json) ->
-        data.push(scope.merge_columns_and_data(json?.securities)...)
-        deferred.resolve(data)
-    
-    deferred.promise({ data: data })
+fetch = ->
+    scope.fetch 'emitter_securities', arguments...
 
 
 $.extend scope,
     emitter_securities: fetch
+
+$.extend scope.fetch_descriptors,
+    emitter_securities:
+        cache_key: (id) ->
+            "#{id}"
+        url: (id) ->
+            "/emitters/#{id}/securities.json"
+        xhr_data: (id) ->
+            'iss.only': 'securities'
+        parse: (json, id) ->
+            scope.merge_columns_and_data(json?.securities)

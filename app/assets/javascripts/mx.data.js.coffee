@@ -1,5 +1,6 @@
 ##= require jquery
 ##= require underscore
+##= require d3.v3
 ##= require mx.iss
 ##= require_self
 ##= require_tree ./mx.data

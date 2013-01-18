@@ -5,35 +5,50 @@ scope   = root['mx']['data']
 $       = jQuery
 
 
-metadata        = mx.data.metadata()
-emitter_columns = mx.iss.emitter_columns()
+metadata        = undefined
+emitter_columns = undefined
 
 
 security_emitter_id_column_name = 'EMITTER_ID'
 
 
 render = (data) ->
-    html = $('<dl>')
-        .addClass('emitter')
+    html = $('<table>')
+        .html('<thead></thead><tbody></tbody>')
     
-    $('<dt>')
-        .addClass('title')
-        .html(data.TITLE)
-        .appendTo(html)
+    table_head = $('thead', html)
+    table_body = $('tbody', html)
     
-    _.each(emitter_columns.result.data, (column) -> render_row(column, data, html))
+    render_table_head_row(data.TITLE, table_head)
+    
+    _.each(emitter_columns.result.data, (column) -> render_table_body_row(column, data, html))
     
     html
 
 
-render_row = (column, data, html) ->
-    $('<dt>')
-        .html(column.short_title)
+render_table_head_row = (data, html) ->
+    row = $('<tr>')
         .appendTo(html)
     
-    $('<dd>')
-        .html(data[column.name])
+    $('<th>')
+        .attr('colspan', 2)
+        .html(data)
+        .appendTo(row)
+    
+    html
+
+
+render_table_body_row = (column, data, html) ->
+    row = $('<tr>')
         .appendTo(html)
+
+    $('<th>')
+        .html(column.short_title)
+        .appendTo(row)
+    
+    $('<td>')
+        .html(data[column.name])
+        .appendTo(row)
     
     html
 
@@ -50,6 +65,10 @@ widget = (ticker) ->
     security    = mx.iss.security ticker
     
     ready       = $.when metadata, emitter_columns, security
+    
+    
+    metadata        ?= mx.data.metadata()
+    emitter_columns ?= mx.iss.emitter_columns()
     
     
     reload = ->
@@ -71,9 +90,11 @@ widget = (ticker) ->
     ready.then ->
         
         security    = security.result
-        id          = _.find(security.data.description, (column) -> column.name == security_emitter_id_column_name).value
+        id          = _.find(security.data.description, (column) -> column.name == security_emitter_id_column_name)?.value
         
-        reload()
+        $(window).trigger "security-info:emitter:invalid:#{ticker}" unless id?
+        
+        reload() if id?
         
         deferred.resolve()
     

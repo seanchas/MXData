@@ -8,11 +8,25 @@ $           = jQuery
 metadata    = undefined
 
 
+iss_date_format = d3.time.format('%Y-%m-%d')
+
+
+locales =
+    listed_from:
+        ru: 'с'
+        en: 'from'
+    date:
+        ru: d3.time.format('%d.%m.%Y')
+        en: d3.time.format('%m/%d/%Y')
+
+
 render = (data) ->
-    html = $('<dl>')
-        .addClass('boards')
+    html = $('<table>')
+        .html('<tbody></tbody>')
     
-    _.each(data, render_row, html)
+    table_body = $('tbody', html)
+    
+    _.each(data, render_row, table_body)
     
     html
 
@@ -20,15 +34,18 @@ render = (data) ->
 render_row = (board) ->
     return unless !!board.is_traded
     
-    $('<dt>')
+    row = $('<tr>')
+        .appendTo(@)
+    
+    $('<th>')
         .html(board.title)
-        .appendTo(@)
+        .appendTo(row)
     
-    $('<dd>')
-        .html("C #{board.listed_from}")
-        .appendTo(@)
+    value = locales.date[mx.locale()] iss_date_format.parse(board.listed_from)
     
-    console.log board
+    $('<td>')
+        .html("#{locales.listed_from[mx.locale()]} #{value}")
+        .appendTo(row)
     
     @
 
