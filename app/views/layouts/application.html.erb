@@ -4,7 +4,7 @@
       <title>MxData</title>
       <%= stylesheet_link_tag    "application" %>
       <%= javascript_include_tag "application" %>
-      <script type="text/javascript">mx.locale("<%= I18n.locale %>")</script>
+      <script type="text/javascript">mx.locale("<%= I18n.locale %>") ; mx.I18n.locale = "<%= I18n.locale %>"</script>
       <%= csrf_meta_tags %>
       <meta name="viewport" content="width=1240" />
     </head>

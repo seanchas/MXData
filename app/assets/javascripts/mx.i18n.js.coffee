@@ -1,3 +1,6 @@
+##= require_self
+##= require_tree ./mx.i18n
+
 root                = @
 
 root['mx']         ?= {}
@@ -43,7 +46,7 @@ i18n.translate = (scope, options = {}) ->
     
     try
     
-        if $.isPlainObject(translation)
+        unless $.type(translation) is 'string'
             if $.isNumeric(options.count)
                 pluralize options.count, translation, scope, options
             else
@@ -61,9 +64,9 @@ i18n.translate = (scope, options = {}) ->
 
 lookup = (scope, options) ->
 
-    messages    = translations[i18n.locale]
+    messages    = translations[options.locale ? i18n.locale]
     
-    [].concat(scope, options.scope).filter((part) -> !!part).join('.').split('.').every (part) -> messages = messages[part]
+    [].concat(scope, options.scope).filter((part) -> !!part).join('.').split('.').every (part) -> messages = messages?[part]
     
     messages    = options.default if not messages? and options.default
     
@@ -75,7 +78,7 @@ lookup = (scope, options) ->
 
 interpolate = (message, options) ->
     
-    message.match(interpolation_placeholder).forEach (match) ->
+    (message.match(interpolation_placeholder) ? []).forEach (match) ->
         value   = options[match.replace interpolation_placeholder, "$1"] ? "[missing #{match} value]"
         message = message.replace match, value
     
@@ -104,7 +107,7 @@ pluralizations =
 
 pluralize = (count, messages, scope, options) ->
     
-    rules   = pluralizations[i18n.locale] ? pluralizations['en']
+    rules   = pluralizations[options.locale ? i18n.locale] ? pluralizations['en']
     counts  = [].concat rules Math.abs options.count
     count   = counts.filter((count) -> messages[count]?)[0]
 

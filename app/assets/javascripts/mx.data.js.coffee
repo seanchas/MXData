@@ -2,6 +2,7 @@
 ##= require underscore
 ##= require d3.v3
 ##= require mx.iss
+##= require mx.i18n
 ##= require_self
 ##= require_tree ./mx.data
 

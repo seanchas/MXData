@@ -1,9 +1,11 @@
+##= require_self
+##= require_tree ./security_info
+
 root    = @
 scope   = root['mx']['data']
 
 
 $       = jQuery
-
 
 
 metadata = mx.data.metadata()
