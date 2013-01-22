@@ -18,6 +18,6 @@ $.extend scope.fetch_descriptors,
             "/engines/#{engine}/markets/#{market}/securities/#{id}/optionboard.json"
         xhr_data: ->
             'iss.only': 'optionboard'
-            'lastdate': '2013-03-14'
+            'lastdate': '2013-06-14'
         parse: (json) ->
             scope.merge_columns_and_data(json?.optionboard)

@@ -1,3 +1,6 @@
+##= require_self
+##= require_tree ./optionsboard
+
 root    = @
 scope   = root['mx']['data']
 
@@ -14,19 +17,6 @@ put_columns     = ['THEORPRICE', 'BID', 'OFFER', 'LAST', "TRADEDATETIME", 'LASTT
 
 
 iss_date_format = d3.time.format('%Y-%m-%d %H:%M:%S')
-
-
-i18n_key = 'security_optionsboard'
-
-
-mx.I18n.add_translations "ru.#{i18n_key}",
-    expirations:
-        zero:   'дней до исполнения'
-        one:    'день до исполнения'
-        few:    'дня до исполнения'
-        many:   'дней до исполнения'
-        other:  'дня до исполнения'
-    
 
 
 prepare_data = (data) ->
@@ -91,13 +81,15 @@ widget = (container, ticker) ->
     metadata   ?= mx.data.metadata()
     columns     = undefined
     
-    ready       = $.when metadata
+    expiration_chooser = scope.optionsboard_expiration_chooser ticker
+    
+    ready       = $.when metadata, expiration_chooser
     
 
     reload = ->
         
         # HARDCODED
-        options_board = mx.iss.security_optionsboard 'futures', 'forts', id
+        options_board = mx.iss.security_optionsboard 'futures', 'forts', id, { force: true }
         
         options_board.then ->
             
@@ -106,7 +98,7 @@ widget = (container, ticker) ->
             
             render data, columns, $('tbody', container)
             
-            _.delay reload, 5 * 1000
+            _.delay reload, 20 * 1000
 
 
     ready.then ->

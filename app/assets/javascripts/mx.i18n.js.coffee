@@ -91,14 +91,15 @@ interpolate = (message, options) ->
 pluralizations = 
 
     en: (count) ->
-        return 'one'    if count == 1
+        return ['zero', 'other']    if count == 0
+        return 'one'                if count == 1
         return 'other'
 
     ru: (count) ->
-        return ['zero', 'many'] if count == 0
-        return 'one'            if count % 10 == 1 and count % 100 != 11
-        return 'few'            if [2, 3, 4].indexOf(count % 10) != -1 and [12, 13, 14].indexOf(count % 100) == -1
-        return 'many'           if count % 10 == 0 or [5, 6, 7, 8, 9].indexOf(count % 10) != -1 or [11, 12, 13, 14].indexOf(count % 100) != -1
+        return ['zero', 'many']     if count == 0
+        return 'one'                if count % 10 == 1 and count % 100 != 11
+        return 'few'                if [2, 3, 4].indexOf(count % 10) != -1 and [12, 13, 14].indexOf(count % 100) == -1
+        return 'many'               if count % 10 == 0 or [5, 6, 7, 8, 9].indexOf(count % 10) != -1 or [11, 12, 13, 14].indexOf(count % 100) != -1
         return 'other'
         
 
