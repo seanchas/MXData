@@ -6,7 +6,10 @@ root['mx'].I18n    ?= {}
 i18n                = root['mx'].I18n
 
 
-localize = (type, value, options = {}) ->
+localize = ->
+    options = if arguments.length > 1 and $.isPlainObject(arguments[arguments.length - 1]) then arguments[arguments.length - 1] else {}
+    value   = arguments[0]
+    
     
 
 # to number

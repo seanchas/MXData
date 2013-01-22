@@ -1,3 +1,104 @@
+<div class="security_options_board" style="border: 1px solid #ccc; margin: 10px; padding: 10px;">
+    
+    <table>
+        
+        <thead>
+            <tr>
+                <th colspan="8">
+                    CALL
+                </th>
+                <th colspan="2">
+                </th>
+                <th colspan="8">
+                    PUT
+                </th>
+            </tr>
+            
+            <tr>
+                <td rowspan="2">
+                    Сделок
+                </td>
+                <td rowspan="2">
+                    Открыт. позиций
+                </td>
+                <td colspan="3" class="last">
+                    Последняя сделка
+                </td>
+                <td rowspan="2">
+                    Покупка
+                </td>
+                <td rowspan="2">
+                    Продажа
+                </td>
+                <td rowspan="2">
+                    Теоретическая цена
+                </td>
+                <td rowspan="2">
+                    Страйк
+                </td>
+                <td rowspan="2">
+                    IV
+                </td>
+                <td rowspan="2">
+                    Теоретическая цена
+                </td>
+                <td rowspan="2">
+                    Покупка
+                </td>
+                <td rowspan="2">
+                    Продажа
+                </td>
+                <td colspan="3" class="last">
+                    Последняя сделка
+                </td>
+                <td rowspan="2">
+                    Сделок
+                </td>
+                <td rowspan="2">
+                    Открыт. позиций
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Значение
+                </td>
+                <td>
+                    Время сделки
+                </td>
+                <td>
+                    Изменение к закрытию
+                </td>
+                <td>
+                    Значение
+                </td>
+                <td>
+                    Время сделки
+                </td>
+                <td>
+                    Изменение к закрытию
+                </td>
+            </tr>
+        </thead>
+        
+        <tbody>
+        </tbody>
+        
+        <tfoot>
+           <tr>
+               <td>&mdash;</td>
+               <td>&mdash;</td>
+               <th colspan="14">
+                   Итого
+               </th>
+               <td>&mdash;</td>
+               <td>&mdash;</td>
+           </tr>         
+        </tfoot>
+        
+    </table>
+    
+</div>
+
 <div class="security_info" style="border: 1px solid #ccc; margin: 10px; padding: 10px;">
     
     <div class="security description">
@@ -30,7 +131,9 @@
 
     $(function() {
         
-        mx.data.security_info($('.security_info'), 'EQNE:GAZP')
+        mx.data.optionsboard($('.security_options_board'), 'ROPD:GZU3')
+        
+        // mx.data.security_info($('.security_info'), 'EQNE:GAZP')
         // mx.data.security_info($('.security_info'), 'SNDX:MICEXINDEXCF')
         
     });
