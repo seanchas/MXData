@@ -1,0 +1,74 @@
+#auth {
+    float: right;
+    font-size: 13px;
+    
+    ul {
+
+        list-style: none;
+        margin: 0;
+        overflow: hidden;
+        padding: 0;
+        
+        li {
+            float: left;
+            margin-left: 1em;
+        }
+        
+    }
+    
+}
+
+.auth_sites_links {
+    font-size: 13px;
+    
+    position: absolute;
+    
+    ul {
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        list-style: none;
+        margin: 10px 0 0;
+        padding: 0;
+        position: relative;
+        
+        li {
+            margin: .75em 15px;
+            padding: 0;
+        }
+        
+        li.logout {
+            border-top: 1px solid #ccc;
+            padding-top: .75em;
+        }
+    }
+    
+    ul::before,
+    ul::after {
+        content: '';
+        right: 1em;
+        position: absolute;
+        top: 0;
+    }
+    
+    ul::before {
+        border-left: 11px solid transparent;
+        border-right: 11px solid transparent;
+        border-bottom: 11px solid #ccc;
+        height: 0;
+        margin-top: -11px;
+        margin-left: -6px;
+        width: 0;
+    }
+    
+    ul::after {
+        border-left: 11px solid transparent;
+        border-right: 11px solid transparent;
+        border-bottom: 11px solid #fff;
+        height: 0;
+        margin-top: -10px;
+        margin-left: -6px;
+        width: 0;
+    }
+    
+}

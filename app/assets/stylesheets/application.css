@@ -11,6 +11,15 @@ body {
     font-family: 'calibri', 'trebuchet ms', arial, sans-serif;
 }
 
+a {
+    color: #039;
+}
+    
+a:hover {
+    color: #903;
+}
+
+
 .clearfix::before,
 .clearfix::after {
     content: "";
