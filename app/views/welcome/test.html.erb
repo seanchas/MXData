@@ -1,3 +1,6 @@
+<div id="tabs">
+</div>
+
 <div id="expirations_chooser">
     
 </div>
@@ -135,21 +138,14 @@
 <script type="text/javascript" charset="utf-8">
 
     $(function() {
-        
-        mx.data.optionsboard($('.security_options_board'), 'RFUD:GZH3', {
-            expirations_container: $('#expirations_chooser')
-        })
 
-        /*
-        var expirations = mx.data.optionsboard_expiration_chooser('RFUD:GZH3')
+
+        shared.user($('#tabs'))
         
-        expirations.then(function() {
-            
-            $('#expirations_chooser').html(expirations.html())
-            
-        });
-        */
-        
+        //mx.data.optionsboard($('.security_options_board'), 'RFUD:GZH3', {
+        //    expirations_container: $('#expirations_chooser')
+        //})
+
         // mx.data.security_info($('.security_info'), 'EQNE:GAZP')
         // mx.data.security_info($('.security_info'), 'SNDX:MICEXINDEXCF')
         
