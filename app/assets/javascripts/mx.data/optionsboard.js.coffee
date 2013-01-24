@@ -20,7 +20,12 @@ iss_date_format = d3.time.format('%Y-%m-%d %H:%M:%S')
 
 
 prepare_data = (data) ->
-    _.reduce(data, ((memo, record) -> (memo[record.STRIKE] ?= {})[record.CONTRACTTYPE] = record ; memo ), {})
+    result = {}
+
+    _.each(data['call'],    (record) -> (result[record.STRIKE] ?= {})['C'] = record)
+    _.each(data['put'],     (record) -> (result[record.STRIKE] ?= {})['P'] = record)
+    
+    result
 
 
 
@@ -31,11 +36,6 @@ calculate_sum = (data, type, column) ->
 render = (data, columns, container) ->
     container.empty()
 
-    call_trades_sum     = calculate_sum(data, 'C', 'NUMTRADES')
-    put_trades_sum      = calculate_sum(data, 'P', 'NUMTRADES')
-    call_positions_sum  = calculate_sum(data, 'C', 'OPENPOSITION')
-    put_positions_sum   = calculate_sum(data, 'P', 'OPENPOSITION')
-    
     _.chain(data).keys().sort((a, b) -> a - b).each((key) -> render_row data[key], columns, container)
     
 
@@ -72,8 +72,10 @@ render_cells = (data, columns, container, type) ->
     )
 
 
-widget = (container, ticker) ->
+widget = (container, ticker, options = {}) ->
     container   = $(container) ; return if container.length == 0
+    
+    expirations_container = $(options.expirations_container)
     
     deferred    = new $.Deferred
     
@@ -88,8 +90,7 @@ widget = (container, ticker) ->
 
     reload = ->
         
-        # HARDCODED
-        options_board = mx.iss.security_optionsboard 'futures', 'forts', id, { force: true }
+        options_board = mx.iss.security_optionsboard board.engine.name, board.market.name, board.id, id, expiration_chooser.date(), { force: true, expires_in: 20 * 1000 }
         
         options_board.then ->
             
@@ -105,11 +106,15 @@ widget = (container, ticker) ->
         
         board = metadata.board board
         
-        columns = mx.iss.security_optionsboard_columns 'futures', 'forts'
+        columns = mx.iss.security_optionsboard_columns board.engine.name, board.market.name
         
         columns.then ->
             columns = _.reduce(columns.result.data, ((memo, column) -> memo[column.name] = column ; memo), {})
             reload()
+        
+        expirations_container.html(expiration_chooser.html()) if expirations_container.length > 0
+        
+        expiration_chooser.on_change reload
         
         deferred.resolve()
     

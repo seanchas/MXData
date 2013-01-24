@@ -61,3 +61,46 @@
     }
     
 }
+
+.expirations_chooser {
+    
+    span.title {
+    }
+    
+    span.title::after {
+        content: ': ';
+    }
+    
+    span.day {
+        
+        a {
+            border-bottom: 1px dashed #039;
+            color: #039;
+            text-decoration: none;
+        }
+    
+        a:hover {
+            border-color: #903;
+            color: #903;
+        }
+        
+        a.active {
+            font-weight: bold;
+        }
+        
+    }
+    
+    span.day:not(:last-child)::after{
+        content: ', ';
+    }
+    
+}
+
+.expirations_chooser.inactive {
+    a {
+        border: none !important;
+        color: #000 !important;
+        cursor: text;
+        font-weight: normal !important;
+    }
+}

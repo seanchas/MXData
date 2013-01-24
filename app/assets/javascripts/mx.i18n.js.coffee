@@ -10,7 +10,7 @@ i18n                = root['mx'].I18n
 
 
 # interpolation placeholder
-interpolation_placeholder = /(\{\{)(.*?)(\}\})/gm
+interpolation_placeholder = /\{\{(.*?)\}\}/gm
 
 # locale
 
@@ -59,6 +59,7 @@ i18n.translate = (scope, options = {}) ->
         translation_missing scope
         
 
+i18n.t = i18n.translate
 
 # lookup
 

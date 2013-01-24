@@ -1,3 +1,8 @@
+<div id="expirations_chooser">
+    
+</div>
+
+
 <div class="security_options_board" style="border: 1px solid #ccc; margin: 10px; padding: 10px;">
     
     <table>
@@ -131,7 +136,19 @@
 
     $(function() {
         
-        mx.data.optionsboard($('.security_options_board'), 'RFUD:GZM3')
+        mx.data.optionsboard($('.security_options_board'), 'RFUD:GZH3', {
+            expirations_container: $('#expirations_chooser')
+        })
+
+        /*
+        var expirations = mx.data.optionsboard_expiration_chooser('RFUD:GZH3')
+        
+        expirations.then(function() {
+            
+            $('#expirations_chooser').html(expirations.html())
+            
+        });
+        */
         
         // mx.data.security_info($('.security_info'), 'EQNE:GAZP')
         // mx.data.security_info($('.security_info'), 'SNDX:MICEXINDEXCF')

@@ -12,10 +12,10 @@ $.extend scope,
 
 $.extend scope.fetch_descriptors,
     security_optionsboard_expirations:
-        cache_key: (engine, market, id) ->
-            "#{engine}:#{market}:#{id}"
-        url: (engine, market, id) ->
-            "/engines/#{engine}/markets/#{market}/securities/#{id}/expirations.json"
+        cache_key: (engine, market, board, id) ->
+            "#{engine}:#{market}:#{board}:#{id}"
+        url: (engine, market, board, id) ->
+            "/engines/#{engine}/markets/#{market}/boards/#{board}/securities/#{id}/expirations.json"
         xhr_data: ->
             'iss.only': 'options'
         parse: (json) ->
