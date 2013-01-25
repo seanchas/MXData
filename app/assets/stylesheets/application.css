@@ -20,6 +20,16 @@ a:hover {
 }
 
 
+a.local {
+    border-bottom: 1px dashed #039;
+    text-decoration: none;
+}
+
+a.local:hover {
+    border-bottom-color: #903;
+}
+
+
 .clearfix::before,
 .clearfix::after {
     content: "";

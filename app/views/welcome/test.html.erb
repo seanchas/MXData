@@ -1,8 +1,35 @@
-<div id="expirations_chooser">
+<div id="tabs" class="tabs">
+    
+    <ul class="clearfix">
+        <li class="tab" data-key="security_description">
+            <a href="#" class="local">Информация об инструменте</a>
+        </li>
+        <li class="tab" data-key="options_board">
+            <a href="#" class="local">Доска опционов</a>
+            <span class="expirations">&mdash;</span>
+        </li>
+        <li class="button right" data-key="remove_from_chart">
+            <a href="#" class="local">Убрать с графика</a>
+        </li>
+        <li class="button right" data-key="add_to_chart">
+            <a href="#" class="local">Добавить на график</a>
+        </li>
+        <li class="button right" data-key="remove_from_table">
+            <a href="#" class="local">Удалить инструмент</a>
+        </li>
+    </ul>
+    
+    <div data-key="security_description" style="display: none;">
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    </div>
+    
+    <div data-key="options_board" style="display: none;">
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    </div>
     
 </div>
 
-
+<!--
 <div class="security_options_board" style="border: 1px solid #ccc; margin: 10px; padding: 10px;">
     
     <table>
@@ -132,12 +159,14 @@
     
 </div>
 
+-->
+
 <script type="text/javascript" charset="utf-8">
 
     $(function() {
 
 
-        shared.user($('#auth'))
+        shared.tabs($('#tabs'))
         
         //mx.data.optionsboard($('.security_options_board'), 'RFUD:GZH3', {
         //    expirations_container: $('#expirations_chooser')
