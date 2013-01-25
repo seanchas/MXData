@@ -13,23 +13,45 @@ build_screen = (html) ->
         .appendTo(html)
 
 
-activate_tab = (tab, tabs) ->
-    tabs.not(tab).removeClass('current') ; tab.addClass('current')
-
-
 widget = (container) ->
     container = $(container) ; return if container.length == 0
     
+    on_activate = new $.Callbacks
+    
     build_screen container
     
-    tabs    = $('> ul > li', container)
+    tabs        = $('> ul > li', container)
+    contents    = $('> div', container)
+    
+    
+    tab = (key) ->
+        $(tabs.get().filter((t) -> $(t).data('key') == key)[0])
+    
+    content = (key) ->
+        $(contents.get().filter((c) -> $(c).data('key') == key)[0])
+    
+
+    activate = (key) ->
+        t = tab(key) ; return if t.length == 0
+        
+        if t.hasClass('tab') and not t.hasClass('current')
+            tabs.not(t).removeClass('current') ; t.addClass('current')
+        
+        on_activate.fire(key)
+        
+        c = content(key) ; return if c.length == 0
+        
+        contents.not(c).hide() ; c.show()
+        
     
     container.on 'click', '> ul > li > a', (event) ->
-        event.preventDefault()
+        event.preventDefault() ; activate $(@).closest('li').data('key')
+    
 
-        tab = $(@).closest('li')
-        
-        activate_tab(tab, tabs) if tab.hasClass('tab')
+    on_activate:    (callback) ->   on_activate.add(callback)
+    activate:       activate
+    tab:            tab
+    content:        content
 
 
 $.extend scope,
