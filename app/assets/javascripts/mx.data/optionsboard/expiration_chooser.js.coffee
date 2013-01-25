@@ -35,7 +35,7 @@ render = (dates) ->
     days    = _.map(dates, (date) -> Math.ceil((iss_date_format.parse(date) - now) / milliseconds_in_day))
     
     
-    html = $('<div>')
+    html = $('<span>')
         .addClass('expirations_chooser')
         .toggleClass('inactive', days.length == 1)
     

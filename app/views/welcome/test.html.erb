@@ -1,3 +1,5 @@
+<%= render "shared/icanhaz/options_board" %>
+
 <div id="tabs" class="tabs">
     
     <ul class="clearfix">
@@ -19,16 +21,35 @@
         </li>
     </ul>
     
-    <div data-key="security_description" style="display: none;">
-        <strong>Description</strong>
-        <br />
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    <div data-key="security_description" class="security_info" style="display: none;">
+    
+        <div class="security description">
+            <div class="block">
+                <dl class="description_container">
+                    description
+                </dl>
+            </div>
+            <div class="block">
+                <div class="emitter_container">
+                    emitter
+                </div>
+                <div class="boards_container">
+                    boards
+                </div>
+                <div class="emitter_securities_container">
+                    others
+                </div>
+            </div>
+            <div class="block">
+                <div class="orderbook_container">
+                    orderbook
+                </div>
+            </div>
+        </div>
+
     </div>
     
-    <div data-key="options_board" style="display: none;">
-        <strong>Options Board</strong>
-        <br />
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    <div data-key="options_board" class="security_options_board" style="display: none;">
     </div>
     
 </div>
@@ -169,8 +190,24 @@
 
     $(function() {
 
+        var optionsboard    = undefined;
+        var description     = undefined;
 
-        shared.tabs($('#tabs'))
+        var tabs = shared.tabs($('#tabs'));
+
+        tabs.on_activate(function(key) {
+            
+            if (key == 'security_description' && !description)
+                description = mx.data.security_info(tabs.content(key), 'RFUE:GZH3')
+            
+            if (key == 'options_board' && !optionsboard) {
+                optionsboard = mx.data.optionsboard('RFUE:GZH3', { container: tabs.content(key) })
+                optionsboard.then(function() {
+                    //tabs.content(key).html(optionsboard.html())
+                })
+            }
+            
+        });
         
         //mx.data.optionsboard($('.security_options_board'), 'RFUD:GZH3', {
         //    expirations_container: $('#expirations_chooser')

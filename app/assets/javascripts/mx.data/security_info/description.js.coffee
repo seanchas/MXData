@@ -182,7 +182,7 @@ widget = (ticker) ->
             render_security_marketdata(security_marketdata.data.security, html, {
                 precision:  precision
                 columns:    _.filter(columns, (column) -> !_.include(security_columns, column.name))
-            })  unless  security_marketdata.error?
+            })  unless  security_marketdata.error? or not security_marketdata.data.security?
 
             render_security_indices(security_indices.data, html)                        unless  security_indices.error? or security_indices.data.length == 0
             render_index_securities(index_securities.data, html)                        unless  index_securities.error? or index_securities.data.length == 0

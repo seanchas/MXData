@@ -8,7 +8,7 @@ scope   = root['mx']['data']
 $       = jQuery
 
 
-metadata = mx.data.metadata()
+metadata = undefined
 
 
 render_description = (container, description) ->
@@ -39,6 +39,8 @@ widget = (container, ticker) ->
     emitter_securities  = undefined
     orderbook           = undefined
     
+    metadata           ?= mx.data.metadata()
+    
     ready       = $.when metadata
     
     ready.then ->
@@ -63,7 +65,7 @@ widget = (container, ticker) ->
         emitter_securities  = mx.data.security_info_emitter_securities(id)
         boards              = mx.data.security_info_boards(id)
         orderbook           = mx.data.security_info_orderbook(ticker)
-
+        
         deferred.resolve()
     
 
