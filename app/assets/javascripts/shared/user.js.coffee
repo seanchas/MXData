@@ -58,6 +58,27 @@ localized_sites =
 cache       = kizzy('shared:user')
 
 
+t = (c) -> if c.toUpperCase() != c.toLowerCase() then 'A' else ' '
+
+
+prune = (string, length, spacer) ->
+    return string unless string?
+    
+    length = ~~length
+    spacer = '...' unless spacer?
+    
+    return string if string.length <= length
+    
+    template = string.slice(0, length + 1).replace(/.(?=\W*\w*$)/g, t)
+    
+    template = if template.slice(template.length - 2).match(/\w\w/)
+        template.replace(/\s+\S+$/, '')
+    else
+        template.slice(0, template.length - 1).trimRight()
+    
+    if (template + spacer).length > string.length then string else string.slice(0, template.length) + spacer
+
+
 fetch = ->
     deferred = new $.Deferred
     
@@ -140,7 +161,7 @@ render_sites = (id, container) ->
 done = (user_data, container) ->
     cache.set('name', full_name_or_nickname(user_data))
     
-    $('li.user a', container).html(cache.get('name'))
+    $('li.user a', container).html(prune(cache.get('name'), 32))
     
     $('li.login, li.registration', container).hide()
     $('li.user', container).show()
