@@ -198,10 +198,10 @@
         tabs.on_activate(function(key) {
             
             if (key == 'security_description' && !description)
-                description = mx.data.security_info(tabs.content(key), 'RFUE:GZH3')
+                description = mx.data.security_info(tabs.content(key), 'RFUD:GZH3')
             
             if (key == 'options_board' && !optionsboard) {
-                optionsboard = mx.data.optionsboard('RFUE:GZH3', { container: tabs.content(key) })
+                optionsboard = mx.data.optionsboard('RFUD:GZH3', { container: tabs.content(key) })
                 optionsboard.then(function() {
                     //tabs.content(key).html(optionsboard.html())
                 })
