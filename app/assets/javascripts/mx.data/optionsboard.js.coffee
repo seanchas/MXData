@@ -93,6 +93,9 @@ widget = (ticker, options = {}) ->
     
     render_in_container = -> container.html(html) if container? ; render_in_container = _.once render_in_container    
     
+    show = -> html.show() ; expiration_chooser.show()
+    hide = -> html.hide() ; expiration_chooser.hide()
+    
     reload = ->
         
         options_board = mx.iss.security_optionsboard board.engine.name, board.market.name, board.id, id, expiration_chooser.date(), { force: true, expires_in: 20 * 1000 }
@@ -129,6 +132,8 @@ widget = (ticker, options = {}) ->
     deferred.promise
         expiration_chooser: -> expiration_chooser
         html:               -> html
+        show:                  show
+        hide:                  hide
 
 
 

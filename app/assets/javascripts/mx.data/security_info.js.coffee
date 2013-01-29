@@ -11,24 +11,36 @@ $       = jQuery
 metadata = undefined
 
 
-render_description = (container, description) ->
-    container.html(description.html() ? '')
+render_description = (description, html) ->
+    $('.description_title').toggleClass('active', description.html()?)
+    $('.description_container', html).html(description.html() ? '')
 
-render_emitter = (container, emitter) ->
-    container.html(emitter.html() ? '')
+render_emitter = (emitter, html) ->
+    $('.emitter_title').toggleClass('active', emitter.html()?)
+    $('.emitter_container', html).html(emitter.html() ? '').toggle(emitter.html()?)
 
-render_emitter_securities = (container, emitter_securities) ->
-    container.html(emitter_securities.html() ? '')
+render_emitter_securities = (emitter_securities, html) ->
+    $('.emitter_securities_title').toggleClass('active', emitter_securities.html()?)
+    $('.emitter_securities_container', html).html(emitter_securities.html() ? '').toggle(emitter_securities.html()?)
 
-render_boards = (container, boards) ->
-    container.html(boards.html() ? '')
-
-render_orderbook = (container, orderbook) ->
-    container.html(orderbook.html() ? '')
+render_boards = (boards, html) ->
+    $('.boards_title').toggleClass('active', boards.html()?)
+    $('.boards_container', html).html(boards.html() ? '').toggle(boards.html()?)
 
 
-widget = (container, ticker) ->
-    container   = $(container) ; return if container.length == 0
+render_orderbook = (orderbook, html) ->
+    $('.orderbook_title').toggleClass('active', orderbook.html()?)
+    $('.orderbook_container', html).html(orderbook.html() ? '')
+
+
+
+render  = ->
+    ich.security_info()
+
+
+
+widget = (ticker, options = {}) ->
+    container   = $(options.container) ; container = undefined if container.length == 0
 
     deferred    = new $.Deferred
     
@@ -41,9 +53,16 @@ widget = (container, ticker) ->
     
     metadata           ?= mx.data.metadata()
     
+    html                = undefined
+    
+    show                = -> html.show()
+    hide                = -> html.hide()
+    
     ready       = $.when metadata
     
     ready.then ->
+
+        ###
 
         $(window).on "security-info:description:loaded:#{ticker}", ->
             render_description $('.description_container', container), description
@@ -66,10 +85,23 @@ widget = (container, ticker) ->
         boards              = mx.data.security_info_boards(id)
         orderbook           = mx.data.security_info_orderbook(ticker)
         
+        ###
+        
+        html = render() ; container.html(html) if container?
+        
+        description         = mx.data.security_info_description(ticker,         { after_render: -> render_description(description, html) })
+        orderbook           = mx.data.security_info_orderbook(ticker,           { after_render: -> render_orderbook(orderbook, html) })
+        emitter             = mx.data.security_info_emitter(ticker,             { after_render: -> render_emitter(emitter, html) })
+        boards              = mx.data.security_info_boards(ticker,              { after_render: -> render_boards(boards, html) })
+        emitter_securities  = mx.data.security_info_emitter_securities(ticker,  { after_render: -> render_emitter_securities(emitter_securities, html) })
+
         deferred.resolve()
     
 
-    deferred.promise()
+    deferred.promise
+        html:   -> html
+        show:      show
+        hide:      hide
 
 
 $.extend scope,

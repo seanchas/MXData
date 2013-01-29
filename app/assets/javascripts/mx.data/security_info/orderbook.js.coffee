@@ -91,12 +91,12 @@ render_table_body_row = (record, index, data) ->
     row
     
 
-widget = (ticker) ->
+widget = (ticker, options = {}) ->
 
     deferred    = new $.Deferred
+
+    after_render_callbacks   = new $.Callbacks
     
-    engine      = undefined
-    market      = undefined
     [board, id] = ticker.split(':')
     
     ready       = $.when metadata
@@ -104,10 +104,13 @@ widget = (ticker) ->
     html        = undefined
     access      = undefined
     error       = undefined
+    
+
+    [].concat(options.after_render).forEach after_render_callbacks.add if options.after_render?
 
     
     reload = ->
-        orderbook = mx.iss.orderbook(engine.name, market.name, board.id, id, { force: true })
+        orderbook = mx.iss.orderbook(board.engine.name, board.market.name, board.id, id, { force: true })
 
         orderbook.then ->
             
@@ -119,20 +122,19 @@ widget = (ticker) ->
             html        = render(orderbook.data)    unless  orderbook.error? or orderbook.data.length == 0
             error       = orderbook.error           if      orderbook.error?
 
-            $(window).trigger "security-info:orderbook:loaded:#{ticker}"
-
             _.delay reload, reload_timeout
     
+            after_render_callbacks.fire()
+
+            deferred.resolve()
+            
 
     ready.then ->
         
         board   = metadata.board(board)
-        engine  = board.engine
-        market  = board.market
 
         reload()
 
-        deferred.resolve()
 
 
     deferred.promise

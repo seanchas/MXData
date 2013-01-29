@@ -14,6 +14,7 @@ security_emitter_id_column_name = 'EMITTER_ID'
 
 render = (data) ->
     html = $('<table>')
+        .addClass('common')
         .html('<tbody></tbody>')
     
     table_body = $('tbody', html)
@@ -46,16 +47,20 @@ render_row = (security_type, data, html) ->
     html
 
 
-widget = (ticker) ->
+widget = (ticker, options = {}) ->
     
     deferred = new $.Deferred
     
+    after_render_callbacks   = new $.Callbacks
+
     html        = undefined
     access      = undefined
     error       = undefined
     id          = undefined
     
-    security    = mx.iss.security ticker
+    [board, secid] = ticker.split(':')
+    
+    security    = mx.iss.security secid
     
     ready       = $.when metadata, security_types, security
     
@@ -64,6 +69,9 @@ widget = (ticker) ->
     security_types  ?= mx.iss.security_types()
     
     
+    [].concat(options.after_render).forEach after_render_callbacks.add if options.after_render?
+
+
     reload = ->
         securities = mx.iss.emitter_securities id
         
@@ -77,19 +85,22 @@ widget = (ticker) ->
             html        = render(securities.data)   unless  securities.error? or securities.data.length == 0
             error       = securities.error          if      securities.error?
             
-            $(window).trigger "security-info:emitter-securities:loaded:#{ticker}"
-            
+            after_render_callbacks.fire()
+
+            deferred.resolve()
     
+
     ready.then ->
         
         security    = security.result
         id          = _.find(security.data.description, (column) -> column.name == security_emitter_id_column_name)?.value
         
-        $(window).trigger "security-info:emitter-securities:invalid:#{ticker}" unless id?
+        unless id?
+            after_render_callbacks.fire()
+            deferred.reject()
 
         reload() if id?
         
-        deferred.resolve()
     
 
     deferred.promise

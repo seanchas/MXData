@@ -44,6 +44,7 @@ mx.I18n.add_translations "ru.#{i18n_key}",
 
 prepare_render = ->
     $('<table>')
+        .addClass('common description')
         .html('<thead></thead><tbody></tbody><tfoot></tfoot>')
 
 
@@ -139,10 +140,12 @@ render_index_securities = (data, html) ->
     html
 
 
-widget = (ticker) ->
+widget = (ticker, options = {}) ->
     
     deferred = new $.Deferred
     
+    after_render_callbacks   = new $.Callbacks
+        
     access      = undefined
     html        = undefined
     error       = undefined
@@ -154,6 +157,9 @@ widget = (ticker) ->
     
     
     ready   = $.when metadata
+    
+
+    [].concat(options.after_render).forEach after_render_callbacks.add if options.after_render?
     
     
     reload = ->
@@ -187,7 +193,9 @@ widget = (ticker) ->
             render_security_indices(security_indices.data, html)                        unless  security_indices.error? or security_indices.data.length == 0
             render_index_securities(index_securities.data, html)                        unless  index_securities.error? or index_securities.data.length == 0
 
-            $(window).trigger "security-info:description:loaded:#{ticker}"
+            after_render_callbacks.fire()
+            
+            deferred.resolve()
         
     
     
@@ -208,8 +216,6 @@ widget = (ticker) ->
             
             reload()
         
-            deferred.resolve()
-    
     
     deferred.promise
         access: -> access

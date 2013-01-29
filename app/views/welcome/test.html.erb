@@ -1,5 +1,12 @@
 <%= render "shared/icanhaz/options_board" %>
+<%= render "shared/icanhaz/security_info" %>
+<%= render "shared/icanhaz/table_ticker_aux" %>
 
+<div id="test" style="padding: 10px; margin: 10px;">
+    
+</div>
+
+<!--
 <div id="tabs" class="tabs">
     
     <ul class="clearfix">
@@ -8,7 +15,7 @@
         </li>
         <li class="tab" data-key="options_board">
             <a href="#" class="local">Доска опционов</a>
-            <span class="expirations">&mdash;</span>
+            <span class="expirations"></span>
         </li>
         <li class="button right" data-key="remove_from_chart">
             <a href="#" class="local">Убрать с графика</a>
@@ -22,31 +29,6 @@
     </ul>
     
     <div data-key="security_description" class="security_info" style="display: none;">
-    
-        <div class="security description">
-            <div class="block">
-                <dl class="description_container">
-                    description
-                </dl>
-            </div>
-            <div class="block">
-                <div class="emitter_container">
-                    emitter
-                </div>
-                <div class="boards_container">
-                    boards
-                </div>
-                <div class="emitter_securities_container">
-                    others
-                </div>
-            </div>
-            <div class="block">
-                <div class="orderbook_container">
-                    orderbook
-                </div>
-            </div>
-        </div>
-
     </div>
     
     <div data-key="options_board" class="security_options_board" style="display: none;">
@@ -54,167 +36,44 @@
     
 </div>
 
-<!--
-<div class="security_options_board" style="border: 1px solid #ccc; margin: 10px; padding: 10px;">
+<div id="security_info" class="security_info" style="border: 1px solid #ccc; margin: 10px; padding: 10px;">
     
-    <table>
-        
-        <thead>
-            <tr>
-                <th colspan="8">
-                    CALL
-                </th>
-                <th colspan="2">
-                </th>
-                <th colspan="8">
-                    PUT
-                </th>
-            </tr>
-            
-            <tr>
-                <td rowspan="2">
-                    Сделок
-                </td>
-                <td rowspan="2">
-                    Открыт. позиций
-                </td>
-                <td colspan="3" class="last">
-                    Последняя сделка
-                </td>
-                <td rowspan="2">
-                    Покупка
-                </td>
-                <td rowspan="2">
-                    Продажа
-                </td>
-                <td rowspan="2">
-                    Теоретическая цена
-                </td>
-                <td rowspan="2">
-                    Страйк
-                </td>
-                <td rowspan="2">
-                    IV
-                </td>
-                <td rowspan="2">
-                    Теоретическая цена
-                </td>
-                <td rowspan="2">
-                    Покупка
-                </td>
-                <td rowspan="2">
-                    Продажа
-                </td>
-                <td colspan="3" class="last">
-                    Последняя сделка
-                </td>
-                <td rowspan="2">
-                    Сделок
-                </td>
-                <td rowspan="2">
-                    Открыт. позиций
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Значение
-                </td>
-                <td>
-                    Время сделки
-                </td>
-                <td>
-                    Изменение к закрытию
-                </td>
-                <td>
-                    Значение
-                </td>
-                <td>
-                    Время сделки
-                </td>
-                <td>
-                    Изменение к закрытию
-                </td>
-            </tr>
-        </thead>
-        
-        <tbody>
-        </tbody>
-        
-        <tfoot>
-           <tr>
-               <td>&mdash;</td>
-               <td>&mdash;</td>
-               <th colspan="14">
-                   Итого
-               </th>
-               <td>&mdash;</td>
-               <td>&mdash;</td>
-           </tr>         
-        </tfoot>
-        
-    </table>
-    
-</div>
-
-<div class="security_info" style="border: 1px solid #ccc; margin: 10px; padding: 10px;">
-    
-    <div class="security description">
+    <div class="security description clearfix">
         <div class="block">
             <dl class="description_container">
-                description
             </dl>
         </div>
         <div class="block">
             <div class="emitter_container">
-                emitter
             </div>
             <div class="boards_container">
-                boards
             </div>
             <div class="emitter_securities_container">
-                others
             </div>
         </div>
         <div class="block">
             <div class="orderbook_container">
-                orderbook
             </div>
         </div>
     </div>
     
 </div>
-
 -->
 
 <script type="text/javascript" charset="utf-8">
 
     $(function() {
-
-        var optionsboard    = undefined;
-        var description     = undefined;
-
-        var tabs = shared.tabs($('#tabs'));
-
-        tabs.on_activate(function(key) {
-            
-            if (key == 'security_description' && !description)
-                description = mx.data.security_info(tabs.content(key), 'RFUD:GZH3')
-            
-            if (key == 'options_board' && !optionsboard) {
-                optionsboard = mx.data.optionsboard('RFUD:GZH3', { container: tabs.content(key) })
-                optionsboard.then(function() {
-                    //tabs.content(key).html(optionsboard.html())
-                })
-            }
-            
-        });
         
+        // mx.data.table_ticker_aux('EQNE:GAZP', { container: $('#test') });
+        // mx.data.table_ticker_aux('RFUD:GZH3', { container: $('#test') });
+
         //mx.data.optionsboard($('.security_options_board'), 'RFUD:GZH3', {
         //    expirations_container: $('#expirations_chooser')
         //})
 
-        // mx.data.security_info($('.security_info'), 'EQNE:GAZP')
-        // mx.data.security_info($('.security_info'), 'SNDX:MICEXINDEXCF')
+        //mx.data.security_info('RFUD:GZH3', { container: $('#security_info') })
+        //mx.data.security_info('EQNE:GAZP', { container: $('#security_info') })
+        //mx.data.security_info('SNDX:MICEXINDEXCF', { container: $('#security_info') })
         
     });
 

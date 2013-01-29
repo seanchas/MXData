@@ -1,0 +1,18 @@
+ru:
+    shared:
+        icanhaz:
+            options_board:
+                call:           CALL
+                put:            PUT
+                trades:         Сделок
+                open_positions: Открыт. позиций
+                last_trade:     Последняя сделка
+                buy:            Покупка
+                sell:           Продажа
+                theory_price:   Теоретическая цена
+                strike:         Страйк
+                iv:             IV
+                price:          Значение
+                time:           Время сделки
+                change:         Изменение к закрытию
+                

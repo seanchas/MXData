@@ -85,6 +85,10 @@ widget = (ticker, options = {}) ->
     date        = undefined
     
     
+    show = -> html.show()
+    hide = -> html.hide()
+    
+    
     reload = ->
         
         expirations = mx.iss.security_optionsboard_expirations board.engine.name, board.market.name, board.id, id
@@ -124,6 +128,8 @@ widget = (ticker, options = {}) ->
 
     deferred.promise
         html:                   -> html
+        show:                      show
+        hide:                      hide
         date:                   -> date
         on_change: (callback)   -> on_change_callbacks.add(callback)
 

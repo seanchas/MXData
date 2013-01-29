@@ -22,6 +22,7 @@ locales =
 
 render = (data) ->
     html = $('<table>')
+        .addClass('common boards')
         .html('<tbody></tbody>')
     
     table_body = $('tbody', html)
@@ -50,13 +51,17 @@ render_row = (board) ->
     @
 
 
-widget = (ticker) ->
+widget = (ticker, options = {}) ->
     
     deferred = new $.Deferred
     
+    after_render_callbacks   = new $.Callbacks
+
     access  = undefined
     html    = undefined
     error   = undefined
+    
+    [board, id] = ticker.split(':')
     
     
     metadata ?= mx.data.metadata()
@@ -64,9 +69,12 @@ widget = (ticker) ->
     
     ready   = $.when metadata
     
+
+    [].concat(options.after_render).forEach after_render_callbacks.add if options.after_render?
     
+
     reload = ->
-        security = mx.iss.security ticker
+        security = mx.iss.security id
         
         security.then ->
             
@@ -78,16 +86,15 @@ widget = (ticker) ->
             html        = render(security.data.boards)  unless  security.error?
             error       = security.error                if      security.error?
             
+            after_render_callbacks.fire()
             
-            $(window).trigger "security-info:boards:loaded:#{ticker}"
+            deferred.resolve()
         
     
     
     ready.then ->
         
         reload()
-        
-        deferred.resolve()
     
     
     deferred.promise

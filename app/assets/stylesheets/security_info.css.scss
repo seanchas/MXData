@@ -1,6 +1,138 @@
-.security_info .orderbook_container {
+.security_info {
+    
+    .block {
+        
+        .wrapper {
+            padding: 0 10px;
+        }
 
-    width: 20%;
+        h4 {
+            border-bottom: 3px solid #ccc;
+            display: none;
+            margin: 0 0 .5em;
+            padding: 0 0 .25em;
+        }
+        
+        h4.active {
+            display: block;
+        }
+        
+    }
+    
+    .block {
+        float: left;
+
+        .table_wrapper {
+            margin-bottom: 2em;
+        }
+    
+    }
+    
+    .block.left {
+        width: 40%;
+    }
+    
+    .block.right {
+        width: 20%;
+    }
+    
+}
+
+
+.security_info {
+    
+    table.common {
+        
+        border-collapse: collapse;
+        border-spacing: 0;
+        
+        font-size: 12px;
+        width: 100%;
+        
+        thead {
+            
+            th {
+                padding: .5em 0;
+                text-align: left;
+            }
+            
+        }
+        
+        tbody {
+            
+            th, td {
+                border-bottom: 1px solid #eee;
+                padding: .5em 0;
+                text-align: left;
+                vertical-align: top;
+            }
+            
+            th {
+                color: #666;
+                font-weight: normal;
+                width: 30%;
+            }
+            
+            tr:last-child th,
+            tr:last-child td {
+                border-bottom: none;
+            }
+            
+        }
+        
+    }
+    
+
+    // boards table
+    
+    table.boards tbody th {
+        width: 100%;
+    }
+    
+    table.boards tbody td {
+        white-space: nowrap;
+    }
+    
+    
+    table.description {
+        
+        thead {
+            th, td {
+                border-bottom: 1px solid #eee;
+            }
+        }
+        
+        td, th {
+            font-weight: normal;
+            text-align: left;
+        }
+        
+        th {
+            color: #666;
+            width: 50%;
+        }
+        
+        tbody tr:first-child th,
+        tbody tr:first-child td {
+            border-top: 3px solid #ccc;
+        }
+        
+        tfoot tr th,
+        tfoot tr td {
+            border-top: 1px solid #eee;
+            padding: .5em 0;
+            vertical-align: top;
+        }
+        
+    }
+
+
+}
+
+
+.security_info .orderbook_container {
+    
+    font-size: 12px;
     
     table {
         border-collapse: collapse;
@@ -10,7 +142,7 @@
         thead {
             
             td {
-                border-bottom: 1px solid #ccc;
+                color: #666;
             }
             
             td.buy {
@@ -23,9 +155,35 @@
         }
         
         td {
+            padding: .5em 0;
             text-align: right;
             white-space: nowrap;
             width: 1%;
+        }
+        
+        tbody {
+            
+            td {
+                border-bottom: 1px solid #eee;
+            }
+            
+            tr:last-child td {
+                border-bottom: none;
+            }
+            
+            td.price {
+                padding-left: 5px;
+                padding-right: 5px;
+            }
+            
+            td.buy {
+                padding-right: 5px;
+            }
+            
+            td.sell {
+                padding-left: 5px;
+            }
+            
         }
         
         td.bar {

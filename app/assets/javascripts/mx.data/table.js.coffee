@@ -77,7 +77,7 @@ render_table_body_rows = (container, records, columns, options = {}) ->
         render_table_body_row_cells(row, record, columns, options)
         
         if information_row = row.data('information-row')
-            $('td', information_row).attr('colspan', row.children().length)
+            $('> td', information_row).attr('colspan', row.children().length)
     
 
     tickers = _.pluck(records, 'ticker')

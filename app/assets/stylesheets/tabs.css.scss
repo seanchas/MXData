@@ -24,11 +24,11 @@ div.tabs {
         }
         
         li.current {
-            font-weight: bold;
             
-            a {
+            > a {
                 border-bottom-style: solid;
                 border-bottom-width: 2px;
+                font-weight: bold;
             }
 
         }
@@ -40,6 +40,35 @@ div.tabs {
         height: 0;
         overflow: hidden;
         padding: 0;
+    }
+    
+}
+
+// tabs for records table
+
+table.records tbody {
+    
+    
+    > tr:not(.chart) {
+
+        div.tabs > ul > li.add_to_chart {
+            display: block;
+        }
+
+        div.tabs > ul > li.remove_from_chart {
+            display: none;
+        }
+    }
+    
+    > tr.chart {
+        
+        div.tabs > ul > li.add_to_chart {
+            display: none;
+        }
+        
+        div.tabs > ul > li.remove_from_chart {
+            display: block;
+        }
     }
     
 }

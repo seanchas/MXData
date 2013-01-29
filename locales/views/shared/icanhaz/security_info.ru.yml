@@ -1,0 +1,10 @@
+ru:
+    shared:
+        icanhaz:
+            security_info:
+                description:        Параметры инструмента
+                emitter:            Информация об эмитенте
+                boards:             Режимы торгов
+                emitter_securities: Другие инструменты
+                orderbook:          Котировки
+                

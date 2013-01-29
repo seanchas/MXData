@@ -93,6 +93,7 @@ default_volumes_yAxis_options =
     height:     volumes_yAxis_height
     top:        candles_yAxis_margin + candles_yAxis_height + volumes_yAxis_margin
     offset:     0
+    opposite: true
     showEmpty:  false
     alignTicks: false
 
