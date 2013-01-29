@@ -1,4 +1,15 @@
 <div id="header">
+    <ul class="locales">
+        <li class="ru">
+            <%= link_to 'Русский', root_path(:locale => :ru) %>
+        </li>
+        <li class="en">
+            <%= link_to 'English', root_path(:locale => :en) %>
+        </li>
+    </ul>
+    
+    <%= link_to :home, 'http://rts.beta.micex.ru', :class => :home %>
+    
     <div id="auth">
     </div>
 

@@ -63,7 +63,6 @@ MxData::Application.routes.draw do
   
   get '/(:locale)/test',
     :to => 'welcome#test',
-    :as => :root,
     :constraints => {
       :locale => /[a-z]{2}/
     },
