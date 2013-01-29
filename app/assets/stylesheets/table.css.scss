@@ -60,6 +60,16 @@
                 white-space: nowrap;
             }
             
+            > td {
+                cursor: move;
+            }
+            
+            > td.number,
+            > td.date,
+            > td.time {
+                text-align: right;
+            }
+
             > tr {
 
                 > td.sortable {
@@ -98,10 +108,18 @@
         
         
         > thead.sorting {
-            > tr > td > span {
-                color: #000 !important;
-                cursor: move;
-                border: none !important;
+            > tr > td {
+
+                > span {
+                    color: #000 !important;
+                    cursor: move;
+                    border: none !important;
+                }
+                
+            }
+
+            > tr > td::after {
+                display: none;
             }
         }
         
