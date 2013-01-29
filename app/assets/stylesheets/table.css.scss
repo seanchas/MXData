@@ -63,31 +63,28 @@
             > tr {
 
                 > td.sortable {
-                    cursor: pointer;                
                 
                     span {
+                        cursor: pointer;                
                         border-bottom: 1px dashed #999;
                     }
-                }
-            
-                > td.sortable:hover {
 
-                    span {
+                    span:hover {
                         color: #ccc;
                         border-bottom-color: #ccc;
                     }
 
                 }
-
-                > td.sort_field::after {
+            
+                > td.sortable::after {
                     margin-left: .5em;
                 }
             
-                > td.sort_field.asc::after {
+                > td.sortable.asc::after {
                     content: '\2191';
                 }
             
-                > td.sort_field.desc::after {
+                > td.sortable.desc::after {
                     content: '\2193';
                 }
 			
@@ -102,7 +99,7 @@
         
         > tbody {
             
-            > tr {
+            > tr.ticker {
                 
                 > td {
 
@@ -160,7 +157,7 @@
 
             }
             
-            > tr.odd > td {
+            > tr.ticker.odd > td {
                 background-color: rgb(233, 234, 237);
             }
             

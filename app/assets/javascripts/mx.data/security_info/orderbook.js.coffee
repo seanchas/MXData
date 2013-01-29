@@ -8,7 +8,7 @@ $       = jQuery
 metadata        = mx.data.metadata()
 
 
-reload_timeout  = 15 * 1000
+reload_timeout  = 2 * 1000
 
 
 locales =

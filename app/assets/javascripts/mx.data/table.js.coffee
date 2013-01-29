@@ -523,7 +523,37 @@ widget = (wrapper, engine, market) ->
             return unless data.engine == engine.name and data.market == market.name
             render()
 
+        # columns filter
+
         table_container_view.on 'click', 'div.columns_filter_trigger', toggle_columns_filter_visibility
+        
+        # records sorting
+        
+        table_container_view.on 'click', 'table.records > thead > tr.columns > td.sortable > span', (event) ->
+            cell    = $(@).closest('td')
+            id      = cell.data('id')
+            
+            direction = if cell.hasClass('asc') then -1 else 1
+            
+            cell.siblings('.sortable').removeClass('asc desc')
+
+            cell.toggleClass('asc',     direction > 0)
+            cell.toggleClass('desc',    direction < 0)
+            
+            values = table_body_view.children('.ticker').get().map (row) ->
+                row     = $ row
+                value   = $(row.children().get().filter((cell) -> cell = $(cell) ; cell.data('id') == id)[0]).data('value')
+                [value, row]
+            
+            values.sort((a, b) -> direction * if a[0] > b[0] then 1 else if a[0] < b[0] then -1 else 0).forEach (value) ->
+                row = value[1]
+                table_body_view.append row
+                if row.data('information-row')?
+                    table_body_view.append row.data('information-row')
+            
+            colorize_rows(table_body_view)
+            
+            
         
         # ticker information
         
