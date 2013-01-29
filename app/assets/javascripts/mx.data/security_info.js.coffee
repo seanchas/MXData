@@ -12,24 +12,24 @@ metadata = undefined
 
 
 render_description = (description, html) ->
-    $('.description_title').toggleClass('active', description.html()?)
+    $('.description_title', html).toggleClass('active', description.html()?)
     $('.description_container', html).html(description.html() ? '')
 
 render_emitter = (emitter, html) ->
-    $('.emitter_title').toggleClass('active', emitter.html()?)
+    $('.emitter_title', html).toggleClass('active', emitter.html()?)
     $('.emitter_container', html).html(emitter.html() ? '').toggle(emitter.html()?)
 
 render_emitter_securities = (emitter_securities, html) ->
-    $('.emitter_securities_title').toggleClass('active', emitter_securities.html()?)
+    $('.emitter_securities_title', html).toggleClass('active', emitter_securities.html()?)
     $('.emitter_securities_container', html).html(emitter_securities.html() ? '').toggle(emitter_securities.html()?)
 
 render_boards = (boards, html) ->
-    $('.boards_title').toggleClass('active', boards.html()?)
+    $('.boards_title', html).toggleClass('active', boards.html()?)
     $('.boards_container', html).html(boards.html() ? '').toggle(boards.html()?)
 
 
 render_orderbook = (orderbook, html) ->
-    $('.orderbook_title').toggleClass('active', orderbook.html()?)
+    $('.orderbook_title', html).toggleClass('active', orderbook.html()?)
     $('.orderbook_container', html).html(orderbook.html() ? '')
 
 
