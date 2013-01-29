@@ -442,6 +442,7 @@ widget = (wrapper, engine, market) ->
     
     
     toggle_columns_filter_visibility = ->
+        table_head_view.toggleClass('sorting')
         columns_filter.view().toggle('blind', {}, 250)
     
 

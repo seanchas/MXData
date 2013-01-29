@@ -61,7 +61,7 @@ render_cells = (data, columns, container, type) ->
         
         value = switch column.type
             when 'date'
-                mx.I18n.to_datetime(iss_date_format.parse(value)) if value?
+                mx.I18n.to_time(iss_date_format.parse(value)) if value?
             when 'number'
                 scope.utils.number_with_precision(value, { precision: column.precision ? 2 }) if value?
             else
