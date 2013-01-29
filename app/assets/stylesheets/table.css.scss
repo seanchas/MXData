@@ -97,6 +97,15 @@
         }
         
         
+        > thead.sorting {
+            > tr > td > span {
+                color: #000 !important;
+                cursor: move;
+                border: none !important;
+            }
+        }
+        
+        
         > tbody {
             
             > tr.ticker {
