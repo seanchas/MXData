@@ -44,3 +44,22 @@ body[lang=ru] #header ul.locales li.ru {
     display: none;
 }
 
+
+#header .date {
+    color: #666;
+    font-size: .8em;
+    margin-top: -.4em;
+    margin-left: 250px;
+    position: absolute;
+    top: 50%;
+    text-transform: capitalize;
+}
+
+#header .phone {
+    color: #666;
+    font-size: 1.2em;
+    margin-top: -.6em;
+    margin-left: 500px;
+    position: absolute;
+    top: 50%;
+}

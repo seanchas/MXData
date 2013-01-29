@@ -6,6 +6,15 @@ root['mx'].I18n    ?= {}
 i18n                = root['mx'].I18n
 
 
+i18n.add_translations 'ru',
+    date:
+        day_names: ['воскресение', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота']
+
+i18n.add_translations 'en',
+    date:
+        day_names: ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+
+
 localize = ->
     options = if arguments.length > 1 and $.isPlainObject(arguments[arguments.length - 1]) then arguments[arguments.length - 1] else {}
     value   = arguments[0]
@@ -75,6 +84,7 @@ datetime_format_pad = (v, f, n) -> (new Array(n + 1).join(f) + v).slice(-n)
 
 
 datetime_formats =
+    'A': (v, p) -> i18n.translate('date.day_names')[v.getDay()]
     'd': (v, p) -> datetime_format_pad(v.getDate(),         p, 2)
     'H': (v, p) -> datetime_format_pad(v.getHours(),        p, 2)
     'm': (v, p) -> datetime_format_pad(v.getMonth() + 1,    p, 2)

@@ -12,7 +12,14 @@
     
     <div id="auth">
     </div>
-
+    
     <%= link_to t(:exchange), root_path(:locale => I18n.locale), :class => :logo, :title => t(:exchange) %>
+
+    <span class="date">&mdash;</span>
+    <span class="phone">(495) 363-32-32</span>
+
 </div>
 
+<script type="text/javascript" charset="utf-8">
+    $(function() { $('#header .date').html(mx.I18n.to_datetime(new Date, { format: '%A, %d.%m.%Y %H:%M' })) })
+</script>
