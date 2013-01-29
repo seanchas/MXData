@@ -110,6 +110,8 @@ widget = (ticker, options = {}) ->
 
     
     reload = ->
+        return _.delay(reload, reload_timeout) if html?.is(':hidden')
+        
         orderbook = mx.iss.orderbook(board.engine.name, board.market.name, board.id, id, { force: true })
 
         orderbook.then ->
