@@ -1,80 +1,21 @@
-<%= render "shared/icanhaz/options_board" %>
-<%= render "shared/icanhaz/security_info" %>
-<%= render "shared/icanhaz/table_ticker_aux" %>
 
-<div id="test" style="padding: 10px; margin: 10px;">
-    
+
+<div id="test" style="padding: 1em 10px; margin: 1em 10px; background: #f9f9f9;">
+    <div class="chart">
+        <ul class="tickers">
+            <li>tickers</li>
+        </ul>
+    </div>
 </div>
 
-<!--
-<div id="tabs" class="tabs">
-    
-    <ul class="clearfix">
-        <li class="tab" data-key="security_description">
-            <a href="#" class="local">Информация об инструменте</a>
-        </li>
-        <li class="tab" data-key="options_board">
-            <a href="#" class="local">Доска опционов</a>
-            <span class="expirations"></span>
-        </li>
-        <li class="button right" data-key="remove_from_chart">
-            <a href="#" class="local">Убрать с графика</a>
-        </li>
-        <li class="button right" data-key="add_to_chart">
-            <a href="#" class="local">Добавить на график</a>
-        </li>
-        <li class="button right" data-key="remove_from_table">
-            <a href="#" class="local">Удалить инструмент</a>
-        </li>
-    </ul>
-    
-    <div data-key="security_description" class="security_info" style="display: none;">
-    </div>
-    
-    <div data-key="options_board" class="security_options_board" style="display: none;">
-    </div>
-    
-</div>
-
-<div id="security_info" class="security_info" style="border: 1px solid #ccc; margin: 10px; padding: 10px;">
-    
-    <div class="security description clearfix">
-        <div class="block">
-            <dl class="description_container">
-            </dl>
-        </div>
-        <div class="block">
-            <div class="emitter_container">
-            </div>
-            <div class="boards_container">
-            </div>
-            <div class="emitter_securities_container">
-            </div>
-        </div>
-        <div class="block">
-            <div class="orderbook_container">
-            </div>
-        </div>
-    </div>
-    
-</div>
--->
 
 <script type="text/javascript" charset="utf-8">
-
     $(function() {
-        
-        // mx.data.table_ticker_aux('EQNE:GAZP', { container: $('#test') });
-        // mx.data.table_ticker_aux('RFUD:GZH3', { container: $('#test') });
 
-        //mx.data.optionsboard($('.security_options_board'), 'RFUD:GZH3', {
-        //    expirations_container: $('#expirations_chooser')
-        //})
-
-        //mx.data.security_info('RFUD:GZH3', { container: $('#security_info') })
-        //mx.data.security_info('EQNE:GAZP', { container: $('#security_info') })
-        //mx.data.security_info('SNDX:MICEXINDEXCF', { container: $('#security_info') })
-        
-    });
-
+        var chart = mx.chart.widget({
+            container: '#test'
+        })
+    
+    })
 </script>
+
