@@ -21,5 +21,5 @@
 </div>
 
 <script type="text/javascript" charset="utf-8">
-    $(function() { $('#header .date').html(mx.I18n.to_datetime(new Date, { format: '%A, %d.%m.%Y %H:%M' })) })
+    $(function() { setInterval(function() {$('#header .date').html(mx.I18n.to_datetime(new Date, { format: '%A, %d.%m.%Y %H:%M' }, 30 * 1000))}) })
 </script>
