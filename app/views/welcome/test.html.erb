@@ -1,9 +1,62 @@
+<style type="text/css" media="screen">
+    ul.tickers {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    
+    ul.tickers li {
+        cursor: pointer;
+        float: left;
+        margin-right: 2em;
+        padding: 0 5px 2px;
+        position: relative;
+    }
+    
+    ul.tickers li:hover {
+        border-bottom-width: 2px;
+        border-bottom-style: solid;
+        padding-bottom: 0;
+    }
+
+    ul.tickers li:last-child {
+        margin-right: 0;
+    }
+    
+    ul.tickers li span.remove {
+        color: #f00;
+        display: none;
+        font-size: .8em;
+        font-weight: bold;
+        height: .8em;
+        line-height: .8em;
+        margin-top: -.4em;
+        position: absolute;
+        right: -15px;
+        top: 50%;
+    }
+</style>
 
 
 <div id="test" style="padding: 1em 10px; margin: 1em 10px; background: #f9f9f9;">
     <div class="chart">
-        <ul class="tickers">
-            <li>tickers</li>
+        <ul class="tickers clearfix">
+            <li>
+                ticker 1
+                <span class="remove">[x]</span>
+            </li>
+            <li>
+                ticker 2
+                <span class="remove">[x]</span>
+            </li>
+            <li>
+                ticker 3
+                <span class="remove">[x]</span>
+            </li>
+            <li>
+                ticker 4
+                <span class="remove">[x]</span>
+            </li>
         </ul>
     </div>
 </div>
@@ -14,6 +67,59 @@
 
         var chart = mx.chart.widget({
             container: '#test'
+        })
+        
+        var colors = d3.scale.category10()
+        
+        $('#test ul.tickers li').each(function(i, li) {
+            $(li).css('color', colors(i))
+            $(li).css('border-bottom-color', colors(i))
+        })
+        
+        var prevent_click = false;
+        var prevent_click_timeout = undefined;
+        var current_remove_button = undefined;
+        
+        $('#test').on('click', 'ul.tickers li', function(event) {
+            if (prevent_click) return event.stopPropagation();
+            clearTimeout(prevent_click_timeout)
+            console.log('clicked')
+        })
+    
+        $('#test').on('mousedown', 'ul.tickers li', function(event) {
+            var button = $(this).children('.remove');
+            prevent_click_timeout = _.delay(function() {
+                prevent_click = true;
+                current_remove_button = button;
+                button.show()
+            }, .5 * 1000)
+        })
+    
+        $('#test').on('mouseup', 'ul.tickers li', function(event) {
+            _.defer(function() {
+                prevent_click = false;
+            })
+        })
+        
+        $('#test').on('click', 'ul.tickers li span.remove', function(event) {
+            event.stopPropagation();
+            clearTimeout(prevent_click_timeout)
+            $(this).closest('li').remove();
+            $('#test ul.tickers li').each(function(i, li) {
+                $(li).css('color', colors(i))
+                $(li).css('border-bottom-color', colors(i))
+            })
+        })
+        
+        $(window).on('keydown', function(event) {
+            if (event.keyCode == 27)
+                $('ul.tickers li span.remove', '#test').hide()
+            
+        })
+        
+        $(window).on('mousedown', function(event) {
+            if (current_remove_button && $(event.target)[0] != current_remove_button[0])
+                current_remove_button.hide()
         })
     
     })

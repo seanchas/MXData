@@ -85,7 +85,7 @@ fetch = ->
     result = {}
     
     $.ajax
-        url: "http://www.beta.micex.ru/cu"
+        url: '/cu' # "http://www.beta.micex.ru/cu"
         dataType: 'json'
         xhrFields:
             withCredentials: true

@@ -67,7 +67,7 @@ fetch = (name, args...) ->
 
 
 $.extend scope,
-    url_prefix:             'http://www.beta.micex.ru/iss'
+    url_prefix:             '/iss' #'http://www.beta.micex.ru/iss'
     fetch:                  fetch
     fetch_descriptors:      {}
     merge_columns_and_data: merge
