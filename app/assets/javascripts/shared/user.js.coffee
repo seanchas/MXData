@@ -57,6 +57,9 @@ localized_sites =
 
 cache       = kizzy('shared:user')
 
+unless String.prototype.trimRight
+    String.prototype.trimRight = -> @replace(/\s+$/, '')
+
 
 t = (c) -> if c.toUpperCase() != c.toLowerCase() then 'A' else ' '
 
