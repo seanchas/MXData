@@ -12,4 +12,4 @@ scope = root['mx']['cs']
 
 
 $.extend scope,
-    url_prefix: '/cs' # 'http://www.beta.micex.ru/cs'
+    url_prefix: if $.browser.msie? then '/cs' else 'http://www.beta.micex.ru/cs'

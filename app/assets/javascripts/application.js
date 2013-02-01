@@ -7,5 +7,8 @@
 //= require jquery
 //= require jquery-ui
 //= require jquery_ujs
+//
+//= require chart
+//
 //= require_tree .
 //= require_tree ./shared

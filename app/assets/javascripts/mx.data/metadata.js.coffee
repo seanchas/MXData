@@ -1,11 +1,6 @@
-root    = @
-scope   = root['mx']['data']
-
-
 $       = jQuery
-
-
-data = mx.iss.metadata()
+scope   = @mx.data
+data    = undefined
 
 
 mappings = 
@@ -24,6 +19,7 @@ mappings =
         trading:    (record) -> !!record.is_traded
         market_id:  'market_id'
         engine_id:  'engine_id'
+
 
 
 engines         = undefined
@@ -50,17 +46,21 @@ populate_data = (mapping, data) ->
 
 metadata = ->
     
-    deferred = new $.Deferred
+    deferred    = new $.Deferred
     
-    ready = $.when(data)
+    data       ?= mx.iss.metadata()
+    
+    ready       = $.when(data)
     
     ready.then ->
-        [engines, engines_hash] = populate_data(mappings.engines,   data.engines)
-        [markets, markets_hash] = populate_data(mappings.markets,   data.markets)
-        [boards,  boards_hash]  = populate_data(mappings.boards,    data.boards)
+        [engines, engines_hash] = populate_data(mappings.engines,   data.result.data.engines)
+        [markets, markets_hash] = populate_data(mappings.markets,   data.result.data.markets)
+        [boards,  boards_hash]  = populate_data(mappings.boards,    data.result.data.boards)
         
         _.each(markets_hash, (market) -> market.engine = engines_hash[market.engine_id])
         _.each(boards_hash, (board) -> board.market = markets_hash[board.market_id] ; board.engine = engines_hash[board.engine_id])
+        
+        
         
         deferred.resolve()
 

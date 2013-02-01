@@ -1,6 +1,5 @@
-root    = @
-scope   = root['mx']['iss']
 $       = jQuery
+scope   = @mx.iss
 
 
 keys = [
@@ -12,22 +11,20 @@ keys = [
 
 
 fetch = ->
-    deferred = new $.Deferred
-    
-    data = {}
-    
-    $.ajax
-        url: "#{scope.url_prefix}.jsonp?callback=?"
-        data:
-            'iss.meta': 'off'
-        dataType: 'jsonp'
-    .then (json) ->
-        for key in keys
-            data[key] = scope.merge_columns_and_data json?[key]
-        deferred.resolve data
-    
-    deferred.promise(data)
+    scope.fetch 'metadata', arguments...
 
 
 $.extend scope,
-    metadata: _.once fetch
+    metadata: fetch
+
+
+$.extend scope.fetch_descriptors,
+    metadata:
+        cache_key: ->
+            ""
+        url: ->
+            "/index.json"
+        xhr_data: ->
+            'iss.only': keys.join(',')
+        parse: (json) ->
+            keys.reduce(((memo, key) -> memo[key] = scope.merge_columns_and_data(json?[key]) ; memo), {})

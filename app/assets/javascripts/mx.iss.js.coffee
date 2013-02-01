@@ -66,8 +66,11 @@ fetch = (name, args...) ->
     requests_cache[cache_key] = cached_request.promise({ result: result, expires_at: expires_at })
 
 
+url_prefix = 
+
+
 $.extend scope,
-    url_prefix:             '/iss' #'http://www.beta.micex.ru/iss'
+    url_prefix:             if $.browser.msie? then '/iss' else 'http://www.beta.micex.ru/iss'
     fetch:                  fetch
     fetch_descriptors:      {}
     merge_columns_and_data: merge

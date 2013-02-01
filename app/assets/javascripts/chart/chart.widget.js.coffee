@@ -1,11 +1,5 @@
-##= require mx.iss
-
 $               = jQuery
-root            = @
-root.mx        ?= {}
-root.mx.chart  ?= {}
-scope           = root.mx.chart
-
+scope           = @mx.chart
 
 
 widget = (options = {}) ->
@@ -16,6 +10,9 @@ widget = (options = {}) ->
     html        = undefined
     
     ready       = $.when true
+    
+    
+    instruments = scope.instruments_widget(options)
 
 
     ready.then ->

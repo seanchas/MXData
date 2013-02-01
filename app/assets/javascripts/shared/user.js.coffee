@@ -88,7 +88,7 @@ fetch = ->
     result = {}
     
     $.ajax
-        url: '/cu' # "http://www.beta.micex.ru/cu"
+        url: if $.browser.msie? then '/cu' else 'http://www.beta.micex.ru/cu'
         dataType: 'json'
         xhrFields:
             withCredentials: true
