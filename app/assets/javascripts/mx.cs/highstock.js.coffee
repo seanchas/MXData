@@ -59,13 +59,15 @@ fetch_2 = (param, options = {}) ->
     
     result = {}
     
-    metadata ?= mx.iss.metadata()
+    metadata ?= mx.data.metadata()
 
     
     metadata.then ->
         
         [ board, id ]               = param.split(':')
-        { engine, market, group }   = find_metadata board
+        board                       = metadata.board board
+        engine                      = board.engine.name
+        market                      = board.market.name
         
         technicals_params = _.reduce options.technicals, (memo, technical, index) ->
             memo["indicator#{index}.#{value.name}.value"] = value.value for value in technical.values ; memo
@@ -81,7 +83,7 @@ fetch_2 = (param, options = {}) ->
         query_data = _.reduce(query_data, ((container, value, key) -> container[key] = value if value? ; container ), {})
         
         $.ajax
-            url:        "#{scope.url_prefix}/engines/#{engine}/markets/#{market}/boardgroups/#{group}/securities/#{id}.hs"
+            url:        "#{scope.url_prefix}/engines/#{engine}/markets/#{market}/securities/#{id}.hs"
             data:       $.extend query_data, technicals_params
             dataType:   'json'
         .then (json) ->

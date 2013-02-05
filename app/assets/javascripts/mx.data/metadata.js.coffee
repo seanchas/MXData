@@ -60,8 +60,6 @@ metadata = ->
         _.each(markets_hash, (market) -> market.engine = engines_hash[market.engine_id])
         _.each(boards_hash, (board) -> board.market = markets_hash[board.market_id] ; board.engine = engines_hash[board.engine_id])
         
-        
-        
         deferred.resolve()
 
     deferred.promise
@@ -74,4 +72,4 @@ metadata = ->
 
 
 $.extend scope,
-    metadata: metadata
+    metadata: _.once metadata

@@ -79,7 +79,7 @@ widget = (wrapper) ->
     # render periods
     
     ready_for_render.then ->
-        candle_widths       = data.durations
+        candle_widths       = data.result.data.durations
         
         candle_widths_view  = make_candle_widths_view wrapper
     

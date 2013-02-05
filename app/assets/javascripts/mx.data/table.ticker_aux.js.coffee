@@ -23,13 +23,14 @@ widget = (ticker, options = {}) ->
     hide = -> html.hide() if html?
 
     metadata               ?= mx.data.metadata()
+
     security_description    = undefined
     options_board           = undefined
     
-    ready   = $.when metadata, security_description, options_board
-
+    ready   = $.when metadata
+    
     tabs    = shared.tabs(html)
-
+    
     on_tab_activate = (key) ->
         switch key
             when 'security_description'
@@ -48,7 +49,6 @@ widget = (ticker, options = {}) ->
 
             when 'remove_from_table'
                 $(window).trigger "global:table:security:remove:#{board.engine.name}:#{board.market.name}", { ticker: ticker }
-
 
     ready.then ->
         board                   = metadata.board board
@@ -73,8 +73,7 @@ widget = (ticker, options = {}) ->
             container.html(html) if container?
         
         deferred.resolve()
-
-
+    
     deferred.promise
         after_render:      after_render_callbacks.add
         html:           -> html

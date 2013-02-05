@@ -1,0 +1,6 @@
+ru:
+    shared:
+        icanhaz:
+            table_ticker_aux:
+                instrument_info:    Информация об инструменте
+                options_board:      Доска опционов
