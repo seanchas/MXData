@@ -69,11 +69,10 @@ widget = (ticker, options = {}) ->
     
     security    = mx.iss.security secid
     
-    ready       = $.when metadata, emitter_columns, security
-    
-    
     metadata        ?= mx.data.metadata()
     emitter_columns ?= mx.iss.emitter_columns()
+
+    ready       = $.when metadata, emitter_columns, security
     
     
     [].concat(options.after_render).forEach after_render_callbacks.add if options.after_render?

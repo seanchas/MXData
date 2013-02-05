@@ -5,9 +5,9 @@ scope   = root['mx']['data']
 $       = jQuery
 
 
-security_groups         = mx.iss.security_groups()
+security_groups         = undefined
 security_groups_hash    = undefined
-metadata                = mx.iss.metadata()
+metadata                = undefined
 metadata_engines_hash   = undefined
 metadata_markets_hash   = undefined
 metadata_boards_hash    = undefined
@@ -25,7 +25,7 @@ query_threshold = 3
 
 
 securities_keys = ->
-    _.map(metadata.markets, (market) -> "#{market.trade_engine_name}:#{market.market_name}:securities")
+    _.map(metadata.markets(), (market) -> "#{market.engine.name}:#{market.name}:securities")
 
 
 # NB!!! Delete and replace with common utility function
@@ -95,7 +95,7 @@ render_results = (container, data) ->
     
     _.each(data, (record) ->
         record.boards = []
-        record.boards.push _.find(metadata.boards, (board) -> board.boardid == record.primary_boardid)
+        record.boards.push metadata.board(record.primary_boardid)
     )
     
     container.html(ich.query_search_results({ groups: groups }))
@@ -105,7 +105,7 @@ render_results = (container, data) ->
 
 
 render_boards = (container, data) ->
-    boards = _.chain(data).reject((board) -> !board.is_traded).map((board) -> metadata_boards_hash[board.boardid]).value()
+    boards = _.chain(data).reject((board) -> !board.is_traded).map((board) -> metadata.board(board.boardid)).value()
     
     container.append(ich.query_search_results_boards({ boards: boards }))
     
@@ -162,11 +162,12 @@ remove_ticker_from_table = (board_id, security_id) ->
 
 
 add_or_remove_table_ticker = (method, board_id, security_id) ->
-    board   = _.find(metadata.boards,   (board)     -> board.boardid    == board_id)
-    market  = _.find(metadata.markets,  (market)    -> market.market_id == board.market_id)
-    engine  = _.find(metadata.engines,  (engine)    -> engine.id        == board.engine_id)
+    board = metadata.board(board_id)
+    #board   = _.find(metadata.boards,   (board)     -> board.boardid    == board_id)
+    #market  = _.find(metadata.markets,  (market)    -> market.market_id == board.market_id)
+    #engine  = _.find(metadata.engines,  (engine)    -> engine.id        == board.engine_id)
     
-    $(window).trigger "global:table:security:#{method}:#{engine.name}:#{market.market_name}", { ticker: "#{board_id}:#{security_id}" }
+    $(window).trigger "global:table:security:#{method}:#{board.engine.name}:#{board.market.name}", { ticker: "#{board_id}:#{security_id}" }
 
 
 widget = (container, options = {}) ->
@@ -181,6 +182,10 @@ widget = (container, options = {}) ->
     search_timeout      = undefined
     performed_query     = undefined
     performed_search    = undefined
+    
+    
+    metadata           ?= mx.data.metadata()
+    security_groups    ?= mx.iss.security_groups()
     
 
     filter_markets  = scope.quote_search_filter_markets()

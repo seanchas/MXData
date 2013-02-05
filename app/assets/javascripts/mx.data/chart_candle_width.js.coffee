@@ -8,7 +8,7 @@ $       = jQuery
 cache = kizzy('data.chart.period')
 
 
-data            = mx.iss.metadata()
+data            = undefined
 candle_widths   = []
 
 default_candle_width_interval = 1
@@ -36,6 +36,8 @@ widget = (wrapper) ->
     deferred                = new $.Deferred
 
     candle_widths_view      = undefined
+    
+    data                   ?= mx.iss.metadata()
     
     ready_for_render        = $.when data
     

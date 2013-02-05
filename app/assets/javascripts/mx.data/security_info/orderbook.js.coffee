@@ -5,7 +5,7 @@ scope   = root['mx']['data']
 $       = jQuery
 
 
-metadata        = mx.data.metadata()
+metadata        = undefined
 
 
 reload_timeout  = 2 * 1000
@@ -99,6 +99,7 @@ widget = (ticker, options = {}) ->
     
     [board, id] = ticker.split(':')
     
+    metadata    ?= mx.data.metadata()
     ready       = $.when metadata
 
     html        = undefined

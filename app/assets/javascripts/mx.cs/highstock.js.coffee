@@ -6,7 +6,7 @@ scope   = root['mx']['cs']
 $       = jQuery
 
 
-metadata = mx.iss.metadata()
+metadata = undefined
 
 
 find_metadata = (boardid) ->
@@ -58,6 +58,9 @@ fetch_2 = (param, options = {}) ->
     deferred    = new $.Deferred
     
     result = {}
+    
+    metadata ?= mx.iss.metadata()
+
     
     metadata.then ->
         

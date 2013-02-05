@@ -12,7 +12,7 @@ max_technicals              = 10
 max_identical_technicals    = 3
 
 
-technicals_descriptors      = mx.cs.technicals()
+technicals_descriptors      = undefined
 
 technicals_descriptors_hash = _.once ->
     _.reduce technicals_descriptors, (memo, technical_descriptor) ->
@@ -138,6 +138,8 @@ widget = (wrapper, options = {}) ->
 
     anchors_view            = null
     
+    technicals_descriptors ?= mx.cs.technicals()
+
     ready_for_render        = $.when technicals_descriptors
     
     technicals_changed      = true

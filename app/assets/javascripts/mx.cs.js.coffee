@@ -10,6 +10,9 @@ root['mx']['cs'] = {}
 
 scope = root['mx']['cs']
 
+url_prefix  = '/cs'
+url_prefix  = mx.url + url_prefix if $.support.cors
+
 
 $.extend scope,
-    url_prefix: if $.browser.msie? then '/cs' else 'http://www.beta.micex.ru/cs'
+    url_prefix: url_prefix

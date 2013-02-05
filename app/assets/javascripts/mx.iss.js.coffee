@@ -12,6 +12,8 @@ root['mx']['iss'] = {}
 
 scope = root['mx']['iss']
 
+url_prefix  = '/iss'
+url_prefix  = mx.url + url_prefix if $.support.cors
 
 requests_cache = {}
 
@@ -46,7 +48,7 @@ fetch = (name, args...) ->
     
     $.ajax
         url: scope.url_prefix + descriptor.url(args...)
-        data: $.extend(descriptor.xhr_data(args...), { 'iss.meta': 'off', 'lang': mx.locale() })
+        data: $.extend(descriptor.xhr_data(args...), { 'iss.meta': 'off', 'lang': mx.I18n.locale })
         cache: false
         dataType: 'json'
         xhrFields:
@@ -66,11 +68,8 @@ fetch = (name, args...) ->
     requests_cache[cache_key] = cached_request.promise({ result: result, expires_at: expires_at })
 
 
-url_prefix = 
-
-
 $.extend scope,
-    url_prefix:             if $.browser.msie? then '/iss' else 'http://www.beta.micex.ru/iss'
+    url_prefix:             url_prefix
     fetch:                  fetch
     fetch_descriptors:      {}
     merge_columns_and_data: merge

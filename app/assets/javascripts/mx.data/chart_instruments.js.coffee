@@ -8,7 +8,7 @@ $       = jQuery
 max_instruments = 5
 
 
-bootstrap_data  = mx.iss.bootstrap()
+bootstrap_data  = undefined
 bootstrap_keys  = ['indices', 'currencies']
 
 
@@ -54,6 +54,8 @@ widget = (wrapper) ->
     instruments         = []
     instruments_changed = true
 
+
+    bootstrap_data  ?= mx.iss.bootstrap()
 
     ready_for_render    = $.when true
 

@@ -7,7 +7,7 @@
 //= require jquery
 //= require jquery-ui
 //= require jquery_ujs
-//
+//= require mx
 //= require chart
 //
 //= require_tree .

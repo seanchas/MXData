@@ -5,7 +5,7 @@ scope   = root['mx']['data']
 $       = jQuery
 
 
-metadata = mx.iss.metadata()
+metadata = undefined
 
 
 
@@ -47,6 +47,8 @@ widget = ->
 
     cache_key = ''
     view = undefined    
+    
+    metadata ?= mx.iss.metadata()
     
     ready = $.when(metadata)
     

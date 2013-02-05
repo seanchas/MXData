@@ -20,7 +20,6 @@ read_or_write_cache = (name, key, value) ->
 
 
 _.extend scope,
-    ready: mx.iss.metadata()
     caches:
         table_filtered_columns: _.wrap(read_or_write_cache, (f, key, value) -> f('data.table.filtered_columns', key, value))
         chart_instruments: _.wrap(read_or_write_cache, (f, value) -> f('data.chart.instruments', '', value))

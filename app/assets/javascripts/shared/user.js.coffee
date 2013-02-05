@@ -6,6 +6,10 @@ root            = @
 root.shared    ?= {}
 scope           = root.shared
 
+url             = '/cu'
+url             = mx.url + url if $.support.cors
+
+
 links   = ['login',     'registration', 'user']
 sites   = ['passport',  'services',     'logout']
 
@@ -88,7 +92,7 @@ fetch = ->
     result = {}
     
     $.ajax
-        url: if $.browser.msie? then '/cu' else 'http://www.beta.micex.ru/cu'
+        url: url
         dataType: 'json'
         xhrFields:
             withCredentials: true
