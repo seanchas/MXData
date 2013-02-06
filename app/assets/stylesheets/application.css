@@ -8,7 +8,10 @@
 
 html,
 body {
+    color: #333;
     font-family: 'calibri', 'trebuchet ms', arial, sans-serif;
+    font-size: 14px;
+    line-height: 20px;
 }
 
 a {
@@ -27,6 +30,11 @@ a.local {
 
 a.local:hover {
     border-bottom-color: #903;
+}
+
+
+p {
+    margin: 0 0 10px;
 }
 
 

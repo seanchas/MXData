@@ -8,7 +8,9 @@
 //= require jquery-ui
 //= require jquery_ujs
 //= require mx
+//= require table
 //= require chart
 //
 //= require_tree .
+//= require_tree ./bootstrap
 //= require_tree ./shared
