@@ -17,6 +17,7 @@ mappings =
         id:             'boardid'
         title:          'board_title'
         trading:        (record) -> !!record.is_traded
+        candles:        (record) -> !!record.has_candles
         market_id:      'market_id'
         engine_id:      'engine_id'
         boardgroup_id:  'board_group_id'

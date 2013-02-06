@@ -1,8 +1,10 @@
 div.tabs {
     
     border: 1px solid #ccc;
-    margin: 1em 10px;
+    border-width: 1px 0;
+    margin: 1em 0;
     padding: 1em 10px;
+    position: relative;
     
     > ul {
         
@@ -68,6 +70,48 @@ table.records tbody {
         
         div.tabs > ul > li.remove_from_chart {
             display: block;
+        }
+    }
+    
+    > tr.info div.tabs:not(.candles) {
+        li.add_to_chart,
+        li.remove_from_chart {
+            display: none;
+        }
+    }
+    
+    > tr.info {
+        
+        > td {
+            padding: 0;
+        }
+        
+        div.tabs::before,
+        div.tabs::after {
+            content: '';
+            left: 50%;
+            position: absolute;
+            top: 0;
+        }
+    
+        div.tabs::before {
+            border-left: 11px solid transparent;
+            border-right: 11px solid transparent;
+            border-bottom: 11px solid #ccc;
+            height: 0;
+            margin-top: -11px;
+            margin-left: -6px;
+            width: 0;
+        }
+    
+        div.tabs::after {
+            border-left: 11px solid transparent;
+            border-right: 11px solid transparent;
+            border-bottom: 11px solid #fff;
+            height: 0;
+            margin-top: -10px;
+            margin-left: -6px;
+            width: 0;
         }
     }
     

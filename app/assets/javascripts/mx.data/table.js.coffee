@@ -224,7 +224,7 @@ render_information_row = (row) ->
 
 process_chart_tickers = (container, tickers) ->
     rows = $('tr.ticker', container)
-
+    
     _.each rows, hide_chart_state
 
     chart_rows = _.select(rows, (row) -> _.include(tickers, $(row).data('id')))

@@ -58,6 +58,8 @@ widget = (ticker, options = {}) ->
             tabs.tab('options_board').show()
             options_board = mx.data.optionsboard(ticker)
         
+        html.addClass('candles') if board.candles
+        
         $.when(security_description, options_board).then ->
             
             tabs.content('security_description').html(security_description.html())

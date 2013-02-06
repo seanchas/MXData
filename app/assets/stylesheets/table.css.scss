@@ -53,12 +53,15 @@
             > tr > td,
             > td {
                 color: #999;
-                cursor: move;
                 font-size: .75em;
 				padding-top: .75em;
 				padding-bottom: .75em;
                 vertical-align: top;
                 white-space: nowrap;
+            }
+            
+            > tr.columns > td {
+                cursor: move;
             }
             
             > td {
