@@ -5,29 +5,38 @@ data    = undefined
 
 mappings = 
     engines:
-        id:         'id'
-        name:       'name'
-        title:      'title'
+        id:             'id'
+        name:           'name'
+        title:          'title'
     markets:
-        id:         'market_id'
-        name:       'market_name'
-        title:      'market_title'
-        engine_id:  'trade_engine_id'
+        id:             'market_id'
+        name:           'market_name'
+        title:          'market_title'
+        engine_id:      'trade_engine_id'
     boards:
-        id:         'boardid'
-        title:      'board_title'
-        trading:    (record) -> !!record.is_traded
-        market_id:  'market_id'
-        engine_id:  'engine_id'
+        id:             'boardid'
+        title:          'board_title'
+        trading:        (record) -> !!record.is_traded
+        market_id:      'market_id'
+        engine_id:      'engine_id'
+        boardgroup_id:  'board_group_id'
+    boardgroups:
+        id:             'board_group_id'
+        default:        (record) -> !!record.is_default
+        market_id:      'market_id'
+        name:           'name'
+        title:          'title'
 
 
 
-engines         = undefined
-engines_hash    = undefined
-markets         = undefined
-markets_hash    = undefined
-boards          = undefined
-boards_hash     = undefined
+engines             = undefined
+engines_hash        = undefined
+markets             = undefined
+markets_hash        = undefined
+boards              = undefined
+boards_hash         = undefined
+boardgroups         = undefined
+boardgroups_hash    = undefined
 
 
 
@@ -53,12 +62,13 @@ metadata = ->
     ready       = $.when(data)
     
     ready.then ->
-        [engines, engines_hash] = populate_data(mappings.engines,   data.result.data.engines)
-        [markets, markets_hash] = populate_data(mappings.markets,   data.result.data.markets)
-        [boards,  boards_hash]  = populate_data(mappings.boards,    data.result.data.boards)
+        [engines,       engines_hash]       = populate_data(mappings.engines,       data.result.data.engines)
+        [markets,       markets_hash]       = populate_data(mappings.markets,       data.result.data.markets)
+        [boards,        boards_hash]        = populate_data(mappings.boards,        data.result.data.boards)
+        [boardgroups,   boardgroups_hash]   = populate_data(mappings.boardgroups,   data.result.data.boardgroups)
         
         _.each(markets_hash, (market) -> market.engine = engines_hash[market.engine_id])
-        _.each(boards_hash, (board) -> board.market = markets_hash[board.market_id] ; board.engine = engines_hash[board.engine_id])
+        _.each(boards_hash, (board) -> board.market = markets_hash[board.market_id] ; board.engine = engines_hash[board.engine_id] ; board.boardgroup = boardgroups_hash[board.boardgroup_id])
         
         deferred.resolve()
 

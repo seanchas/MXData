@@ -8,6 +8,8 @@ $       = jQuery
 max_instruments = 5
 
 
+metadata = undefined
+
 bootstrap_data  = undefined
 bootstrap_keys  = ['indices', 'currencies']
 
@@ -24,7 +26,7 @@ make_instrument_view = (instrument, index, size) ->
     view = $('<li>')
         .attr({ 'data-param': instrument.id })
         .css('background-color', scope.background_colors[index])
-        .html(instrument.title || instrument.id)
+        .html(instrument.id + ' : ' + metadata.board(instrument.board).boardgroup.title)
         .toggleClass('disabled', !!instrument.disabled)
     
     if instrument.failure?
@@ -53,11 +55,14 @@ widget = (wrapper) ->
 
     instruments         = []
     instruments_changed = true
+    
+    
+    metadata           ?= mx.data.metadata()
 
 
     bootstrap_data  ?= mx.iss.bootstrap()
 
-    ready_for_render    = $.when true
+    ready_for_render    = $.when metadata
 
     sort_in_progress    = false
     
