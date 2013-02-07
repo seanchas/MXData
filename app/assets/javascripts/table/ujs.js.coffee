@@ -4,11 +4,10 @@
 
 $(document).on 'click', 'table.tickers caption a[data-market]', (event) ->
     event.preventDefault()
-
+    
     element = $(@)
-
-    unless element.data('popover')
-        element.popover
-            content: 'Content: ' + element.data('market')
-            
-        element.popover('show')
+    
+    $('.datepicker', element.next('.down-slider')).datepicker()
+    
+    element.next('.down-slider').toggle('blind', { direction: 'vertical' }, 100);
+    

@@ -1,0 +1,37 @@
+// Colors
+// ----------------------------------------
+
+$dark-grey: #333;
+$white: #fff;
+
+
+// Typographics
+// ----------------------------------------
+
+$base-font-size: 14px;
+$base-line-height: 20px;
+
+// Popovers
+// ----------------------------------------
+
+$down-slider-background-color: #fff;
+$down-slider-title-background-color: darken($down-slider-background-color, 3%);
+
+$down-slider-arrow-width: 10px;
+$down-slider-arrow-color: #fff;
+
+$down-slider-arrow-outer-width: $down-slider-arrow-width + 1;
+$down-slider-arrow-outer-color: rgba(0, 0, 0, .25);
+
+
+// Borders
+// ----------------------------------------
+$base-border-radius: 4px;
+
+
+// Buttons
+// ----------------------------------------
+
+$button-background: $white;
+$button-background-highlight: darken($white, 10%);
+$button-border: #bbb;

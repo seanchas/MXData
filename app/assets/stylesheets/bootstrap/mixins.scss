@@ -1,0 +1,102 @@
+// Backgrounds
+// ----------------------------------------
+
+
+@mixin gradient-bar($primary-color, $secondary-color, $text-color: #fff, $text-shadow: 0 -1px 0 rgba(0, 0, 0, .25)) {
+    border-color: $secondary-color $secondary-color darken($secondary-color, 15%);
+    border-color: rgba(0,0,0,.1) rgba(0,0,0,.1) fade-in(rgba(0,0,0,.1), 0.15);
+    color: $text-color;
+    text-shadow: $text-shadow;
+
+    @include gradient-vertical($primary-color, $secondary-color);
+}
+
+
+@mixin gradient-vertical($start-color: #555, $end-color: #333) {
+    background-color: mix($start-color, $end-color, 60%);    
+
+    background-image: -webkit-linear-gradient(top, $start-color, $end-color);
+    background-image: -moz-linear-gradient(top, $start-color, $end-color);
+    background-image: -o-linear-gradient(top, $start-color, $end-color);
+    background-image: linear-gradient(to bottom, $start-color, $end-color);
+
+    background-repeat: repeat-x;
+    
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#{ie-hex-str($start-color)}', endColorstr='#{ie-hex-str($end-color)}', GradientType=0);
+}
+
+
+@mixin reset-filter() {
+    filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+}
+
+
+// Button backgrounds
+// ----------------------------------------
+
+@mixin button-background($start-color, $end-color, $text-color: #fff, $text-shadow: 0 -1px 0 rgba(0, 0, 0, .25)) {
+    @include gradient-bar($start-color, $end-color, $text-color, $text-shadow);
+    @include reset-filter();
+    
+    &:hover,
+    &:active,
+    &.active,
+    &.disabled,
+    &[disabled] {
+        background-color: $end-color;
+        color: $text-color;
+        
+    }
+}
+
+// border radius
+
+@mixin border-radius($radius) {
+    -webkit-border-radius: $radius;
+       -moz-border-radius: $radius;
+            border-radius: $radius;
+}
+
+@mixin border-top-left-radius($radius) {
+    -webkit-border-top-left-radius: $radius;
+       -moz-border-top-left-radius: $radius;
+            border-top-left-radius: $radius;
+}
+
+
+@mixin border-bottom-left-radius($radius) {
+    -webkit-border-bottom-left-radius: $radius;
+       -moz-border-bottom-left-radius: $radius;
+            border-bottom-left-radius: $radius;
+}
+
+@mixin border-top-right-radius($radius) {
+    -webkit-border-top-right-radius: $radius;
+       -moz-border-top-right-radius: $radius;
+            border-top-right-radius: $radius;
+}
+
+
+@mixin border-bottom-right-radius($radius) {
+    -webkit-border-bottom-right-radius: $radius;
+       -moz-border-bottom-right-radius: $radius;
+            border-bottom-right-radius: $radius;
+}
+
+
+// box shadow
+
+@mixin box-shadow($shadow...) {
+    -webkit-box-shadow: $shadow;
+       -moz-box-shadow: $shadow;
+            box-shadow: $shadow;
+}
+
+// transitions
+
+@mixin transition($transition) {
+    -webkit-transition: $transition;
+       -moz-transition: $transition;
+         -o-transition: $transition;
+            transition: $transition;
+}
