@@ -91,6 +91,9 @@ table.tickers caption .down-slider {
     // buttons
     
     .buttons {
+        
+        margin: 10px 0 6px;
+        
         .button:last-child {
             float: right;
         }
@@ -104,7 +107,7 @@ table.tickers caption .down-slider {
         
     background-color: #555;
     display: inline-block;
-    margin: 6px 0;
+    margin: 5px 0;
     
     .ui-datepicker {
             
@@ -197,7 +200,7 @@ table.tickers caption .down-slider {
         text-align: center;
         width: 30px;
     }
-        
+
     .ui-datepicker-prev {
         float: left;
     }
