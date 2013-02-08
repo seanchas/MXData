@@ -1,7 +1,7 @@
 @import 'bootstrap/variables.scss';
 @import 'bootstrap/mixins.scss';
 
-table.tickers caption .down-slider {
+.table_container h4 .down-slider {
     
     background-color: $down-slider-background-color;
     border: 1px solid rgba(0, 0, 0, .2);
@@ -20,6 +20,7 @@ table.tickers caption .down-slider {
     
     &.hover {
         position: absolute;
+        z-index: 1010;
     }
 
 
@@ -108,11 +109,14 @@ table.tickers caption .down-slider {
     background-color: #555;
     display: inline-block;
     margin: 5px 0;
+    text-align: center;
     
     .ui-datepicker {
             
         border: 1px solid #bbb;
         font-size: 9pt;
+        text-align: center;
+        margin: 0 auto;
 
             
         a {
@@ -233,3 +237,47 @@ table.tickers caption .down-slider {
         
 }
     
+
+.table_container h4 dl.csv-options {
+
+    margin: 0;
+    padding: 0;
+    
+    dt,
+    dd {
+        margin: 0;
+        padding: 0;
+    }
+    
+    dt {
+        clear: both;
+        float: left;
+        font-size: 8pt;
+        margin-right: 5px;
+        
+        &::after {
+            content: ':';
+        }
+    }
+    
+    dd {
+        float: right;
+        
+        select {
+            font-size: $base-font-size;
+        }
+        
+    }
+    
+    @include clearfix();
+
+}
+
+
+.table_container h4 .button.open .caret {
+    border-top-color: transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 4px solid #000;
+    border-left: 4px solid transparent;
+    margin-top: 4px;
+}

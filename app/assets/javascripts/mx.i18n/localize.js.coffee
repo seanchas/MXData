@@ -90,6 +90,7 @@ datetime_formats =
     'm': (v, p) -> datetime_format_pad(v.getMonth() + 1,    p, 2)
     'M': (v, p) -> datetime_format_pad(v.getMinutes(),      p, 2)
     'S': (v, p) -> datetime_format_pad(v.getSeconds(),      p, 2)
+    'y': (v, p) -> datetime_format_pad(v.getYear(),         p, 2)
     'Y': (v, p) -> datetime_format_pad(v.getFullYear(),     p, 4)
     '%':        -> '%'
 

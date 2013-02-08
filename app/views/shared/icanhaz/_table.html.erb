@@ -2,12 +2,33 @@
     <div class="table_container" data-engine="{{engine.name}}" data-market="{{market.name}}">
 
         <h4 class="title">
-            {{engine.title}} :: {{market.title}}
-            
             <div class="columns_filter_trigger">
                 <span>Поля</span>
             </div>
             
+            <a href="#" class="local market-history" data-market="{{engine.name}}:{{market.name}}">
+                {{engine.title}} :: {{market.title}}
+            </a>
+            
+            <div class="down-slider bottom-left hover market-history">
+                <div class="down-slider-title">
+                    Скачать историю по рынку
+                </div>
+                <div class="down-slider-content">
+                    <div class="datepicker"></div>
+                
+                    <div class="buttons">
+                        <div class="button-group">
+                            <button class="button" data-type="csv">CSV</button>
+                            <button class="button dropdown-toggle">
+                                <span class="caret"></span>
+                            </button>
+                        </div>
+                        <button class="button" data-type="xml">XML</button>
+                    </div>
+                </div>
+            </div>
+
         </h4>
         
         <div class="columns_filter_wrapper" style="display: none;"></div>
