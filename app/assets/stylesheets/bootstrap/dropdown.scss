@@ -1,0 +1,148 @@
+@import 'bootstrap/variables';
+@import 'bootstrap/mixins';
+
+.dropdown {
+    position: relative;
+}
+
+.dropdown-toggle {
+    outline: none;
+}
+
+.dropdown .caret {
+    margin-top: 5px;
+    margin-left: 5px;
+}
+
+// dropdown-menu
+
+.dropdown-menu {
+
+    background-color: $dropdown-background-color;
+    border: 1px solid $dropdown-border-color;
+    display: none;
+    float: left;
+    left: 0%;
+    list-style: none;
+    margin: 2px 0 0;
+    min-width: 160px;
+    padding: 5px 0;
+    position: absolute;
+    top: 100%;
+    z-index: $dropdown-z-index;
+    
+    @include border-radius(6px);
+    @include box-shadow(0 5px 10px rgba(0, 0, 0, .2));
+    
+    -webkit-background-clip: padding-box;
+       -moz-background-clip: padding;
+            background-clip: padding-box;
+    
+
+    &.pull-right {
+        left: auto;
+        right: 0;
+    }
+    
+    .divider {
+        @include nav-divider($dropdown-divider-top-color, $dropdown-divider-bottom-color)
+    }
+    
+    > li {
+        
+        > a {
+            
+            clear: both;
+            color: $dropdown-link-color;
+            display: block;
+            font-weight: normal;
+            line-height: $base-line-height;
+            padding: 3px 20px;
+            text-decoration: none;
+            white-space: nowrap;
+            
+        }
+        
+    }
+    
+}
+
+// hover/focus state
+
+.dropdown-menu > li > a:hover,
+.dropdown-menu > li > a:focus,
+.dropdown-submenu:hover > a,
+.dropdown-submenu:focus > a {
+    color: $dropdown-link-color-hover;
+    text-decoration: none;
+
+    @include gradient-vertical($dropdown-link-background-color-hover, darken($dropdown-link-background-color-hover, 5%));
+}
+
+
+.dropdown-menu > .active > a,
+.dropdown-menu > .active > a:hover,
+.dropdown-menu > .active > a:focus {
+    color: $dropdown-link-color-active;
+    text-decoration: none;
+
+    @include gradient-vertical($dropdown-link-background-color-active, darken($dropdown-link-background-color-active, 5%));
+}
+
+.dropdown-menu > .disabled > a,
+.dropdown-menu > .disabled > a:hover,
+.dropdown-menu > .disabled > a:focus {
+    color: $light-grey;
+}
+
+.dropdown-menu > .disabled > a:hover,
+.dropdown-menu > .disabled > a:focus {
+    background-color: transparent;
+    background-image: none;
+    cursor: default;
+    text-decoration: none;
+    
+    @include reset-filter();
+}
+
+.open > .dropdown-menu {
+    display: block;
+}
+
+// submenu
+
+.dropdown-submenu {
+    position: relative;
+    
+    > .dropdown-menu {
+        left: 100%;
+        margin-top: -6px;
+        margin-left: -1px;
+        top: 0;
+        
+        @include border-radius(0 6px 6px 6px);
+    }
+    
+    &:hover > .dropdown-menu {
+        display: block;
+    }
+    
+    > a::after {
+        border-color: transparent;
+        border-style: solid;
+        border-width: 5px 0 5px 5px;
+        border-left-color: darken($dropdown-background-color, 20%);
+        content: " ";
+        display: block;
+        float: right;
+        height: 0;
+        margin-top: 5px;
+        margin-right: -10px;
+        width: 0;
+    }
+    
+    &:hover > a::after {
+        border-left-color: $dropdown-link-color-hover;
+    }
+    
+}

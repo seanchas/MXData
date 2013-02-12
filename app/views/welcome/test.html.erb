@@ -1,46 +1,50 @@
-<table class="tickers" width="100%" style="margin-top: 10em;">
-
-
-    <caption style="text-align: left; padding: 1em 10px;">
-
-        <a href="#" class="local" data-market="stock:shares">Stock :: Shares</a>
-
-        <div class="down-slider bottom-left hover market-history">
-            <div class="down-slider-title">
-                Скачать историю по рынку
-            </div>
-            <div class="down-slider-content">
-                <div class="datepicker"></div>
-                
-                <div class="buttons">
-                    <div class="button-group">
-                        <button class="button" data-type="csv">CSV</button>
-                        <button class="button dropdown-toggle">
-                            <span class="caret"></span>
-                        </button>
-                    </div>
-                    <button class="button" data-type="xml">XML</button>
-                </div>
-            </div>
-        </div>
-
-    </caption>
-
-
-    <thead>
-    </thead>
-
-
-    <tbody>
-    </tbody>
+<div id="test">
     
+</div>
 
-    <tfoot>
-    </tfoot>
+<div>
+    <ul class="dropdown-menu">
+        <li>
+            <a href="#">First</a>
+        </li>
+        <li>
+            <a href="#">Second</a>
+        </li>
+        <li class="divider"></li>
+        <li>
+            <a href="#">Third</a>
+        </li>
+        <li class="disabled">
+            <a href="#">Fourth</a>
+        </li>
+        <li class="dropdown-submenu">
+            <a href="#">More options</a>
+            <ul class="dropdown-menu">
+                <li>
+                    <a href="#">First</a>
+                </li>
+                <li class="divider"></li>
+                <li>
+                    <a href="#">Second</a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
 
-
-</table>
-
-<p style="margin: auto 10px;">
-    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.    
-</p>
+<script type="text/javascript" charset="utf-8">
+    
+$(function() {
+    
+    var c = mx.chart.instruments_widget({
+        ticker:     'EQNE:GAZP',
+        container:  $('#test'),
+        no_cache:   true
+    })
+    
+    c.then(function() { c.add_ticker('EQBR:AFLT') ; c.add_ticker('SMAL:GAZP') ; c.add_ticker('EQBR:SBER') ; c.add_ticker('SNDX:MICEXINDEXCF') })
+    
+    
+});
+    
+</script>

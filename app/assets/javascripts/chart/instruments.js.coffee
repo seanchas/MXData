@@ -1,3 +1,5 @@
+##= require d3.v3
+
 $               = jQuery
 scope           = @mx.chart
 
@@ -10,6 +12,9 @@ securities_cache    = {}
 
 default_precision_key           = 'DECIMALS'
 default_render_debounce_timeout = .250 * 1000
+
+
+colors = d3.scale.category10()
 
 
 prepare_ticker = (ticker) ->
@@ -34,6 +39,31 @@ prepare_record = (record, columns) ->
     record
 
 
+render_dropdown_menu = ->
+    html = $('<ul>')
+        .addClass('dropdown-menu')
+    
+    $('<a>')
+        .attr('href', '#')
+        .html('Показывать на графике')
+        .appendTo(html)
+        .wrap('<li />')
+    
+    $('<a>')
+        .attr('href', '#')
+        .html('Не показывать на графике')
+        .appendTo(html)
+        .wrap('<li />')
+    
+    $('<a>')
+        .attr('href', '#')
+        .html('Удалить с графика')
+        .appendTo(html)
+        .wrap('<li />')
+    
+    html
+
+
 widget = (options = {}) ->
     container   = $(options.container) ; container = undefined if container.length == 0
     
@@ -51,8 +81,15 @@ widget = (options = {}) ->
     render_debounce_timeout = default_render_debounce_timeout
 
 
+    ticker_present = (ticker) ->
+        [board, id] = ticker.split(':') ; board = metadata.board(board)
+        tickers.some (item) -> [b, i] = tickers_cache[item] ; i == id and b.engine.name == board.engine.name and b.market.name == board.market.name
+
+
     add_ticker  = (ticker) ->
-        return unless tickers.indexOf(ticker) < 0
+        console.log 'adding ' + ticker
+        
+        return if ticker_present(ticker)
         
         tickers.push(ticker)
 
@@ -74,7 +111,27 @@ widget = (options = {}) ->
 
 
     render = ->
-        console.log 'rendered'
+        html = $('<ul>')
+            .addClass('nav nav-pills chart-instruments')
+        
+        tickers.forEach (ticker) ->
+            item = $('<li>')
+                .addClass('dropdown')
+                .appendTo(html)
+            
+            $('<a>')
+                .addClass('dropdown-toggle')
+                .attr('href', '#')
+                .attr('data-toggle', 'dropdown')
+                .css('color', colors(tickers.indexOf(ticker)))
+                .html(securities_cache[ticker].SECID + ' : ' + tickers_cache[ticker][0].boardgroup.title)
+                .append($('<span>').addClass('caret').css('border-top-color', colors(tickers.indexOf(ticker))))
+                .appendTo(item)
+            
+            item.append render_dropdown_menu()
+        
+        container.html(html) if container?
+        
         deferred.resolve()
 
 
@@ -89,6 +146,7 @@ widget = (options = {}) ->
     
     deferred.promise
         tickers: -> tickers
+        add_ticker: add_ticker
 
 
 

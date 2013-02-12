@@ -20,6 +20,7 @@ fetch = ->
             'iss.meta':             'off'
             'indices.columns':      columns.join(',')
             'currencies.columns':   columns.join(',')
+        dataType: 'json'
     .then (json) ->
         for key in keys
             data[key] = scope.merge_columns_and_data json?[key]

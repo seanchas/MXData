@@ -1,3 +1,5 @@
+@import 'bootstrap/variables';
+
 // Backgrounds
 // ----------------------------------------
 
@@ -100,6 +102,20 @@
          -o-transition: $transition;
             transition: $transition;
 }
+
+
+
+// horizontal dividers
+
+@mixin nav-divider($top: #e5e5e5, $bottom: $white) {
+    background-color: $top;
+    border-bottom: 1px solid $bottom;
+    height: 1px;
+    margin: (($base-line-height / 2) - 1) 1px;
+    overflow: hidden;
+}
+
+
 
 // clearfix
 

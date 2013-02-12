@@ -3,7 +3,7 @@ scope   = root['mx']['data']
 
 $       = jQuery
 
-cache   = kizzy('data.table')
+cache   = -> kizzy('data.table')
 
 
 default_filter  = 'preview'
@@ -331,11 +331,11 @@ widget = (wrapper, engine, market) ->
 
 
     add_cached_tickers = ->
-        tickers = cache.get([cache_key, 'securities'].join(':')) ? []
+        tickers = cache().get([cache_key, 'securities'].join(':')) ? []
     
     
     update = (ticker, message) ->
-        cache.set([cache_key, 'securities'].join(':'), tickers)
+        cache().set([cache_key, 'securities'].join(':'), tickers)
         
         $(window).trigger 'table:tickers', { ticker: ticker, message: message }
 
@@ -436,7 +436,7 @@ widget = (wrapper, engine, market) ->
             column.is_sort_field                = 1
             sort_field_column.is_sort_field     = 0
         
-        cache.set([cache_key, 'sort_order'].join(':'), { column_id: column.id, direction: column.is_sort_field })
+        cache().set([cache_key, 'sort_order'].join(':'), { column_id: column.id, direction: column.is_sort_field })
         
         render()
     

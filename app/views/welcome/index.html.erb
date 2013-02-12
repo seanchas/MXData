@@ -63,17 +63,16 @@
 
     $(function() {
         
-        var metadata = mx.data.metadata();
+        var metadata    = mx.data.metadata();
+        var bootstrap   = mx.data.bootstrap();
         
-        metadata.then(function() {
-            
+        $.when(metadata, bootstrap).then(function() {
             mx.data.quote_search("#quote_search");
-            
-            var tables = _.map(metadata.markets(), function(market) { return mx.data.table($('#tables'), market.engine, market); });
-            
             mx.data.chart($('#chart'));
-            
-            mx.data.bootstrap(tables);
+
+            metadata.markets().forEach(function(market) {
+                mx.data.table($('#tables'), market.engine, market)
+            })
         })
         
     });

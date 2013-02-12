@@ -1,8 +1,13 @@
 // Colors
 // ----------------------------------------
 
+$light-grey: #999;
+$lighter-grey: #eee;
+$grey: #555;
 $dark-grey: #333;
 $white: #fff;
+
+$body-background: $white;
 
 
 // Typographics
@@ -10,6 +15,15 @@ $white: #fff;
 
 $base-font-size: 14px;
 $base-line-height: 20px;
+
+
+// links
+// ----------------------------------------
+
+
+$link-color: #08c;
+$link-color-hover: darken($link-color, 15%);
+
 
 // Popovers
 // ----------------------------------------
@@ -35,3 +49,25 @@ $base-border-radius: 4px;
 $button-background: $white;
 $button-background-highlight: darken($white, 10%);
 $button-border: #bbb;
+
+
+// Dropdowns
+// ----------------------------------------
+
+$dropdown-border-color: rgba(0, 0, 0, .2);
+$dropdown-divider-top-color: #e5e5e5;
+$dropdown-divider-bottom-color: $white;
+
+$dropdown-link-color: $dark-grey;
+$dropdown-link-color-hover: $white;
+$dropdown-link-color-active: $white;
+$dropdown-link-background-color-hover: $link-color;
+$dropdown-link-background-color-active: $link-color;
+
+$dropdown-background-color: $white;
+
+
+// Z Indices
+// ----------------------------------------
+
+$dropdown-z-index: 1000;
