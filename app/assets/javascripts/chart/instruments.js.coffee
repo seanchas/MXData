@@ -45,18 +45,21 @@ render_dropdown_menu = ->
     
     $('<a>')
         .attr('href', '#')
+        .attr('data-action', 'on')
         .html('Показывать на графике')
         .appendTo(html)
         .wrap('<li />')
     
     $('<a>')
         .attr('href', '#')
+        .attr('data-action', 'off')
         .html('Не показывать на графике')
         .appendTo(html)
         .wrap('<li />')
     
     $('<a>')
         .attr('href', '#')
+        .attr('data-action', 'remove')
         .html('Удалить с графика')
         .appendTo(html)
         .wrap('<li />')
@@ -112,7 +115,7 @@ widget = (options = {}) ->
 
     render = ->
         html = $('<ul>')
-            .addClass('nav nav-pills chart-instruments')
+            .addClass('nav nav-pills chart-tickers')
         
         tickers.forEach (ticker) ->
             item = $('<li>')
@@ -124,7 +127,7 @@ widget = (options = {}) ->
                 .attr('href', '#')
                 .attr('data-toggle', 'dropdown')
                 .css('color', colors(tickers.indexOf(ticker)))
-                .html(securities_cache[ticker].SECID + ' : ' + tickers_cache[ticker][0].boardgroup.title)
+                .html(securities_cache[ticker].SECID + ': ' + tickers_cache[ticker][0].boardgroup.title)
                 .append($('<span>').addClass('caret').css('border-top-color', colors(tickers.indexOf(ticker))))
                 .appendTo(item)
             

@@ -473,3 +473,20 @@
     }
     
 }
+
+.chart-tickers {
+
+    &.off {
+        .dropdown-menu a[data-action=off] {
+            display: none;
+        }
+    }
+
+    &:not(.off) {
+        .dropdown-menu a[data-action=on]{
+            display: none;
+        }
+    }
+    
+    
+}
