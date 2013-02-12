@@ -14,7 +14,20 @@ default_precision_key           = 'DECIMALS'
 default_render_debounce_timeout = .250 * 1000
 
 
-colors = d3.scale.category10()
+colors = d3.scale.category20().domain(d3.range(20))
+
+
+actions =
+    order: 'on off remove'.split(' ')
+    ru:
+        on:     'Показывать на графике'
+        off:    'Не показывать на графике'
+        remove: 'Убрать с графика'
+    en:
+        on:     'Show on chart'
+        off:    'Don\'t show on chart'
+        remove: 'Remove from chart'
+
 
 
 prepare_ticker = (ticker) ->
@@ -43,28 +56,25 @@ render_dropdown_menu = ->
     html = $('<ul>')
         .addClass('dropdown-menu')
     
-    $('<a>')
-        .attr('href', '#')
-        .attr('data-action', 'on')
-        .html('Показывать на графике')
-        .appendTo(html)
-        .wrap('<li />')
-    
-    $('<a>')
-        .attr('href', '#')
-        .attr('data-action', 'off')
-        .html('Не показывать на графике')
-        .appendTo(html)
-        .wrap('<li />')
-    
-    $('<a>')
-        .attr('href', '#')
-        .attr('data-action', 'remove')
-        .html('Удалить с графика')
-        .appendTo(html)
-        .wrap('<li />')
+    actions.order.forEach (action) ->
+        
+        $('<a>')
+            .attr('href', '#')
+            .attr('data-action', action)
+            .html(actions[mx.I18n.locale][action])
+            .appendTo(html)
+            .wrap('<li>')
     
     html
+
+
+colorize_tickers = (html) ->
+    $('li.ticker > a.dropdown-toggle', html).each (i) ->
+        item    = $(@)
+        offset  = if item.parent().hasClass('off') then 1 else 0
+        
+        item.css('color', colors(i * 2 + offset))
+        item.find('> .caret').css('border-top-color', colors(i * 2 + offset))
 
 
 widget = (options = {}) ->
@@ -72,7 +82,7 @@ widget = (options = {}) ->
     
     deferred    = new $.Deferred
     
-    html        = undefined
+    html        = $('<ul>').addClass('nav nav-pills chart-tickers')
     
     metadata   ?= mx.data.metadata()
     
@@ -114,24 +124,24 @@ widget = (options = {}) ->
 
 
     render = ->
-        html = $('<ul>')
-            .addClass('nav nav-pills chart-tickers')
+        html.empty()
         
         tickers.forEach (ticker) ->
             item = $('<li>')
-                .addClass('dropdown')
+                .addClass('dropdown ticker')
                 .appendTo(html)
             
             $('<a>')
                 .addClass('dropdown-toggle')
                 .attr('href', '#')
                 .attr('data-toggle', 'dropdown')
-                .css('color', colors(tickers.indexOf(ticker)))
                 .html(securities_cache[ticker].SECID + ': ' + tickers_cache[ticker][0].boardgroup.title)
-                .append($('<span>').addClass('caret').css('border-top-color', colors(tickers.indexOf(ticker))))
+                .append($('<span>').addClass('caret'))
                 .appendTo(item)
             
             item.append render_dropdown_menu()
+        
+        colorize_tickers(html)
         
         container.html(html) if container?
         
@@ -144,6 +154,7 @@ widget = (options = {}) ->
     ready.then ->
         
         add_ticker(options.ticker) if options.ticker?
+        
         render()
     
     
@@ -155,3 +166,19 @@ widget = (options = {}) ->
 
 $.extend scope,
     instruments_widget: widget
+
+
+$(document).on 'click', '.chart-tickers a[data-action]', (event) ->
+    event.stopPropagation()
+    event.preventDefault()
+    
+    el = $(@)
+
+    el.parent().click()
+    
+    switch el.data('action')
+        when 'remove'
+            1
+        when 'on', 'off'
+            el.closest('li.dropdown').toggleClass('off')
+            colorize_tickers(el.closest('ul.chart-tickers'))

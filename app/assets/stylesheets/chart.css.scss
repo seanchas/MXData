@@ -1,3 +1,5 @@
+@import 'bootstrap/variables';
+
 @mixin rounded_button {
     border: 2px solid #fff;
     border-radius: 5px;
@@ -476,16 +478,20 @@
 
 .chart-tickers {
 
-    &.off {
-        .dropdown-menu a[data-action=off] {
+    > li.dropdown.off {
+        
+        > .dropdown-menu a[data-action=off] {
             display: none;
         }
+
     }
 
-    &:not(.off) {
-        .dropdown-menu a[data-action=on]{
+    > li.dropdown:not(.off) {
+        
+        > .dropdown-menu a[data-action=on]{
             display: none;
         }
+
     }
     
     

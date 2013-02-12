@@ -36,19 +36,7 @@ keydown = (e) ->
     
 
 get_parent = (el) ->
-    selector = el.attr('data-target')
-    
-    unless selector?
-        selector = el.attr('href')
-        selector = selector and /#/.test(selector) and selector.replace(/.*(?=#[^\s]*$)/, '')
-    
-    pa = selector and $(selector)
-
-    unless pa? and pa.length
-        pa = el.parent()
-    
-    pa
-
+    el.parent()
 
 $(document)
     .on('click.dropdown', clear_menus)
