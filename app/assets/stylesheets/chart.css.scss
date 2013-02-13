@@ -477,6 +477,10 @@
 }
 
 .chart-tickers {
+    
+    .ui-sortable-helper > a {
+        background-color: $lighter-grey;
+    }
 
     > li.dropdown.off {
         

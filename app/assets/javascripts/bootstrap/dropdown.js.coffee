@@ -29,7 +29,7 @@ keydown = (e) ->
     is_active   = pa.hasClass('open')
     
     if !is_active or (is_active and e.keyCode == 27)
-        pa.find(global_selector).focus() if e.which == 27
+        pa.find(global_selector).focus() if e.keyCode == 27
         return el.click()
 
     return

@@ -1,0 +1,43 @@
+@import 'bootstrap/variables';
+
+[class^="icon-"],
+[class*=" icon-"] {
+    
+    background-image: $icon-sprite-path;
+    background-position: 14px 14px;
+    background-repeat: no-repeat;
+    display: inline-block;
+    height: 14px;
+    line-height: 14px;
+    margin-top: 1px;
+    vertical-align: text-top;
+    width: 14px;
+    
+}
+
+.icon-white,
+.nav-pills > .active > a > [class^="icon-"],
+.nav-pills > .active > a > [class*=" icon-"],
+.nav-list > .active > a > [class^="icon-"],
+.nav-list > .active > a > [class*=" icon-"],
+.navbar-inverse .nav > .active > a > [class^="icon-"],
+.navbar-inverse .nav > .active > a > [class*=" icon-"],
+.dropdown-menu > li > a:hover > [class^="icon-"],
+.dropdown-menu > li > a:hover > [class*=" icon-"],
+.dropdown-menu > li > a:focus > [class^="icon-"],
+.dropdown-menu > li > a:focus > [class*=" icon-"],
+.dropdown-menu > .active > a:focus > [class^="icon-"],
+.dropdown-menu > .active > a:focus > [class*=" icon-"],
+.dropdown-submenu:hover > a > [class^="icon-"],
+.dropdown-submenu:hover > a > [class*=" icon-"],
+.dropdown-submenu:focus > a > [class^="icon-"],
+.dropdown-submenu:focus > a > [class*=" icon-"] {
+    background-image: $icon-white-sprite-path;
+}
+
+
+.icon-remove        { background-position: -312px      0px; }
+
+
+.icon-eye-open      { background-position:  -96px   -120px; }
+.icon-eye-close     { background-position: -120px   -120px; }

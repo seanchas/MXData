@@ -1,3 +1,5 @@
+<%= render "shared/icanhaz/chart_instruments_dropdown_menu" %>
+
 <div id="test">
     
 </div>
@@ -36,7 +38,7 @@
     
 $(function() {
     
-    var c = mx.chart.instruments_widget({
+    window.c = mx.chart.instruments_widget({
         ticker:     'EQNE:GAZP',
         container:  $('#test'),
         no_cache:   true
