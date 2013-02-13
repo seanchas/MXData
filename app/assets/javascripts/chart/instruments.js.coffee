@@ -16,20 +16,6 @@ default_precision_key           = 'DECIMALS'
 colors = d3.scale.category20().domain(d3.range(20))
 
 
-actions =
-    order: 'on off remove'.split(' ')
-    classes: ['icon-eye-open', 'icon-eye-close', 'icon-remove']
-    ru:
-        on:     'Показывать на графике'
-        off:    'Не показывать на графике'
-        remove: 'Убрать с графика'
-    en:
-        on:     'Show on chart'
-        off:    'Don\'t show on chart'
-        remove: 'Remove from chart'
-
-
-
 prepare_ticker = (ticker) ->
     [board, id] = ticker.split(':') ; [metadata.board(board), id]
 
@@ -72,30 +58,11 @@ render_tickers = (html, tickers) ->
 render_ticker = (ticker) ->
     return unless securities_cache[ticker]? and tickers_cache[ticker]?
     
-    view = $('<li>')
-        .addClass('dropdown ticker')
-        .data('ticker', ticker)
-    
-    render_ticker_link(ticker)
-        .appendTo(view)
-    
-    render_ticker_dropdown_menu()
-        .appendTo(view)
-    
-    view
+    ich.chart_instruments_ticker
+        ticker:     ticker
+        id:         securities_cache[ticker].SECID
+        group:      tickers_cache[ticker][0].boardgroup.title
 
-
-render_ticker_link = (ticker) ->
-    $('<a>')
-        .addClass('dropdown-toggle')
-        .attr('href', '#')
-        .attr('data-toggle', 'dropdown')
-        .html(securities_cache[ticker].SECID + ': ' + tickers_cache[ticker][0].boardgroup.title)
-        .append($('<span>').addClass('caret'))
-
-
-render_ticker_dropdown_menu = ->
-    ich.chart_instruments_dropdown_menu()
 
 
 reorder_tickers = (html, tickers) ->
@@ -103,7 +70,7 @@ reorder_tickers = (html, tickers) ->
     
     $.each tickers, (i, ticker) ->
         views.filter((i) -> $(views[i]).data('ticker') == ticker).appendTo(html)
-        
+
 
 
 set_tickers_states = (html, off_tickers) ->
@@ -111,19 +78,22 @@ set_tickers_states = (html, off_tickers) ->
 
     $.each off_tickers, (i, ticker) ->
         views.filter((i) -> $(views[i]).data('ticker') == ticker).addClass('off')
-        
 
 
 
 colorize_tickers = (html) ->
-    $('li.ticker > a.dropdown-toggle', html).each (i) ->
+    $('> li.ticker > a.dropdown-toggle', html).each (i) ->
         item    = $(@)
         offset  = if item.parent().hasClass('off') then 1 else 0
         
         item.css('color', colors(i * 2 + offset))
-        item.find('> .caret').css('border-top-color', colors(i * 2 + offset))
+        item.children('
+        .caret').css('border-top-color', colors(i * 2 + offset))
 
 
+#
+# Widget
+#
 
 widget = (options = {}) ->
     container   = $(options.container) ; container = undefined if container.length == 0
@@ -186,17 +156,17 @@ widget = (options = {}) ->
             set_tickers_states(html, off_tickers)
             colorize_tickers(html)
         
-        if container? and !$.contains(container, html)
-            container.append(html)
+            unless $.contains(container, html)
+                container.append(html)
 
-            html.sortable
-                tolerance: 'pointer'
-                start: (event, ui) ->
-                    ui.helper.removeClass('open').blur()
+                html.sortable
+                    tolerance: 'pointer'
+                    start: (event, ui) ->
+                        ui.helper.removeClass('open').blur()
 
-                update: ->
-                    tickers = html.children('li.ticker').map((i, view) -> $(view).data('ticker')).get()
-                    render()
+                    update: ->
+                        tickers = html.children('li.ticker').map((i, view) -> $(view).data('ticker')).get()
+                        render()
         
         deferred.resolve()
 
@@ -206,7 +176,6 @@ widget = (options = {}) ->
         add_ticker(options.ticker) if options.ticker?
         
         html.on 'chart:ticker:on chart:ticker:off', (event, ticker) -> toggle_ticker ticker
-
         html.on 'chart:ticker:remove', (event, ticker) -> remove_ticker ticker
         
         render()
