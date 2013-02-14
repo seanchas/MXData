@@ -50,9 +50,9 @@ make_source_columns_view = (columns, filtered_columns) ->
     list_view = $('<ul>')
         .addClass('source_list clearfix')
     
-    for id, column of columns when !column.is_system
+    for column in columns when !column.is_system
         
-        id = parseInt(id)
+        id = parseInt(column.id)
         
         item_view = $('<li>')
             .addClass('item')
@@ -179,7 +179,11 @@ widget = (wrapper, engine, market) ->
         
         filtered_columns = filter_columns(columns(), filters(), scope.caches.table_filtered_columns(cache_key))
         
-        source_columns_view = make_source_columns_view(columns(), filtered_columns)
+        cols = filters()['full'].reduce (memo, item) ->
+            memo.push columns()[item.id] ; memo
+        , []
+        
+        source_columns_view = make_source_columns_view(cols, filtered_columns)
         
         check_active_columns()
         
