@@ -6,6 +6,9 @@ $       = jQuery
 cache   = -> kizzy('data.table')
 
 
+metadata = undefined
+
+
 default_filter  = 'preview'
 
 
@@ -229,7 +232,15 @@ process_chart_tickers = (container, tickers) ->
 
     chart_rows = _.select(rows, (row) -> _.include(tickers, $(row).data('id')))
     
-    _.each chart_rows, (row) ->
+    tickers = tickers.map (ticker) -> [board, id] = ticker.split(':') ; board = metadata.board(board) ; [board, id]
+    
+    rows = rows.filter( ->
+        row         = $(@)
+        [board, id] = row.data('id').split(':') ; board = metadata.board(board)
+        tickers.some (ticker) -> ticker[0].market.name == board.market.name and ticker[1] == id
+    )
+    
+    _.each rows, (row) ->
         show_chart_state row
        
 
@@ -269,6 +280,8 @@ widget = (wrapper, engine, market) ->
     
     cache_key   = [engine.name, market.name].join(':')
     
+    metadata ?= mx.data.metadata()
+    
     table_container_view    = make_table_container_view(wrapper, engine, market)
     table_view              = $('table', table_container_view)
     table_head_view         = $('thead', table_view)
@@ -287,7 +300,7 @@ widget = (wrapper, engine, market) ->
 
     records_source          = undefined
 
-    ready_for_render        = $.when columns_source, filters_source, columns_filter
+    ready_for_render        = $.when metadata, columns_source, filters_source, columns_filter
     
     tickers                 = []
     chart_tickers           = []

@@ -12,7 +12,7 @@ widget = (element, options = {}) ->
     $.when(
         filters_data_source
     ).then (filters) ->
-        console.log filters
+        1
     
     {}
 

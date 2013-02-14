@@ -28,9 +28,6 @@ fetch = ->
     
     ready.then ->
         
-        console.log 'bootstrapping'
-        
-        
         to_table = (ticker) ->
             board   = metadata.board(ticker.BOARDID)
             key     = "#{board.engine.name}:#{board.market.name}:securities"
@@ -45,7 +42,6 @@ fetch = ->
             
             values  = scope.caches.chart_instruments() || [] ; values.push(value)
             
-            console.log values
             scope.caches.chart_instruments(values)
         
         keys.forEach (key) ->

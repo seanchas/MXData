@@ -10,9 +10,6 @@ max_instruments = 5
 
 metadata = undefined
 
-bootstrap_data  = undefined
-bootstrap_keys  = ['indices', 'currencies']
-
 
 make_instruments_wrapper = (wrapper) ->
     container = $('<ul>').attr('id', 'chart_instruments')
@@ -24,7 +21,7 @@ make_instruments_wrapper = (wrapper) ->
 
 make_instrument_view = (instrument, index, size) ->
     view = $('<li>')
-        .attr({ 'data-param': instrument.id })
+        .attr({ 'data-param': [instrument.board, instrument.id].join(':') })
         .css('background-color', scope.background_colors[index])
         .html(instrument.id + ' : ' + metadata.board(instrument.board).boardgroup.title)
         .toggleClass('disabled', !!instrument.disabled)
@@ -41,10 +38,6 @@ make_instrument_view = (instrument, index, size) ->
     view
 
 
-instruments_from_bootstrap = _.once ->
-    _.map bootstrap_keys, (key) -> instrument = _.first bootstrap_data[key] ; { id: instrument['SECID'], board: instrument['BOARDID'], title: instrument['SHORTNAME'] }
-
-
 widget = (wrapper) ->
     wrapper = $(wrapper); return if _.size(wrapper) == 0
 
@@ -59,8 +52,6 @@ widget = (wrapper) ->
     
     metadata           ?= mx.data.metadata()
 
-
-    bootstrap_data  ?= mx.iss.bootstrap()
 
     ready_for_render    = $.when metadata
 
@@ -106,30 +97,35 @@ widget = (wrapper) ->
             [board, id] = data.split(':')
             data = { board: board, id: id }
         
-        return if _.size(instrument for instrument in instruments when instrument.id == data.id)
+        board = metadata.board(data.board)
+        
+        present = instruments.filter (instrument) ->
+            metadata.board(instrument.board).market.name == board.market.name and instrument.id == data.id
+        
+        return if present.length > 0
         
         instruments.push data
         
-        update 'add', instrument
+        update 'add', data
     
     del = (data) ->
-        remove _.last(data.split(':'))
-    
+        remove data
 
-    remove = (param) ->
+
+    remove = (ticker) ->
+        
         if _.size(instruments) == 1
             return $(window).trigger 'chart:tickers', { message: 'too little tickers' }
-            
         
-        instrument = _.first(instrument for instrument in instruments when instrument.id == param)
-        return unless instrument?
+        ticker = do -> [board, id] = ticker.split(':') ; board = metadata.board(board) ; [board, id]
         
-        instruments = _.without instruments, instrument
+        instrument = _.filter(instruments, (instrument) -> board = metadata.board(instrument.board) ; instrument.id == ticker[1] and board.market.name == ticker[0].market.name)[0]
+        
+        if instrument
+            instruments = _.without instruments, instrument
+            update 'remove', instrument
         
         _.first(instruments).disabled = false if should_be_enabled()
-        
-        update 'remove', instrument
-        
         
 
     toggle_state = (param) ->
@@ -143,8 +139,9 @@ widget = (wrapper) ->
         update 'toggle state'
     
     reorder = ->
-        params      = $('li', @).map -> $(@).data('param')
-        instruments = _.sortBy instruments, (instrument) ->_.indexOf params, instrument.id
+        params      = $('li', @).map(-> $(@).data('param')).get()
+        
+        instruments = _.sortBy instruments, (instrument) ->_.indexOf params, [instrument.board, instrument.id].join(':')
         sort_in_progress = false
 
         update 'reorder'
