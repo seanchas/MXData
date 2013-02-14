@@ -129,7 +129,8 @@ widget = (wrapper) ->
         
 
     toggle_state = (param) ->
-        instrument = _.first(instrument for instrument in instruments when instrument.id == param)
+        [board, id] = param.split(':') ; board = metadata.board(board)
+        instrument = _.first(instrument for instrument in instruments when instrument.id == id and metadata.board(instrument.board).market.name == board.market.name)
         return unless instrument?
         
         instrument.disabled = !instrument.disabled
@@ -177,7 +178,7 @@ widget = (wrapper) ->
         broadcast('init')
     
 
-    deferred.promise({ data: -> instruments })
+    deferred.promise({ data: -> instruments.map((i) -> return { id: [i.board, i.id].join(':'), failure: i.failure })})
     
 
 

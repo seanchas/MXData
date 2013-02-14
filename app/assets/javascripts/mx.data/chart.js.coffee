@@ -728,7 +728,7 @@ widget = (wrapper, options = {}) ->
         duration    = chart_candle_width.data().duration
         period      = "#{Math.ceil(duration / 120)}d"
         
-        mx.cs.highstock_2 "#{instrument.board}:#{instrument.id}",
+        mx.cs.highstock_2 instrument.id,
             interval:   interval
             period:     period
             technicals: technicals.data()

@@ -378,7 +378,7 @@ widget = (wrapper, engine, market) ->
             # render table head
             render_table_head_columns($('tr.columns', table_head_view), columns)
             render_table_head_columns_filter_cell($('tr.columns_filter', table_head_view), columns, columns_filter.view())
-        
+            
             # activate columns sort
         
             try
@@ -423,6 +423,7 @@ widget = (wrapper, engine, market) ->
         render_table_body_rows(table_body_view, records, columns)
         
         # post process
+        sort_records()
         colorize_table_body_cell_changes(table_body_view)
         colorize_rows(table_body_view)
         process_chart_tickers(table_body_view, chart_tickers)
@@ -438,20 +439,29 @@ widget = (wrapper, engine, market) ->
 
     # view manipulation
 
-    sort_records_by = (view) ->
-        id                  = view.data('id')
-        column              = _.find(prepared_columns, (column) -> column.id == id) ; return unless column?
-        sort_field_column   = _.find(prepared_columns, (column) -> !!column.is_sort_field)
+    sort_records = ->
+        key         = cache().get([cache_key, 'sort'].join(':'))
+        id          = Math.abs(key)
+        direction   = key / id
         
-        if sort_field_column and sort_field_column == column
-            column.is_sort_field *= -1
-        else
-            column.is_sort_field                = 1
-            sort_field_column.is_sort_field     = 0
+        columns = table_head_view.children('.columns').children('.sortable')
+        columns.removeClass('asc desc')
         
-        cache().set([cache_key, 'sort_order'].join(':'), { column_id: column.id, direction: column.is_sort_field })
+        column = columns.filter(-> $(@).data('id') == id) ; return if column.length == 0
         
-        render()
+        column.toggleClass('asc',   direction >= 0)
+        column.toggleClass('desc',  direction < 0)
+        
+        values = table_body_view.children('.ticker').get().map (row) ->
+            row     = $ row
+            value   = $(row.children().get().filter((cell) -> cell = $(cell) ; cell.data('id') == id)[0]).data('value')
+            [value, row]
+            
+        values.sort((a, b) -> direction * if a[0] > b[0] then 1 else if a[0] < b[0] then -1 else 0).forEach (value) ->
+            row = value[1]
+            table_body_view.append row
+            if row.data('information-row')?
+                table_body_view.append row.data('information-row')
     
     
     toggle_columns_filter_visibility = ->
@@ -544,29 +554,13 @@ widget = (wrapper, engine, market) ->
         # records sorting
         
         table_container_view.on 'click', 'table.records > thead > tr.columns > td.sortable > span', (event) ->
-            cell    = $(@).closest('td')
-            id      = cell.data('id')
+            cell        = $(@).closest('td')
+            id          = cell.data('id')
+            direction   = if cell.hasClass('asc') then -1 else 1
             
-            direction = if cell.hasClass('asc') then -1 else 1
-            
-            cell.siblings('.sortable').removeClass('asc desc')
-
-            cell.toggleClass('asc',     direction > 0)
-            cell.toggleClass('desc',    direction < 0)
-            
-            values = table_body_view.children('.ticker').get().map (row) ->
-                row     = $ row
-                value   = $(row.children().get().filter((cell) -> cell = $(cell) ; cell.data('id') == id)[0]).data('value')
-                [value, row]
-            
-            values.sort((a, b) -> direction * if a[0] > b[0] then 1 else if a[0] < b[0] then -1 else 0).forEach (value) ->
-                row = value[1]
-                table_body_view.append row
-                if row.data('information-row')?
-                    table_body_view.append row.data('information-row')
-            
+            cache().set([cache_key, 'sort'].join(':'), direction * id)
+            sort_records()
             colorize_rows(table_body_view)
-            
             
         
         # ticker information
