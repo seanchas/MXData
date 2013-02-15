@@ -50,3 +50,9 @@
     vertical-align: top;
     width: 0;
 }
+
+// dropdown after button
+
+.button + .dropdown-menu {
+    @include border-top-left-radius(0);
+}

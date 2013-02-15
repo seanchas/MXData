@@ -1,7 +1,21 @@
 <%= render "shared/icanhaz/chart_instruments" %>
 
-<div id="test">
+<div id="test" style="position: relative;">
+    <div class="background" style="position: absolute; font-size: 2em; right: 10px; top: 50%; margin-top: -.5em; line-height: 1em; color: #f5f5f5;"><em>Инструменты</em></div>
 </div>
+
+<div id="technicals-test" style="margin-top: 2em; position: relative; padding: 0 10px;">
+    <div class="background" style="position: absolute; font-size: 2em; right: 10px; top: 50%; margin-top: -.5em;  line-height: 1em; color: #f5f5f5;"><em>Индикаторы</em></div>
+    <div style="position: relative;">
+        <button class="button dropdown-toggle" data-toggle="dropdown"><i class="icon-plus"></i></button>
+        <ul class="dropdown-menu">
+            <li>
+                <a href="#">Technical</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
 <script type="text/javascript" charset="utf-8">
     
 $(function() {

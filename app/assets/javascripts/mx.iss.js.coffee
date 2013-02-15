@@ -38,7 +38,7 @@ fetch = (name, args...) ->
     expires_at      = if options.expires_in? then now + options.expires_in
     
     if cached_request?
-        return cached_request if        cached_request == 'pending'
+        return cached_request if        cached_request.state() == 'pending'
         return cached_request if        cached_request.expires_at? and expires_at? and cached_request.expires_at > now
         return cached_request unless    options.force == true
     

@@ -40,6 +40,19 @@ boardgroups         = undefined
 boardgroups_hash    = undefined
 
 
+prepared_tickers = {}
+
+
+prepare_ticker = (ticker) ->
+    [board, id] = ticker.split(':') ; board = scope.metadata().board(board)
+    
+    id:             id
+    board:          board
+    boardgroup:     board.boardgroup
+    market:         board.market
+    engine:         board.engine
+    toString:    -> "#{id}:#{board.id}"
+
 
 populate_data = (mapping, data) ->
     hash = _.reduce(data,
@@ -80,6 +93,7 @@ metadata = ->
         market:     (id) -> markets_hash[id]
         boards:          -> boards
         board:      (id) -> boards_hash[id]
+        ticker: (ticker) -> prepared_tickers[ticker] ?= prepare_ticker(ticker)
 
 
 $.extend scope,

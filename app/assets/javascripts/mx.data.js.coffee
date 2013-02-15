@@ -8,10 +8,13 @@
 
 root = @
 
+
 root['mx'] ?= {}
 root['mx']['data'] = {}
 
+
 scope = root['mx']['data']
+
 
 
 read_or_write_cache = (name, key, value) ->
