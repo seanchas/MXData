@@ -15,4 +15,6 @@ url_prefix  = mx.url + url_prefix if $.support.cors
 
 
 $.extend scope,
-    url_prefix: url_prefix
+    url_prefix:             url_prefix
+    fetch:               -> mx.fetch scope, arguments...
+    fetch_descriptors:      {}

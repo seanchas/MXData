@@ -9,9 +9,6 @@
     <div style="position: relative;">
         <button class="button dropdown-toggle" data-toggle="dropdown"><i class="icon-plus"></i></button>
         <ul class="dropdown-menu">
-            <li>
-                <a href="#">Technical</a>
-            </li>
         </ul>
     </div>
 </div>
@@ -27,6 +24,20 @@ $(function() {
     })
     
     c.then(function() { c.add_ticker('EQBR:AFLT') ; c.add_ticker('SMAL:GAZP') ; c.add_ticker('EQBR:SBER') ; c.add_ticker('SNDX:MICEXINDEXCF') ; c.add_ticker('SNDX:MICEXO&G') })
+    
+    var t = mx.cs.technicals2()
+    
+    t.then(function() {
+
+        var list = $('#technicals-test ul.dropdown-menu')
+        
+        t.result.data.forEach(function(technical) {
+            $('<li>')
+                .append($('<a>').attr('href', '').html(technical.title))
+                .appendTo(list)
+        })
+        
+    })
     
     
 });

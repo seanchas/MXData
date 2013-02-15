@@ -21,3 +21,12 @@ fetch = ->
 
 $.extend scope,
     technicals: fetch
+    technicals2: -> scope.fetch 'chart_technicals', arguments...
+
+
+$.extend scope.fetch_descriptors,
+    chart_technicals:
+        url: ->
+            "/indicators.hs"
+        parse: (json) ->
+            json
