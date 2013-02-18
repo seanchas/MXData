@@ -111,7 +111,6 @@ widget = (ticker, options = {}) ->
 
     
     reload = ->
-        console.log html?.is(':hidden')
         
         return _.delay(reload, reload_timeout) if html?.is(':hidden')
         

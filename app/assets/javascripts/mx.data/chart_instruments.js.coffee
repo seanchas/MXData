@@ -178,7 +178,7 @@ widget = (wrapper) ->
         broadcast('init')
     
 
-    deferred.promise({ data: -> instruments.map((i) -> return { id: [i.board, i.id].join(':'), failure: i.failure })})
+    deferred.promise({ data: -> instruments })
     
 
 

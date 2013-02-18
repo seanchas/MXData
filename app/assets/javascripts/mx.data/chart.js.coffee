@@ -106,9 +106,12 @@ no_data = ->
     $('<div>').addClass('no_data').html('Нет данных')
 
 
+instrument_key = (instrument) -> "#{instrument.board}:#{instrument.id}"
+
+
 validate_instruments = (instruments, data_sources) ->
     for instrument in instruments
-        data_source         = data_sources[instrument.id]
+        data_source         = data_sources[instrument_key(instrument)]
         instrument.failure  = data_source.error_message if data_source.error_message?
         instrument.disabled = true if instrument.failure?
     instruments
@@ -127,7 +130,7 @@ create_candles = (data_sources, instruments, chart_type) ->
         
         effective_chart_type = if effective_index > 0 or effective_instruments_size > 2 then 'line' else chart_type
 
-        candles         = _.first data_sources[instrument.id].candles
+        candles         = _.first data_sources[instrument_key(instrument)].candles
         candles_data    = candles["#{if effective_chart_type == 'line' then 'line' else 'candles'}_data"]
         
         candles_serie_options = $.extend true, {}, default_candles_series_options,
@@ -181,7 +184,7 @@ update_candles = (data_sources, instruments, chart_type, offset, options) ->
         
         effective_chart_type = if effective_index > 0 or effective_instruments_size > 2 then 'line' else chart_type
 
-        candles         = _.first data_sources[instrument.id].candles
+        candles         = _.first data_sources[instrument_key(instrument)].candles
         candles_data    = candles["#{if effective_chart_type == 'line' then 'line' else 'candles'}_data"]
         
         options.chart.series[effective_index + offset].setData(candles_data, false)
@@ -207,7 +210,7 @@ create_volumes = (data_sources, instruments) ->
 
         continue if instrument.disabled == true
     
-        volumes = _.first data_sources[instrument.id].volumes
+        volumes = _.first data_sources[instrument_key(instrument)].volumes
         
         volumes_serie_options = $.extend true, {}, default_volumes_series_options,
             id:     "volumes:#{index}"
@@ -237,7 +240,7 @@ update_volumes = (data_sources, instruments, offset, options) ->
 
         continue if instrument.disabled == true
         
-        volumes         = _.first data_sources[instrument.id].volumes
+        volumes         = _.first data_sources[instrument_key(instrument)].volumes
         volumes_data    = volumes.data
         
         options.chart.series[effective_index + offset].setData(volumes_data, false)
@@ -258,7 +261,7 @@ create_inline_technicals = (data_sources, instruments, technicals, offset, optio
     if _.size(effective_instruments) < 3
         
         effective_instrument    = _.first effective_instruments
-        data_source             = data_sources[effective_instrument.id].technicals
+        data_source             = data_sources[instrument_key(effective_instrument)].technicals
         
         for technical, index in data_source
             
@@ -299,7 +302,7 @@ update_inline_technicals = (data_sources, instruments, technicals, offset, optio
     if _.size(effective_instruments) < 3
     
         effective_instrument    = _.first effective_instruments
-        data_source             = data_sources[effective_instrument.id].technicals
+        data_source             = data_sources[instrument_key(effective_instrument)].technicals
     
         for technical in data_source when !!technical.inline
             for serie in technical.data
@@ -320,7 +323,7 @@ create_separate_technicals = (data_sources, instruments, technicals, offset, opt
     technical_index     = 0
 
     [effective_instrument, effective_index]  = _.first([instrument, index] for instrument, index in instruments when !instrument.disabled)
-    data_source                                         = data_sources[effective_instrument.id].technicals
+    data_source                                         = data_sources[instrument_key(effective_instrument)].technicals
     
     for technical, index in data_source
         
@@ -354,7 +357,7 @@ update_separate_technicals = (data_sources, instruments, technicals, offset, opt
     effective_offset = 0
     
     effective_instrument   = _.first(instrument for instrument in instruments when !instrument.disabled)
-    data_source            = data_sources[effective_instrument.id].technicals
+    data_source            = data_sources[instrument_key(effective_instrument)].technicals
     
     for technical in data_source when !technical.inline
         for serie in technical.data
@@ -524,7 +527,7 @@ calculate_technicals_colors_indices = (technicals, instruments, data_sources) ->
     
     result = []
     
-    for technical in data_sources[instruments[effective_instrument_index].id].technicals
+    for technical in data_sources[instrument_key(instruments[effective_instrument_index])].technicals
         if technical.inline
             result.push total_instruments + inline_instrument_index
             inline_instrument_index++
@@ -728,7 +731,7 @@ widget = (wrapper, options = {}) ->
         duration    = chart_candle_width.data().duration
         period      = "#{Math.ceil(duration / 120)}d"
         
-        mx.cs.highstock_2 instrument.id,
+        mx.cs.highstock_2 instrument_key(instrument),
             interval:   interval
             period:     period
             technicals: technicals.data()
@@ -738,7 +741,7 @@ widget = (wrapper, options = {}) ->
         clearTimeout refresh_timeout
         
         data_sources = _.reduce instruments.data(), (memo, instrument) ->
-            memo[instrument.id] = data_source_for_instrument instrument ; memo
+            memo[instrument_key(instrument)] = data_source_for_instrument instrument ; memo
         , {}
 
         delayed_render()
@@ -757,9 +760,9 @@ widget = (wrapper, options = {}) ->
     change_instruments = (event, instruments, message) ->
         switch message
             when 'add'
-                data_sources[instrument.id] ?= data_source_for_instrument instrument for instrument in instruments
+                data_sources[instrument_key(instrument)] ?= data_source_for_instrument instrument for instrument in instruments
             when 'remove'
-                delete data_sources[key] for key in _.difference _.keys(data_sources), _.pluck(instruments, 'id')
+                delete data_sources[key] for key in _.difference _.keys(data_sources), instruments.map((i) -> instrument_key(i))
 
         should_rebuild = true ; delayed_render()
 
