@@ -134,6 +134,7 @@ widget = (wrapper) ->
         return unless instrument?
         
         instrument.disabled = !instrument.disabled
+        instrument.failure  = undefined
         
         instrument.disabled = false if should_be_enabled()
 

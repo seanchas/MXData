@@ -527,12 +527,13 @@ calculate_technicals_colors_indices = (technicals, instruments, data_sources) ->
     
     result = []
     
-    for technical in data_sources[instrument_key(instruments[effective_instrument_index])].technicals
-        if technical.inline
-            result.push total_instruments + inline_instrument_index
-            inline_instrument_index++
-        else
-            result.push effective_instrument_index
+    if effective_instrument_index?
+        for technical in data_sources[instrument_key(instruments[effective_instrument_index])].technicals
+            if technical.inline
+                result.push total_instruments + inline_instrument_index
+                inline_instrument_index++
+            else
+                result.push effective_instrument_index
     
     result
 
