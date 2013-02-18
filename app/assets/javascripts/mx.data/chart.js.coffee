@@ -673,6 +673,9 @@ widget = (wrapper, options = {}) ->
 
 
     render = ->
+        if should_rebuild
+            instruments.data().forEach (i) -> i.disabled = false if i.failure? ; i.failure = undefined
+        
         $.when(_.values(data_sources)...).then ->
             
             cached_extremes = cache.get 'extremes'
