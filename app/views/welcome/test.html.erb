@@ -1,15 +1,64 @@
-<%= render "shared/icanhaz/chart_instruments" %>
+<div id="test" style="position: relative; padding: 1em 9px;">
+    <div class="tickers-table">
+        <table>
+            <caption>
+                caption
+                
+                <button class="button"><i class="icon-wrench"></i></button>
+            </caption>
+            <thead>
+                <tr>
+                    <th>thead</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>tbody</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
-<div id="test" style="position: relative;">
-    <div class="background" style="position: absolute; font-size: 2em; right: 10px; top: 50%; margin-top: -.5em; line-height: 1em; color: #f5f5f5;"><em>Инструменты</em></div>
-</div>
 
-<div id="technicals-test" style="margin-top: 2em; position: relative; padding: 0 10px;">
-    <div class="background" style="position: absolute; font-size: 2em; right: 10px; top: 50%; margin-top: -.5em;  line-height: 1em; color: #f5f5f5;"><em>Индикаторы</em></div>
-    <div style="position: relative;">
-        <button class="button dropdown-toggle" data-toggle="dropdown"><i class="icon-plus"></i></button>
-        <ul class="dropdown-menu">
-        </ul>
+    <div class="tickers-table">
+        <table>
+            <caption>
+                caption
+                
+                <button class="button"><i class="icon-wrench"></i></button>
+            </caption>
+            <thead>
+                <tr>
+                    <th>thead</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>tbody</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+    <div class="tickers-table">
+        <table>
+            <caption>
+                caption
+                
+                <button class="button"><i class="icon-wrench"></i></button>
+            </caption>
+            <thead>
+                <tr>
+                    <th>thead</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>tbody</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 
@@ -17,27 +66,23 @@
     
 $(function() {
     
-    window.c = mx.chart.instruments_widget({
-        ticker:     'EQNE:GAZP',
-        container:  $('#test'),
-        no_cache:   true
-    })
-    
-    c.then(function() { c.add_ticker('EQBR:AFLT') ; c.add_ticker('SMAL:GAZP') ; c.add_ticker('EQBR:SBER') ; c.add_ticker('SNDX:MICEXINDEXCF') ; c.add_ticker('SNDX:MICEXO&G') })
-    
-    var t = mx.cs.technicals2()
-    
-    t.then(function() {
 
-        var list = $('#technicals-test ul.dropdown-menu')
-        
-        t.result.data.forEach(function(technical) {
-            $('<li>')
-                .append($('<a>').attr('href', '').html(technical.title))
-                .appendTo(list)
-        })
-        
-    })
+    var stack = [];
+    
+    $('#test .tickers-table').on('mousedown', function() {
+        var $this = $(this);
+        var i = stack.indexOf($this);
+
+        if (i > 0)
+            stack.splice(i, 1)
+
+        stack.push($this);
+        $.each(stack, function(z, item) { item.css('z-index', z + 1000) })
+    });
+    
+    $('#test .tickers-table').width($('#test .tickers-table').width());
+
+    $('#test .tickers-table').resizable().draggable({ handle: 'caption' })
     
     
 });

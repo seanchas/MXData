@@ -20,5 +20,9 @@
 /log/*.log
 /tmp
 
-# RVM
+# Ignore RVM
 /.rvmrc
+
+# Ignore RBEnv
+/.ruby-version
+/.rbenv-gemsets

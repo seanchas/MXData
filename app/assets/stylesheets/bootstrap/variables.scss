@@ -74,6 +74,13 @@ $icon-sprite-path: image-url('icons/glyphicons-halflings.png');
 $icon-white-sprite-path: image-url('icons/glyphicons-halflings-white.png');
 
 
+// Tickers table
+// ----------------------------------------
+
+$tickers-table-background-color: $white;
+$tickers-table-caption-background-color: darken($tickers-table-background-color, 3%);
+
+
 // Z Indices
 // ----------------------------------------
 
