@@ -16,6 +16,8 @@ gem 'jquery-rails'
 gem 'capistrano'
 gem 'rvm-capistrano'
 
+gem 'dotenv'
+
 group :production do
   gem 'libv8',        :platform => :ruby
   gem 'therubyracer', :platform => :ruby

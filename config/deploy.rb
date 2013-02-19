@@ -27,7 +27,7 @@ namespace :deploy do
 end
 
 configuration = [
-    '.rvmrc'
+  '.env'
 ]
 
 namespace :deploy do
