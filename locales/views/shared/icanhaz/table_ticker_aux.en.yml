@@ -3,3 +3,6 @@ en:
         icanhaz:
             table_ticker_aux:
                 instrument_info: 'Information'
+                remove_from_chart:  Remove from chart
+                add_to_chart:       Add to chart
+                remove_from_table:  Remove instrument

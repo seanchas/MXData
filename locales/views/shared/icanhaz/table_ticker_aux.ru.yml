@@ -4,3 +4,6 @@ ru:
             table_ticker_aux:
                 instrument_info:    Информация об инструменте
                 options_board:      Доска опционов
+                remove_from_chart:  Убрать с графика
+                add_to_chart:       Добавить на график
+                remove_from_table:  Удалить инструмент

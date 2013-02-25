@@ -201,16 +201,38 @@
         height: 30px;
         line-height: 600%;
         overflow: hidden;
+        position: relative;
         text-align: center;
         width: 30px;
+        
+        span {
+            display: inline-block;
+            border: 5px solid transparent;
+            height: 0;
+            left: 10px;
+            position: absolute;
+            top: 10px;
+            width: 0;
+        }
+        
     }
 
     .ui-datepicker-prev {
         float: left;
+        
+        span {
+            border-right-color: #000;
+            margin-left: -5px;
+        }
     }
         
     .ui-datepicker-next {
         float: right;
+
+        span {
+            border-left-color: #000;
+            margin-left: 5px;
+        }
     }
         
     .ui-datepicker-calendar .ui-state-default {

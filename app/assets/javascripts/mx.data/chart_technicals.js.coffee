@@ -21,6 +21,16 @@ technicals_descriptors_hash = _.once ->
 
 
 
+locales =
+    ru:
+        add_technical: 'Добавить индикатор'
+        remove_technical: 'Удалить'
+    en:
+        add_technical: 'Add technical'
+        remove_technical: 'Remove'
+
+
+
 serialize_view = (view) ->
     $('input,select', view).serializeArray()
 
@@ -36,7 +46,7 @@ make_anchors_view = (wrapper) ->
 make_factory_anchor_view = (wrapper) ->
     $('<li>')
         .addClass('anchor factory')
-        .html($('<span>').html('Новый индикатор'))
+        .html($('<span>').html(locales[mx.I18n.locale].add_technical))
         .appendTo(wrapper)
 
 
@@ -98,7 +108,7 @@ make_technical_child_view = (anchor, descriptor, values) ->
             row.append $('<td>').addClass('hint').html(param.description)
 
     # remove button
-    wrapper.append $('<li>').addClass('remove').html($('<span>').html('Удалить'))
+    wrapper.append $('<li>').addClass('remove').html($('<span>').html(locales[mx.I18n.locale].remove_technical))
 
     view.insertAfter(anchor.siblings('.anchor').last())
     

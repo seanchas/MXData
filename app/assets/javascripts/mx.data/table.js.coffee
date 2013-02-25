@@ -292,15 +292,14 @@ widget = (wrapper, engine, market) ->
     columns_filter          = scope.table_columns_filter(columns_filter_view, engine.name, market.name)
 
 
-    filters_source          = mx.iss.marketdata_filters(engine.name, market.name)
-    columns_source          = mx.iss.marketdata_columns(engine.name, market.name)
+    columns_source          = mx.iss.security_marketdata_columns(engine.name, market.name)
 
     securities_source       = undefined
     marketdata_source       = undefined
 
     records_source          = undefined
 
-    ready_for_render        = $.when metadata, columns_source, filters_source, columns_filter
+    ready_for_render        = $.when metadata, columns_source, columns_filter
     
     tickers                 = []
     chart_tickers           = []
@@ -368,10 +367,10 @@ widget = (wrapper, engine, market) ->
         
         # prepare records
         records = (_.extend({}, securities_data[key], marketdata_data[key]) for key of securities_data)
-        records = (records[key] = scope.utils.prepare_marketdata_record(record, columns_source.data) for key, record of records)
+        records = (records[key] = scope.utils.prepare_marketdata_record(record, columns_source.result.data.hash('id')) for key, record of records)
         
         # prepare columns
-        columns = (columns_source.data[column] for column in columns_filter.columns())
+        columns = columns_filter.columns().map (column) -> columns_source.result.data.hash('id')[column]
         
         unless columns_sorter_is_active
 

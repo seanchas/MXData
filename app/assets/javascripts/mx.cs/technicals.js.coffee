@@ -11,6 +11,8 @@ fetch = ->
     
     $.ajax
         url: "#{scope.url_prefix}/indicators.hs?callback=?"
+        data:
+            lang: mx.I18n.locale
         dataType: 'jsonp'
     .then (json) ->
         data.push json...

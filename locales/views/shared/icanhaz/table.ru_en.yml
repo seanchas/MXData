@@ -1,0 +1,13 @@
+ru:
+    shared:
+        icanhaz:
+            table:
+                fields: Поля
+                market_history_download: Скачать историю по рынку
+
+en:
+    shared:
+        icanhaz:
+            table:
+                fields: Columns
+                market_history_download: Download market history

@@ -1,4 +1,5 @@
 ##= require kizzy
+##= require mx.i18n
 
 #
 # Tickers table history by market
@@ -15,6 +16,12 @@ make_market_history_url = (engine, market, type, date) ->
     csv_options = Object.keys(fields.mapping).map((key) -> if cache.get(key)? then "#{fields.mapping[key]}=#{encodeURIComponent(cache.get(key))}" else undefined).filter((value) -> !!value).join('&')
     csv_options = if type == 'csv' and csv_options.length > 0 then '&' + csv_options else ''
     "#{mx.url}/iss/history/engines/#{engine}/markets/#{market}/securities.#{type}?date=#{mx.I18n.to_date(date, { format: '%Y-%m-%d' })}&lang=#{mx.I18n.locale}" + csv_options
+
+
+
+month_names = 
+    ru: [ "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь" ]
+    en: [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ]
 
 
 fields =
@@ -79,7 +86,7 @@ $(document).on 'click', '.table_container h4 a.market-history[data-market]', (ev
     element             = $(@)
     datepicker_element  = $('.datepicker', element.next('.down-slider'))
 
-    datepicker_element.datepicker() unless datepicker_element.hasClass('hasDatepicker')
+    datepicker_element.datepicker({ monthNames: month_names[mx.I18n.locale] }) unless datepicker_element.hasClass('hasDatepicker')
     
     toggle element.next('.down-slider')
 

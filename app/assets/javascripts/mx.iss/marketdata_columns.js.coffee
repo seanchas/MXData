@@ -30,4 +30,4 @@ fetch = (engine, market) ->
 
 
 $.extend scope,
-    marketdata_columns: fetch
+    __marketdata_columns: fetch

@@ -118,7 +118,7 @@ widget = (wrapper, engine, market) ->
     filtered_columns_container_view     = undefined
     source_columns_container_view       = undefined
     
-    columns_data_source = mx.iss.marketdata_columns(engine, market);
+    columns_data_source = mx.iss.security_marketdata_columns(engine, market);
     filters_data_source = mx.iss.marketdata_filters(engine, market);
     
     
@@ -126,12 +126,10 @@ widget = (wrapper, engine, market) ->
     
     filtered_columns    = undefined
     
-    #filtered_columns_sortable_out = undefined
-    
     source_columns_view = undefined
     
 
-    columns = (id) -> if id? then columns_data_source.data[id] else columns_data_source.data
+    columns = (id) -> if id? then columns_data_source.result.data.hash('id')[id] else columns_data_source.result.data.hash('id')
     
     filters = -> filters_data_source.data
     
