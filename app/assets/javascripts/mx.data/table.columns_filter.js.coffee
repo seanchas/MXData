@@ -12,6 +12,7 @@ min_active_columns  = 3
 
 filter_columns = (columns, filters, cached_filtered_columns) ->
     return cached_filtered_columns if cached_filtered_columns and _.isArray(cached_filtered_columns)
+    return [] unless filters[default_filter_name]?
     column.id for column in filters[default_filter_name] when columns[column.id]? and !columns[column.id].is_system
 
 
@@ -177,7 +178,7 @@ widget = (wrapper, engine, market) ->
         
         filtered_columns = filter_columns(columns(), filters(), scope.caches.table_filtered_columns(cache_key))
         
-        cols = filters()['full'].reduce (memo, item) ->
+        cols = (filters()['full'] ? []).reduce (memo, item) ->
             memo.push columns()[item.id] ; memo
         , []
         
