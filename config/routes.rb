@@ -70,6 +70,15 @@ MxData::Application.routes.draw do
       :locale => I18n.default_locale
     }
   
+
+    get '/(:locale)/ticker',
+      :to => 'welcome#ticker',
+      :constraints => {
+        :locale => /[a-z]{2}/
+      },
+      :defaults => {
+        :locale => I18n.default_locale
+      }
   
   #root :to => 'welcome#index'
   
