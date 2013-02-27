@@ -2,19 +2,15 @@ $               = jQuery
 scope           = @mx.chart
 
 
-widget = (options = {}) ->
+proxy = (options = {}) ->
     container   = $(options.container) ; container = undefined if container.length == 0
     
     deferred    = new $.Deferred
     
     html        = undefined
     
-    ready       = $.when true
+    ready       = $.when mx.data.metadata()
     
-    
-    instruments = scope.instruments_widget(options)
-
-
     ready.then ->
         deferred.resolve()
     
@@ -24,4 +20,4 @@ widget = (options = {}) ->
 
 
 $.extend scope,
-    widget: widget
+    proxy: proxy
