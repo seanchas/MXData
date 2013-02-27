@@ -1,0 +1,15 @@
+ru:
+    shared:
+        icanhaz:
+            chart_instruments:
+                show:   'Показывать на графике'
+                hide:   'Не показывать на графике'
+                remove: 'Удалить с графика'
+
+en:
+    shared:
+        icanhaz:
+            chart_instruments:
+                show:   'Show on chart'
+                hide:   'Do not show on chart'
+                remove: 'Remove from chart'

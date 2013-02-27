@@ -116,6 +116,8 @@ widget = (options = {}) ->
 
 
     add_ticker  = (ticker) ->
+        return ticker.forEach(add_ticker) if _.isArray(ticker)
+        
         return if ticker_present(ticker)
         
         tickers.push(ticker)
@@ -173,7 +175,7 @@ widget = (options = {}) ->
 
     ready.then ->
         
-        add_ticker(options.ticker) if options.ticker?
+        add_ticker(options.tickers) if options.tickers?
         
         html.on 'chart:ticker:on chart:ticker:off', (event, ticker) -> toggle_ticker ticker
         html.on 'chart:ticker:remove', (event, ticker) -> remove_ticker ticker
