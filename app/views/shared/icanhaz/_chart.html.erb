@@ -1,0 +1,64 @@
+<script id="chart" type="text/html">
+    <div class="chart">
+        <p class="tickers-placeholder">tickers</p>
+        <p class="technicals-placeholder">technicals</p>
+
+        <div class="periods-placeholder">
+            <div class="button-group">
+                <button class="button">Минута</button>
+                <button class="button">5 минут</button>
+                <button class="button">10 минут</button>
+                <button class="button">15 минут</button>
+                <button class="button">30 минут</button>
+                <button class="button">Час</button>
+                <button class="button">День</button>
+                <button class="button">Неделя</button>
+                <button class="button">Квартал</button>
+            </div>
+        </div>
+
+        <div class="types-placeholder">
+            <div class="button-group">
+                <button class="button">Линия</button>
+                <button class="button">Свечи</button>
+                <button class="button">Бары</button>
+            </div>
+        </div>
+
+        <p class="chart-placeholder">chart</p>
+    </div>
+</script>
+
+<script id="chart_tickers_item" type="text/html">
+    <li class="dropdown ticker" data-ticker="{{ticker}}">
+        <a href="" class="dropdown-toggle" data-toggle="dropdown">
+            {{id}}: {{group}}
+            <span class="caret"></span>
+        </a>
+        {{> chart_tickers_dropdown_menu}}
+    </li>
+</script>
+
+
+<script id="chart_tickers_dropdown_menu" type="text/html">
+    <ul class="dropdown-menu">
+        <li>
+            <a href="" data-action="on">
+                <i class="icon-eye-open"></i>
+                <%= t '.show' %>
+            </a>
+        </li>
+        <li>
+            <a href="" data-action="off">
+                <i class="icon-eye-close"></i>
+                <%= t '.hide' %>
+            </a>
+        </li>
+        <li>
+            <a href="" data-action="remove">
+                <i class="icon-remove"></i>
+                <%= t '.remove' %>
+            </a>
+        </li>
+    </ul>
+</script>

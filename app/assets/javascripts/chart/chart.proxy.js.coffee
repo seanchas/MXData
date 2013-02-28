@@ -4,7 +4,7 @@ scope           = @mx.chart
 
 
 render = ->
-    ich.chart_proxy()
+    ich.chart()
 
 
 
@@ -19,7 +19,7 @@ proxy = (options = {}) ->
     
     ready.then ->
         
-        html = render() if container?
+        html = render().appendTo(container) if container?
         
         deferred.resolve()
     

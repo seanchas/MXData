@@ -1,0 +1,24 @@
+.chart {
+    
+    > p,
+    > div {
+        background-color: #eee;
+        margin: .5em 0;
+        
+        &.periods-placeholder {
+            float: left;
+            margin-top: 0;
+        }
+        
+        &.types-placeholder {
+            float: right;
+            margin-top: 0;
+        }
+        
+        &.chart-placeholder {
+            clear: both;
+        }
+        
+    }
+    
+}

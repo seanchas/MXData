@@ -58,7 +58,7 @@ render_tickers = (html, tickers) ->
 render_ticker = (ticker) ->
     return unless securities_cache[ticker]? and tickers_cache[ticker]?
     
-    ich.chart_instruments_ticker
+    ich.chart_tickers_item
         ticker:     ticker
         id:         securities_cache[ticker].SECID
         group:      tickers_cache[ticker][0].boardgroup.title
