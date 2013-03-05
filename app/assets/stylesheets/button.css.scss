@@ -26,7 +26,8 @@
         @include transition(background-position .1s linear);
     }
     
-    &:active {
+    &:active,
+    &.active {
         background-image: none;
         outline: 0;
         

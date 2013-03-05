@@ -1,11 +1,11 @@
 <script id="chart" type="text/html">
-    <div class="chart">
+    <div class="chart mx-widget">
         <p class="tickers-placeholder">tickers</p>
         <p class="technicals-placeholder">technicals</p>
 
         <div class="periods-placeholder">
-            <div class="button-group">
-                <button class="button">Минута</button>
+            <div class="button-group" data-toggle="buttons-radio">
+                <button class="button active">Минута</button>
                 <button class="button">5 минут</button>
                 <button class="button">10 минут</button>
                 <button class="button">15 минут</button>
@@ -18,8 +18,8 @@
         </div>
 
         <div class="types-placeholder">
-            <div class="button-group">
-                <button class="button">Линия</button>
+            <div class="button-group" data-toggle="buttons-radio">
+                <button class="button active">Линия</button>
                 <button class="button">Свечи</button>
                 <button class="button">Бары</button>
             </div>
