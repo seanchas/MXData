@@ -15,10 +15,8 @@ proxy = (options = {}) ->
     
     html        = undefined
     
-
     types_widget    = scope.types_widget
              default: 'line'
-    
 
     ready       = $.when mx.data.metadata()
     
