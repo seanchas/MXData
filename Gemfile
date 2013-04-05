@@ -19,8 +19,7 @@ gem 'rvm-capistrano'
 gem 'dotenv'
 
 group :production do
-  gem 'libv8',        :platform => :ruby
-  gem 'therubyracer', :platform => :ruby
+  gem 'therubyracer'
 end
 
 group :test do

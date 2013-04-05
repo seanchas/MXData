@@ -75,17 +75,8 @@
 			notice.appendTo( cont )
 				.hide();
 				
-			if ( jQuery.browser.msie && options.usingTransparentPNG )
-			{
-				// IE7 and earlier can't handle the combination of opacity and transparent pngs, so if we're using transparent pngs in our
-				// notice style, we'll just skip the fading in.
-				notice.show();
-			}
-			else
-			{
-				//Fade in the notice we just added
-				notice.fadeIn( options.fadeInSpeed );
-			}
+			//Fade in the notice we just added
+			notice.fadeIn( options.fadeInSpeed );
 			
 			// Set up the removal interval for the added notice if that notice is not a sticky
 			if ( !options.isSticky )
@@ -113,7 +104,7 @@
 		{
 			// IE7 and earlier can't handle the combination of opacity and transparent pngs, so if we're using transparent pngs in our
 			// notice style, we'll just skip the fading out.
-			if ( jQuery.browser.msie && options.usingTransparentPNG )
+			if ( false )
 			{
 				notice.css( { opacity: 0	} )
 					.animate( 

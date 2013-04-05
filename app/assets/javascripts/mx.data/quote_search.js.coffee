@@ -98,7 +98,7 @@ render_results = (container, data) ->
         record.boards.push metadata.board(record.primary_boardid)
     )
     
-    container.html(ich.query_search_results({ groups: groups }))
+    container.append(ich.query_search_results({ groups: groups }))
 
     set_primary_boards(container)
     set_boards_statuses(container)
